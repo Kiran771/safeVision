@@ -1,5 +1,4 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float
-from sqlalchemy.orm import relationship
 from datetime import datetime
 from safeVision_Backend.core.psql_db import Base
 
@@ -47,6 +46,7 @@ class EmergencyContact(Base):
     AuthorityName = Column(String)
     ContactNumber = Column(String)
     Category = Column(String)
+    location=Column(String)
 
 
 

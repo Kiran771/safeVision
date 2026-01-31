@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <link rel="stylesheet" href="/frontend/css/sideMenu.css" />
+</head>
+<body>
+  <aside class="sidebar">
+  <img
+    style="width: 105px; height: 80px; align-self: center"
+    src="/frontend/resources/logo.png"
+  />
+  <div class="logo">safeVision</div>
+
+  <nav>
+    <div class="nav-item" data-role="super_admin,admin">
+      <img src="/frontend/resources/dashboard_icon.png" alt="dashboard" />
+      <a href="/frontend/html/dashboard.html">Dashboard</a>
+    </div>
+
+    <div class="nav-item" data-role="super_admin">
+      <img src="/frontend/resources/person_icon.png" alt="user" />
+      <a href="/frontend/html/userManagement.html">User Management</a>
+    </div>
+
+    <div class="nav-item" data-role="super_admin,admin">
+      <img src="/frontend/resources/camera_icon.png" alt="camera" />
+      <a href="/frontend/html/cameraManagement.html">Camera Management</a>
+    </div>
+
+    <div class="nav-item" data-role="super_admin">
+      <img
+        src="/frontend/resources/emergency_contact_icon.png"
+        alt="emergency"
+      />
+      <a href="/frontend/html/register_contact.html">Emergency Contacts</a>
+    </div>
+
+  </nav>
+
+  <div class="logout-section">
+    <img src="/frontend/resources/logout.png" alt="logout" />
+    <a href="/frontend/html/login.html">Log out</a>
+  </div>
+</aside>
+
+</body>
+</html>

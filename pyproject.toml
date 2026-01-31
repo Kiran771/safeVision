@@ -13,4 +13,7 @@ dependencies = [
     "tensorflow>=2.20.0",
     "sqlalchemy>=2.0.45",
     "psycopg2-binary>=2.9.11",
+    "pwdlib[argon2]>=0.3.0",
+    "pyjwt[crypto,cryptography]>=2.10.1",
+    "python-multipart>=0.0.21",
 ]

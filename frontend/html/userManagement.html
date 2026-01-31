@@ -6,45 +6,22 @@
     <title>User Management</title>
     <link rel="stylesheet" href="/frontend/css/userManagment.css" />
     <script src="/frontend/js/userManagement.js"></script>
+    <script src="/frontend/js/sideMenu_loder.js"></script>
+
   </head>
   <body>
-    <aside class="sidebar">
-      <img
-        style="width:105px;height:80px; align-self:center"
-        src="/frontend/resources/logo.png"
-      />
-      <div class="logo">safeVision</div>
-      <nav>
-        <div class="nav-item">
-          <img src="/frontend/resources/dashboard_icon.png" alt="dashboard" />
-          <span>Dashboard</span>
-        </div>
-        <div class="nav-item active">
-          <img src="/frontend/resources/person_icon.png" alt="user" />
-          <span>User Management</span>
-        </div>
-        <div class="nav-item">
-          <img src="/frontend/resources/settings_icon.png" alt="settings" />
-          <span>Settings</span>
-        </div>
-      </nav>
-      <div class="logout-section">
-        <img src="/frontend/resources/logout.png" alt="logout" />
-        <span>Log out</span>
-      </div>
-    </aside>
-
+    <div id="sidebar-container"></div>
     <main class="main-content">
       <div class="top-bar">
         <h1 class="page-title">User Management</h1>
         <div class="admin-profile">
-            <div class="admin-image">JD</div>
-            <div class="admin-info">
-                <div class="admin-name">John Doe</div>
-                <div class="admin-role">Administrator</div>
-            </div>
+          <div class="admin-image">JD</div>
+          <div class="admin-info">
+            <div class="admin-name">James</div>
+            <div class="admin-role">Administrator</div>
+          </div>
         </div>
-    </div>
+      </div>
       <div class="stats-area">
         <div class="stat-card">
           <h3>Total Admin</h3>
@@ -72,7 +49,6 @@
               <th>Username</th>
               <th>Email</th>
               <th>Role</th>
-              <th>CameraId</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -89,13 +65,14 @@
         </div>
         <div class="form-body">
           <div class="form-group">
-            <label for="userName">Full Name</label>
+            <label for="userName">User Name</label>
             <input
               type="text"
               id="userName"
               placeholder="Enter full name"
               required
             />
+            <small class="error" id="userNameError"></small>
           </div>
           <div class="form-group">
             <label for="userEmail">Email Address</label>
@@ -105,6 +82,7 @@
               placeholder="Enter email address"
               required
             />
+            <small class="error" id="userEmailError"></small>
           </div>
           <div class="form-group">
             <label for="userContact">Contact</label>
@@ -113,14 +91,15 @@
               id="userContact"
               placeholder="Enter contact number"
             />
+            <small class="error" id="userContactError"></small>
           </div>
           <div class="form-group">
             <label for="userRole">Role</label>
             <select id="userRole">
               <option value="Admin">Admin</option>
               <option value="Super Admin" selected>Super Admin</option>
-              
             </select>
+
           </div>
           <div class="form-group">
             <label for="Password">Password</label>
@@ -130,6 +109,7 @@
               placeholder="Enter password"
               required
             />
+            <small class="error" id="passwordError"></small>
           </div>
           <div class="modal-footer">
             <button class="btn btn-cancel">Cancel</button>

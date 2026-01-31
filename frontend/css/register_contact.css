@@ -1,0 +1,361 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'DM Sans', sans-serif;
+    background: white;
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+
+/* Main Content Styles */
+.main-content {
+    margin-left: 255px;   
+    padding: 3rem 4rem;
+    max-width: calc(1600px - 255px);
+    position: relative;
+    z-index: 1;
+}
+
+
+/* Header Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.header-content h1 {
+    font-size: 2.5rem;
+    font-weight: 700;;
+    margin-bottom: 0.5rem;
+}
+
+.subtitle {
+    font-size: 1rem;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background-color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    cursor: pointer;
+    margin-bottom:20px
+}
+
+.user-profile:hover {
+    transform: translateY(-2px);
+}
+
+.user-image {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background:  rgb(2, 51, 79);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.user-info{
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Registration Container */
+.registration-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Form Section Styles */
+.form-section {
+    background: rgba(230, 229, 229, 0.726);
+    border-radius: 24px;
+    padding: 3rem;
+    position: relative;
+    overflow: hidden;
+  
+}
+
+.form-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+
+}
+
+.section-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.section-subtitle {
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+}
+
+.form-group {
+    margin-bottom: 1.75rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.625rem;
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+
+
+.form-input,
+.form-select {
+    width: 100%;
+    padding: 0.875rem 1.25rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    background: white;
+    height:2.3rem;
+}
+
+.form-input:focus,
+.form-select:focus {
+    outline: grey;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(85, 168, 245, 0.08);
+}
+
+
+
+/* Map Section Styles */
+.map-section {
+    background: rgba(230, 229, 229, 0.726);
+    border-radius: 24px;
+    padding: 3rem;
+    box-shadow: var(--shadow-md);
+    position: relative;
+    overflow: hidden;
+}
+
+.map-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+}
+
+.search-container {
+    position: relative;
+    margin-bottom: 1.5rem;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.875rem 3rem 0.875rem 1.25rem;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    font-size: 1rem;
+    font-family: 'DM Sans', sans-serif;;
+
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #4285f4;
+    background: white;
+    box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.08);
+}
+
+.search-icon {
+    position: absolute;
+    right: 1.25rem;
+    top: 50%;
+    transform: translateY(-50%);
+    pointer-events: none;
+    font-size: 1.25rem;
+}
+
+/* Map Container */
+#map {
+    height: 450px;
+    width: 100%;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: var(--shadow-sm);
+    margin-bottom: 1.5rem;
+    z-index: 1;
+    position: relative;
+}
+
+.leaflet-container {
+    height: 100%;
+    width: 100%;
+}
+
+.location-display {
+    padding: 1.25rem;
+    background: white;
+    border-radius: 12px;
+    border-left: 4px solid #4285f4;
+}
+
+.location-label {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.location-value {
+    font-size: 1rem;
+    color: var(--text-dark);
+    font-weight: 500;
+}
+
+/* Button Styles */
+.btn-submit {
+    width: 100%;
+    padding: 1.125rem 2rem;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 1.125rem;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 2rem;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.btn-submit:hover {
+    transform: translateY(-2px);
+}
+
+.btn-submit:active {
+    transform: translateY(0);
+}
+
+/* Error Styles */
+.error-message {
+    display: none;
+    color: var(--primary);
+    font-size: 0.875rem;
+    margin-top: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: rgba(214, 52, 71, 0.05);
+    border-radius: 8px;
+    border-left: 3px solid var(--primary);
+}
+
+.form-input.error,
+.form-select.error {
+    border-color: var(--primary);
+    background: rgba(214, 52, 71, 0.02);
+}
+
+.form-input.error:focus,
+.form-select.error:focus {
+    box-shadow: 0 0 0 4px rgba(214, 52, 71, 0.15);
+}
+
+.emergency-badge {
+    display: inline-flex;
+    align-items: center;
+    background:white;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    margin-top: 1rem;
+}
+
+.emergency-badge::before {
+    content: '🚨';
+    animation: rotate 2s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Leaflet Customization */
+.leaflet-popup-content-wrapper {
+    border-radius: 12px;
+    box-shadow: var(--shadow-md);
+}
+
+.leaflet-popup-content {
+    font-family: 'DM Sans', sans-serif;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .registration-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 2rem 1.5rem;
+    }
+
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .header-content h1 {
+        font-size: 2rem;
+    }
+
+    #map {
+        height: 350px;
+    }
+}

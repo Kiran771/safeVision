@@ -1,9 +1,9 @@
 import os
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from fastapi.responses import StreamingResponse
-from services.video_service import generate_detection_frames
+from safeVision_Backend.services.detection_service import generate_detection_frames
 
-router = APIRouter(prefix="/video", tags=["Video Detection"])
+router = APIRouter(prefix="/detection", tags=["Video Detection"])
 
 @router.post("/detect-accident")
 async def detect_accident(video: UploadFile = File(...)):
