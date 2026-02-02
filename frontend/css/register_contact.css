@@ -106,12 +106,11 @@ body {
 
 /* Form Section Styles */
 .form-section {
-    background: rgba(230, 229, 229, 0.726);
+    background: rgba(72, 108, 141, 0.726);
     border-radius: 24px;
     padding: 3rem;
     position: relative;
     overflow: hidden;
-  
 }
 
 .form-section::before {
@@ -125,28 +124,29 @@ body {
 }
 
 .section-title {
-    font-size: 1.3rem;
+    font-size: 1.5rem;
     font-weight: 700;
     margin-bottom: 0.5rem;
+    color:white;
 }
 
 .section-subtitle {
-    margin-bottom: 2rem;
+    margin-bottom: 1.2rem;
     font-size: 0.95rem;
+    color:white;
 }
 
 .form-group {
-    margin-bottom: 1.75rem;
+    margin-bottom: 1.8rem;
 }
 
 .form-label {
     display: block;
-    margin-bottom: 0.625rem;
+    margin-bottom: 1rem;
     font-weight: 500;
     font-size: 0.95rem;
+    color:white;
 }
-
-
 
 .form-input,
 .form-select {
@@ -165,13 +165,14 @@ body {
     outline: grey;
     background: white;
     box-shadow: 0 0 0 4px rgba(85, 168, 245, 0.08);
+    
 }
 
 
 
 /* Map Section Styles */
 .map-section {
-    background: rgba(230, 229, 229, 0.726);
+    background: rgba(72, 108, 141, 0.726);;
     border-radius: 24px;
     padding: 3rem;
     box-shadow: var(--shadow-md);
@@ -215,7 +216,8 @@ body {
     right: 1.25rem;
     top: 50%;
     transform: translateY(-50%);
-    pointer-events: none;
+    pointer-events: auto; 
+    cursor: pointer;
     font-size: 1.25rem;
 }
 
@@ -260,7 +262,6 @@ body {
 .btn-submit {
     width: 100%;
     padding: 1.125rem 2rem;
-    color: white;
     border: none;
     border-radius: 12px;
     font-size: 1.125rem;
@@ -268,10 +269,11 @@ body {
     cursor: pointer;
     margin-top: 2rem;
     font-family: 'DM Sans', sans-serif;
+    background: white;
 }
 
 .btn-submit:hover {
-    transform: translateY(-2px);
+    transform: translateY(-1px);
 }
 
 .btn-submit:active {

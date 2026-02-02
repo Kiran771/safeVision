@@ -1,36 +1,75 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Login page</title>
-<link rel="stylesheet" href="/frontend/css/login.css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>safeVision - Login</title>
+    <link rel="stylesheet" href="/frontend/css/login.css">
+    <script src="/frontend/js/login.js"></script>
 </head>
 <body>
-<div class="wrapper">
-    <div class="image-container">
-        <img src="/frontend/resources/carcrash.png" alt="Car Collision" class="header-image"/>
-    </div>
     <div class="container">
-        <div class="main-section">
-            <div class="welcome-text">
-                <h1>Login</h1>
+        <div class="left-panel">
+            <img class="illustration" src="/frontend/resources/login.png" alt="car">
+        </div>
+
+        <div class="right-panel">
+            <div class="logo">
+                <img class="logo-icon" src="/frontend/resources/logo.png" alt="Logo">
+                <div class="logo-text">safeVision</div>
             </div>
+
+            <h1>Hello there,</h1>
+            <h2>welcome to safeVision</h2>
+
             <form id="loginForm">
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" id="username" name="username" required />
-                    <small class="error" id="loginError"></small>
+                    <input type="text" id="username" placeholder="Enter your username" required>
+                    <small class="error-text" id="usernameError"></small>
                 </div>
+
                 <div class="form-group">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" required />
-                    <small class="error" id="passwordError"></small>
+                    <div class="input-wrapper">
+                        <input type="password" id="password" placeholder="Enter your password" required>
+                        <img class="toggle-password" onclick="togglePassword()" src="/frontend/resources/password.png">
+                        
+                    </div>
+                    <small class="error-text" id="passwordError"></small>
+                    <div class="forgot-password">
+                        <a href="#">Forgot password?</a>
+                    </div>
                 </div>
-                <button type="submit" class="login-btn">login</button>
+
+                <button type="submit" class="login-button">LOGIN</button>
             </form>
+
+            <div class="social-login">
+                <p>Sign in with:</p>
+                <div class="social-icons">
+                    <a href="#" class="social-icon" title="Google"><img src="/frontend/resources/google.png"></a>
+                </div>
+            </div>
         </div>
     </div>
-</div>
+
+    <script>
+function togglePassword() {
+    const passwordInput = document.getElementById("password");
+    const icon = document.getElementById("togglePassword");
+
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.src = "/frontend/resources/eye-open.png";
+    } else {
+        passwordInput.type = "password";
+        icon.src = "/frontend/resources/eye-closed.png";
+    }
+}
+
+document.getElementById("togglePassword").addEventListener("click", togglePassword);
+</script>
+
 </body>
 </html>

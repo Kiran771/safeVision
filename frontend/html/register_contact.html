@@ -1,17 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Register Authority</title>
-  <link rel="stylesheet" href="/frontend/css/register_contact.css" />
-  <script src="/frontend/js/sideMenu_loder.js"></script>
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register Authority</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+    <link rel="stylesheet" href="/frontend/css/register_contact.css" />
+    <script src="/frontend/js/sideMenu_loder.js"></script>
 </head>
-<body>
-  <div id="sidebar-container"></div>
 
-  <main class="main-content">
+<body>
+    <div id="sidebar-container"></div>
+
+    <main class="main-content">
         <header class="header">
             <div class="header-content">
                 <h1>Register Authority</h1>
@@ -30,19 +32,16 @@
             <!-- Form Section -->
             <div class="form-section">
                 <h2 class="section-title">Authority Details</h2>
-                <p class="section-subtitle">Enter the emergency responder information</p>
+                <p class="section-subtitle">
+                    Enter the emergency responder information
+                </p>
 
                 <form id="authorityForm">
                     <div class="form-group">
                         <label class="form-label" for="authorityName">
                             Authority Name
                         </label>
-                        <input 
-                            type="text" 
-                            id="authorityName" 
-                            class="form-input" 
-                            required
-                        >
+                        <input type="text" id="authorityName" class="form-input" required />
                         <div class="error-message" id="authorityName-error"></div>
                     </div>
 
@@ -50,45 +49,29 @@
                         <label class="form-label" for="contactNumber">
                             Contact Number
                         </label>
-                        <input 
-                            type="tel" 
-                            id="contactNumber" 
-                            class="form-input" 
-                            required
-                        >
+                        <input type="tel" id="contactNumber" class="form-input" required />
                         <div class="error-message" id="contactNumber-error"></div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="category">
-                            Category
-                        </label>
+                        <label class="form-label" for="category"> Category </label>
                         <select id="category" class="form-select" required>
                             <option value="">Select Category</option>
                             <option value="fire">Fire Department</option>
                             <option value="police">Police Department</option>
                             <option value="medical">Medical Services</option>
-                            <option value="disaster">Disaster Management</option>
                             <option value="rescue">Rescue Services</option>
                         </select>
                         <div class="error-message" id="category-error"></div>
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="email">
-                            Email Address
-                        </label>
-                        <input 
-                            type="email" 
-                            id="email" 
-                            class="form-input" 
-                        >
+                        <label class="form-label" for="email"> Email Address </label>
+                        <input type="email" id="email" class="form-input" />
                         <div class="error-message" id="email-error"></div>
                     </div>
 
-                    <div class="emergency-badge">
-                        Emergency Response Authority
-                    </div>
+                    <div class="emergency-badge">Emergency Response Authority</div>
 
                     <button type="submit" class="btn-submit">Add Authority</button>
                 </form>
@@ -97,15 +80,12 @@
             <!-- Map Section -->
             <div class="map-section">
                 <h2 class="section-title">Location Details</h2>
-                <p class="section-subtitle">Search and pin the authority's location</p>
+                <p class="section-subtitle">
+                    Search and pin the authority's location
+                </p>
 
                 <div class="search-container">
-                    <input 
-                        type="text" 
-                        id="searchLocation" 
-                        class="search-input" 
-                        placeholder="Search for location..."
-                    >
+                    <input type="text" id="searchLocation" class="search-input" placeholder="Search for location..." />
                     <span class="search-icon">🔍</span>
                 </div>
 
@@ -122,12 +102,10 @@
         </div>
     </main>
 
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""></script>
-    
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <script src="script.js"></script>
+    <script src="/frontend/js/mapleaflet.js"></script>
 </body>
+
 </html>

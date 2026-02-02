@@ -46,6 +46,8 @@ class EmergencyContact(Base):
     AuthorityName = Column(String)
     ContactNumber = Column(String)
     Category = Column(String)
+    latitude = Column(Float)
+    longitude = Column(Float)
     location=Column(String)
 
 
