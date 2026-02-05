@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -7,7 +7,6 @@
     <link rel="stylesheet" href="/frontend/css/userManagment.css" />
     <script src="/frontend/js/userManagement.js"></script>
     <script src="/frontend/js/sideMenu_loder.js"></script>
-
   </head>
   <body>
     <div id="sidebar-container"></div>
@@ -99,17 +98,33 @@
               <option value="Admin">Admin</option>
               <option value="Super Admin" selected>Super Admin</option>
             </select>
-
           </div>
           <div class="form-group">
             <label for="Password">Password</label>
-            <input
-              type="password"
-              id="Password"
-              placeholder="Enter password"
-              required
-            />
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="Password"
+                placeholder="Enter password"
+                required
+              />
+              <img class="toggle-password" src="/frontend/resources/password.png" alt="toggle-password">
+            </div>
             <small class="error" id="passwordError"></small>
+          </div>
+
+          <div class="form-group">
+            <label for="rePassword">Retype Password</label>
+            <div class="input-wrapper">
+              <input
+                type="password"
+                id="rePassword"
+                placeholder="Re-enter password"
+                required
+              />
+              <img class="toggle-password" src="/frontend/resources/password.png" alt="toggle-password">
+            </div>
+            <small class="error" id="rePasswordError"></small>
           </div>
           <div class="modal-footer">
             <button class="btn btn-cancel">Cancel</button>
@@ -118,5 +133,24 @@
         </div>
       </div>
     </div>
+
+    <script>
+  const toggleIcons = document.querySelectorAll('.toggle-password');
+
+  toggleIcons.forEach(icon => {
+    icon.addEventListener('click', () => {
+      const input = icon.parentElement.querySelector('input');
+
+      if (input.type === 'password') {
+        input.type = 'text'; 
+        icon.src = '/frontend/resources/visible-password.png'; 
+      } else {
+        input.type = 'password'; 
+        icon.src = '/frontend/resources/password.png'; 
+      }
+    });
+  });
+</script>
+
   </body>
 </html>

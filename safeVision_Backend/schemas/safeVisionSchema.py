@@ -1,45 +1,56 @@
 from typing import Optional
-from pydantic import BaseModel,EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field
 
-# Schema for creating an admin user
+
+# Admin / User Schemas 
 class AdminCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
-    contact: str | None = Field(None, min_length=10, max_length=15)
+    contact: Optional[str] = Field(None, min_length=10, max_length=15)
     role: str
     password: str = Field(..., min_length=8)
 
-
-# Schema for login request
+# Login Request Schema
 class LoginRequest(BaseModel):
     username: str = Field(..., min_length=3)
     password: str = Field(..., min_length=8)
 
-
-# Schema for updating an admin user
+# Admin update schema
 class AdminUpdate(BaseModel):
-    username: str | None = None
-    email: EmailStr | None = None
-    contact: str | None = None
-    role: str | None = None
-    password: str | None = None
+    username: Optional[str] = None
+    email: Optional[EmailStr] = None
+    contact: Optional[str] = None
+    role: Optional[str] = None
+    password: Optional[str] = None
 
 
-# Schema fro emergency contact 
+# Emergency Contact Schemas
 class EmergencyContactBase(BaseModel):
-    AuthorityName: str
-    ContactNumber: str = Field(min_length=10, max_length=15)
-    Category: str
+    authority_name: str = Field(..., min_length=2, max_length=150)
+    contact_number: str = Field(..., min_length=10, max_length=20)
+    category: str = Field(..., min_length=3, max_length=50)
     latitude: float
     longitude: float
-    email:Optional[EmailStr] = None
-    Location: str
+    location: str = Field(..., max_length=255)
+    email: Optional[EmailStr] = None
+
 
 class EmergencyContactCreate(EmergencyContactBase):
     pass
 
+
+class EmergencyContactUpdate(BaseModel):
+    authority_name: Optional[str] = None
+    contact_number: Optional[str] = None
+    category: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    location: Optional[str] = None
+    email: Optional[EmailStr] = None
+
+
 class EmergencyContactResponse(EmergencyContactBase):
-    ContactId: int
+    id: int
 
     class Config:
-        from_attributes = True
+        from_attributes = True        

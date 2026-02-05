@@ -42,14 +42,27 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('userEmail').value = '';
     document.getElementById('userContact').value = '';
     document.getElementById('Password').value = '';
+    const roleSelect = document.getElementById('userRole');
+        if (roleSelect) roleSelect.selectedIndex = 0;
 }
+
+    const validateContact = (contact) => {
+        const trimmed = contact.trim();
+        if (!trimmed) return { valid: false, msg: "Contact number is required" };
+        if (!/^(97|98)[0-9]{8}$/.test(trimmed)) {
+            if (trimmed.length !== 10) return { valid: false, msg: "Contact must be exactly 10 digits" };
+            if (!/^(97|98)/.test(trimmed)) return { valid: false, msg: "Mobile number must start with 97 or 98" };
+            return { valid: false, msg: "Invalid mobile number format" };
+        }
+        return { valid: true };
+    };
 
     function validateForm(data) {
     let isValid = true;
     clearErrors();
 
     // Username validation
-    if (!data.username) {
+    if (!data.username.trim()) {
         showError("userNameError", "Username is required");
         isValid = false;
 
@@ -62,20 +75,18 @@ document.addEventListener('DOMContentLoaded', () => {
     } 
 
     // Email validation
-    if (!data.email) {
+    if (!data.email.trim()) {
         showError("userEmailError", "Email is required");
         isValid = false;
-    } else if (!data.email.includes("@")) {
-        showError("userEmailError", "Invalid email address");
+    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+        showError("userEmailError", "Please enter a valid email");
         isValid = false;
     }
 
     // Contact validation
-    if (!data.contact) {
-        showError("userContactError", "Contact is required");
-        isValid = false;
-    } else if (data.contact.length < 10) {
-        showError("userContactError", "Contact must be at least 10 digits");
+    const contactResult = validateContact(data.contact);
+    if (!contactResult.valid) {
+        showError("userContactError", contactResult.msg);
         isValid = false;
     }
 
@@ -103,6 +114,64 @@ document.addEventListener('DOMContentLoaded', () => {
             if (field === "password") showError("passwordError", err.msg);
         });
     }
+
+    const loadAdmins = async () => {
+        const token = getToken();
+        if (!token) {
+            alert("Please login first");
+            return;
+        }
+
+        try {
+            const res = await fetch("http://127.0.0.1:8000/admins/", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (!res.ok) {
+                if (res.status === 401) {
+                    alert("Session expired. Please login again.");
+                    localStorage.removeItem("token");
+                    return;
+                }
+                if (res.status === 403) {
+                    alert("You do not have permission to view admins.");
+                    return;
+                }
+                throw new Error("Failed to load admins");
+            }
+
+            const admins = await res.json();
+
+            tableBody.innerHTML = '';
+            admins.forEach(admin => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${admin.id}</td>
+                    <td>${admin.username}</td>
+                    <td>${admin.email}</td>
+                    <td>${admin.role}</td>
+                    <td class="action-buttons">
+                        <button class="icon-btn btn-edit" data-id="${admin.id}">
+                            <img src="/frontend/resources/edit.png" alt="Edit">
+                        </button>
+                        <button class="icon-btn btn-delete" data-id="${admin.id}">
+                            <img src="/frontend/resources/delete.png" alt="Delete">
+                        </button>
+                    </td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            totalAdminEl.textContent = admins.length;
+
+        } catch (err) {
+            console.error("Load admins error:", err);
+            alert("Cannot load admins. Server may be down.");
+        }
+    };
 
     // Form submission
     submitButton.addEventListener('click', async (e) => {

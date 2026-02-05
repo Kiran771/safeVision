@@ -320,6 +320,77 @@ body {
     animation: rotate 2s linear infinite;
 }
 
+/* Table Section */
+.table-section {
+    margin-top: 4rem;
+    border-radius: 24px;
+}
+
+.table-wrapper {
+    overflow-x: auto;
+    margin-top: 1.5rem;
+}
+
+.authority-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 16px;
+    overflow: hidden;
+}
+
+.authority-table thead {
+    background: rgb(2, 51, 79);
+    color: white;
+}
+
+.authority-table th,
+.authority-table td {
+    padding: 1rem;
+    text-align: left;
+    font-size: 0.95rem;
+}
+
+.authority-table tbody tr {
+    border-bottom: 1px solid #eee;
+}
+
+.authority-table tbody tr:hover {
+    background: rgba(188, 200, 211, 0.764);
+}
+
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.75rem;
+}
+.icon-btn img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain; 
+    display: block;
+}
+
+
+.btn-edit, .btn-delete {
+    background: transparent;
+    border: none;
+    padding: 0; 
+    cursor: pointer;
+    width: 20px; 
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon-btn:hover {
+    opacity: 0.7;
+    transform: scale(1.1);
+    transition: all 0.2s ease;
+}
+
+
 @keyframes rotate {
     from { transform: rotate(0deg); }
     to { transform: rotate(360deg); }

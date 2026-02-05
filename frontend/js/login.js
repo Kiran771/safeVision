@@ -28,10 +28,10 @@ document.addEventListener("DOMContentLoaded", function () {
     if (hasError) return;
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/login", {
+      const res = await fetch("http://127.0.0.1:8000/login/token", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
           username: username.value,
           password: password.value,
         }),
@@ -40,26 +40,30 @@ document.addEventListener("DOMContentLoaded", function () {
       const data = await res.json();
 
       if (!res.ok) {
-        // Check backend error message
-        if (data.detail === "User not found") {
-          usernameError.innerText = "Invalid username";
-          username.classList.add("error");
-        } else if (data.detail === "Incorrect password") {
-          passwordError.innerText = "Invalid password";
-          password.classList.add("error");
-        } else {
-          passwordError.innerText = "Invalid username or password";
-          username.classList.add("error");
-          password.classList.add("error");
-        }
+        // Show generic invalid credentials error
+        usernameError.innerText = "Invalid username or password";
+        passwordError.innerText = "Invalid username or password";
+        username.classList.add("error");
+        password.classList.add("error");
         return;
       }
 
-      // Success → redirect
-      window.location.href = "/dashboard.html";
+      // Save token and role in sessionStorage
+      sessionStorage.setItem("access_token", data.access_token);
+      sessionStorage.setItem("role", data.role);
+
+      // Redirect based on role
+      if (data.role === "Super Admin") {
+        window.location.href = "/admin-dashboard.html";
+      } else if (data.role === "Admin") {
+        window.location.href = "/responder-dashboard.html";
+      } else {
+        window.location.href = "/dashboard.html";
+      }
     } catch (err) {
       console.error(err);
       passwordError.innerText = "Server error. Try again.";
     }
   });
+
 });

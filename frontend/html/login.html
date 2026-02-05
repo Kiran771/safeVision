@@ -1,21 +1,23 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>safeVision - Login</title>
-    <link rel="stylesheet" href="/frontend/css/login.css">
+    <link rel="stylesheet" href="/frontend/css/login.css" />
     <script src="/frontend/js/login.js"></script>
 </head>
+
 <body>
     <div class="container">
         <div class="left-panel">
-            <img class="illustration" src="/frontend/resources/login.png" alt="car">
+            <img class="illustration" src="/frontend/resources/login.png" alt="car" />
         </div>
 
         <div class="right-panel">
             <div class="logo">
-                <img class="logo-icon" src="/frontend/resources/logo.png" alt="Logo">
+                <img class="logo-icon" src="/frontend/resources/logo.png" alt="Logo" />
                 <div class="logo-text">safeVision</div>
             </div>
 
@@ -25,16 +27,16 @@
             <form id="loginForm">
                 <div class="form-group">
                     <label for="username">Username</label>
-                    <input type="text" id="username" placeholder="Enter your username" required>
+                    <input type="text" id="username" placeholder="Enter your username" required />
                     <small class="error-text" id="usernameError"></small>
                 </div>
 
                 <div class="form-group">
                     <label for="password">Password</label>
                     <div class="input-wrapper">
-                        <input type="password" id="password" placeholder="Enter your password" required>
-                        <img class="toggle-password" onclick="togglePassword()" src="/frontend/resources/password.png">
-                        
+                        <input type="password" id="password" placeholder="Enter your password" required />
+                        <img class="toggle-password" id="togglePassword" onclick="togglePassword()"
+                            src="/frontend/resources/password.png" alt="Toggle password" />
                     </div>
                     <small class="error-text" id="passwordError"></small>
                     <div class="forgot-password">
@@ -48,28 +50,31 @@
             <div class="social-login">
                 <p>Sign in with:</p>
                 <div class="social-icons">
-                    <a href="#" class="social-icon" title="Google"><img src="/frontend/resources/google.png"></a>
+                    <a href="#" class="social-icon" title="Google"><img src="/frontend/resources/google.png"
+                            alt="google" /></a>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-function togglePassword() {
-    const passwordInput = document.getElementById("password");
-    const icon = document.getElementById("togglePassword");
+        function togglePassword() {
+            const passwordInput = document.getElementById("password");
+            const icon = document.getElementById("togglePassword");
 
-    if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        icon.src = "/frontend/resources/eye-open.png";
-    } else {
-        passwordInput.type = "password";
-        icon.src = "/frontend/resources/eye-closed.png";
-    }
-}
+            if (passwordInput.type === "password") {
+                passwordInput.type = "text";
+                icon.src = "/frontend/resources/visible-password.png";
+            } else {
+                passwordInput.type = "password";
+                icon.src = "/frontend/resources/password.png";
+            }
+        }
 
-document.getElementById("togglePassword").addEventListener("click", togglePassword);
-</script>
-
+        document
+            .getElementById("togglePassword")
+            .addEventListener("click", togglePassword);
+    </script>
 </body>
+
 </html>
