@@ -1,5 +1,6 @@
 import cv2
 import os
+import tempfile
 from pathlib import Path
 import numpy as np
 import tensorflow as tf
@@ -87,8 +88,11 @@ def send_for_review(frame, video_name, frame_count, mse):
 # Main function to process video frames
 def generate_detection_frames(video_bytes: bytes, video_name: str):
     """Process video frames for anomaly detection and yield annotated frames"""
-    video_stream = BytesIO(video_bytes)
-    cap = cv2.VideoCapture(video_stream)
+    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video:
+        temp_video.write(video_bytes)
+        video_path = temp_video.name
+    cap = cv2.VideoCapture(video_path)
+
 
     frame_count = 0
     consecutive_high_mse = 0  
@@ -142,3 +146,4 @@ def generate_detection_frames(video_bytes: bytes, video_name: str):
         yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
 
     cap.release()
+    os.remove(video_path)

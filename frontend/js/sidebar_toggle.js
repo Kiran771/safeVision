@@ -10,26 +10,17 @@
         sidebar.prepend(toggleBtn);
     }
 
+    sidebar.classList.remove("collapsed");
+    document.body.classList.remove("sidebar-collapsed");
+
     toggleBtn.addEventListener("click", () => {
         sidebar.classList.toggle("collapsed");
-
 
         document.body.classList.toggle(
             "sidebar-collapsed",
             sidebar.classList.contains("collapsed")
         );
-
-        localStorage.setItem(
-            "sidebarCollapsed",
-            sidebar.classList.contains("collapsed")
-        );
     });
-
-
-    if (localStorage.getItem("sidebarCollapsed") === "true") {
-        sidebar.classList.add("collapsed");
-        document.body.classList.add("expanded");
-    }
 
     const currentPath = window.location.pathname;
     document.querySelectorAll(".nav-item a").forEach(link => {

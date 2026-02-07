@@ -1,108 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accident Detection System</title>
     <link rel="stylesheet" href="/frontend/css/detection.css">
     <link rel="stylesheet" href="/frontend/css/admin_side_menu.css">
+    <script src="/frontend/js/upload_video.js" defer></script>
     <script src="/frontend/js/admin_sidebar_loder.js" defer></script>
+
 </head>
+
 <body>
-  <div id="sidebar-container"></div>
-  <div class="page-wrapper">
-    <header>
-        <h3 style="font-weight: 400">Accident Detection System</h3>
-        <div class="admin">
-            <div class="admin-icon"></div>
-            <span>Admin</span>
-        </div>
-    </header>
-  
-    <main class="container">
-        <div class="left-section">
-            <section class="live-feed">
-                <h2>Live feed: Camera 2</h2>
-                <div class="video-container">
-                    <video id="cameraFeed" autoplay loop muted playsinline>
-                        <source src="/frontend/resources" type="video/mp4">
-                    </video>
-                    <div class="video-info">
-                        <span>Camera id : 2</span>
-                        <span class="status">
-                            <span class="status-dot"></span>
-                            Active
-                        </span>
-                        <span class="fps">fps</span>
-                        <span class="fps">30fps</span>
+    <div id="sidebar-container"></div>
+    <div class="page-wrapper">
+        <header>
+            <h3 style="font-weight: 400">Accident Detection System</h3>
+            <div class="admin">
+                <div class="admin-icon"></div>
+                <span>Admin</span>
+            </div>
+        </header>
+
+        <main class="container">
+            <div class="left-section">
+                <section class="live-feed">
+                    <h2>Live feed: Camera 2</h2>
+                    <div class="video-container">
+                        <video id="cameraFeed" autoplay loop muted playsinline>
+                            <source src=" " type="video/mp4">
+                        </video>
+                        <div class="video-info">
+                            <span>Camera id : 2</span>
+                            <span class="status">
+                                <span class="status-dot"></span>
+                                Active
+                            </span>
+                            <span class="fps">fps</span>
+                            <span class="fps">30fps</span>
+                        </div>
                     </div>
-                </div>
-            </section>
-
-            <section class="event-log">
-                <h2>Recent Event Log</h2>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Accident Id</th>
-                                <th>Time</th>
-                                <th>Status</th>
-                                <th>Confidence</th>
-                            </tr>
-                        </thead>
-                        <tbody id="eventTableBody">
-                            <tr>
-                                <td colspan="4" class="no-data">No recent events</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </div>
-
-        <div class="right-section">
-
-            <section class="alert-box">
-                <div class="alert-header">
-                    <span class="alert-icon">⚠</span>
-                    <span class="alert-title">Alert</span>
-                </div>
-                <div class="alert-message" id="alertMessage">
-                    Accident Detected
-                </div>
-            </section>
-
-            <section class="stat-box unverified">
-                <h3>Unverified incidents</h3>
-                <div class="stat-number" id="unverifiedCount">3</div>
-            </section>
-
-
-            <section class="stat-box detected">
-                <h3>Accident Detected</h3>
-                <div class="stat-number" id="detectedCount">3</div>
-            </section>
-
-
-            <section class="location-section">
-                <h2>Location overview</h2>
-                <div class="map-container">
-                    <div class="map-pin">
-
-                        <iframe 
-                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.742584891234!2d81.61420087549703!3d28.06780738202451!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3998675a30f8e175%3A0x93c04013828c9891!2sNepalgunj!5e0!3m2!1sen!2snp!4v1738742278511!5m2!1sen!2snp" 
-                            allowfullscreen="" 
-                            loading="lazy" 
-                            referrerpolicy="no-referrer-when-downgrade">
-                        </iframe>
+                    <div class="video-upload">
+                        <input type="file" id="videoUpload" accept="video/*">
+                        <button id="startDetection">Start Detection</button>
                     </div>
-                </div>
-            </section>
-        </div>
-    </main>
-  </div>
+                </section>
+                <section class="detection-frames-section">
+                    <h2>Detected Frames</h2>
+                    <div id="detectionFramesContainer" class="frames-container">
+                        
+                        <p class="no-frames">No accident detected yet</p>
+                    </div>
+                </section>
 
-    <script src="script.js"></script>
+
+                <section class="event-log">
+                    <h2>Recent Event Log</h2>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Accident Id</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Confidence</th>
+                                </tr>
+                            </thead>
+                            <tbody id="eventTableBody">
+                                <tr>
+                                    <td colspan="4" class="no-data">No recent events</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <div class="right-section">
+
+                <section class="alert-box">
+                    <div class="alert-header">
+                        <span class="alert-icon">⚠</span>
+                        <span class="alert-title">Alert</span>
+                    </div>
+                    <div class="alert-message" id="alertMessage">
+                        Accident Detected
+                    </div>
+                </section>
+
+                <section class="stat-box unverified">
+                    <h3>Unverified incidents</h3>
+                    <div class="stat-number" id="unverifiedCount">3</div>
+                </section>
+
+
+                <section class="stat-box detected">
+                    <h3>Accident Detected</h3>
+                    <div class="stat-number" id="detectedCount">3</div>
+                </section>
+
+
+                <section class="location-section">
+                    <h2>Location overview</h2>
+                    <div class="map-container">
+                        <div class="map-pin">
+
+                            <iframe
+                                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3532.742584891234!2d81.61420087549703!3d28.06780738202451!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3998675a30f8e175%3A0x93c04013828c9891!2sNepalgunj!5e0!3m2!1sen!2snp!4v1738742278511!5m2!1sen!2snp"
+                                allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade">
+                            </iframe>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
 </body>
+
 </html>

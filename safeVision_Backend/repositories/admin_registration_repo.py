@@ -1,4 +1,3 @@
-# repositories/admin_repository.py  (recommended name)
 from sqlalchemy.orm import Session
 from typing import Optional, List
 

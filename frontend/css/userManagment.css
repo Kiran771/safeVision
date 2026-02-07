@@ -161,7 +161,11 @@ td {
     color:white;
 }
 
-
+.no-data {
+    text-align: center;
+    color: #666;
+    
+}
 
 .user-info {
     display: flex;

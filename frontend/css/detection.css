@@ -67,7 +67,7 @@ header h1 {
 .right-section {
     display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 55px;
 }
 
 section {
@@ -79,7 +79,7 @@ section {
 section h2 {
     font-size: 18px;
     font-weight: 600;
-    padding: 20px 25px;
+    padding: 20px 5px;
     background-color: white;
     margin: 0;
 }
@@ -98,13 +98,13 @@ section h3 {
 .video-container {
     position: relative;
     background-color: #c8c8c8;
-    aspect-ratio: 16/9;
+    aspect-ratio: 15/9;
 }
 
 .video-container video {
     width: 100%;
     height: 100%;
-    object-fit: contain;
+    object-fit: cover;
     display: block;
 }
 
@@ -120,6 +120,33 @@ section h3 {
     align-items: center;
     font-size: 14px;
 }
+/* Video Upload Section */
+.video-upload {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 20px;
+    background-color: #f0f0f0;
+    border-bottom: 1px solid #ccc;
+}
+
+.video-upload input[type="file"] {
+    flex: 1;
+}
+
+.video-upload button {
+    padding: 8px 15px;
+    background-color: #6ba3d4;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.video-upload button:hover {
+    background-color: #5685b0;
+}
 
 .status {
     display: flex;
@@ -134,6 +161,39 @@ section h3 {
     border-radius: 50%;
     animation: pulse 2s infinite;
 }
+
+.frames-container {
+    display: flex;
+    height:120px;
+    flex-wrap: wrap;
+    gap: 23px;
+    padding: 10px;
+    max-height: 350px;
+    overflow-y: auto;
+    border-radius: 8px;
+    border: 1px solid #333;
+}
+.no-frames {
+    color: #666;
+    font-size: 14px;
+    margin: auto;
+}
+
+.frames-container img {
+    width: 160px;
+    height: 100px;
+    object-fit: cover;
+    border: 2px solid #555;
+    border-radius: 4px;
+}
+
+.frames-container .label {
+    text-align: center;
+    color: #fff;
+    font-size: 12px;
+    margin-top: 2px;
+}
+
 
 @keyframes pulse {
 
@@ -234,7 +294,7 @@ tbody tr:nth-child(odd) {
     padding: 20px;
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    height: 130px;
+    height: 140px;
 }
 
 .stat-box h3 {

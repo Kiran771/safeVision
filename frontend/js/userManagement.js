@@ -1,32 +1,33 @@
 document.addEventListener('DOMContentLoaded', () => {
+
     const form = document.getElementById('userForm');
     const addButton = document.querySelector('.add-button');
     const closeButton = document.querySelector('.close-btn');
     const cancelButton = document.querySelector('.btn-cancel');
     const submitButton = document.querySelector('.btn-submit');
+    const tableBody = document.getElementById("userTableBody");
+    const totalAdminEl = document.getElementById("totalAdmin");
 
+    //MODAL HANDLING
 
     addButton.addEventListener('click', () => {
         form.classList.add('show');
     });
 
-    closeButton.addEventListener('click', () => {
-        form.classList.remove('show');
-        clearErrors();
-        resetForm();
-    });
-
-    cancelButton.addEventListener('click', () => {
-        form.classList.remove('show');
-        clearErrors();
-        resetForm();
-    });
+    closeButton.addEventListener('click', closeForm);
+    cancelButton.addEventListener('click', closeForm);
 
     form.addEventListener('click', (e) => {
-        if (e.target === form) {
-            form.classList.remove('show');
-        }
+        if (e.target === form) closeForm();
     });
+
+    function closeForm() {
+        form.classList.remove('show');
+        clearErrors();
+        resetForm();
+    }
+
+    //ERROR HANDLING 
 
     function showError(id, message) {
         const el = document.getElementById(id);
@@ -36,15 +37,16 @@ document.addEventListener('DOMContentLoaded', () => {
     function clearErrors() {
         document.querySelectorAll(".error").forEach(e => e.innerText = "");
     }
-    // Reset form fields
+
     function resetForm() {
-    document.getElementById('userName').value = '';
-    document.getElementById('userEmail').value = '';
-    document.getElementById('userContact').value = '';
-    document.getElementById('Password').value = '';
-    const roleSelect = document.getElementById('userRole');
-        if (roleSelect) roleSelect.selectedIndex = 0;
-}
+        document.getElementById('userName').value = '';
+        document.getElementById('userEmail').value = '';
+        document.getElementById('userContact').value = '';
+        document.getElementById('Password').value = '';
+        document.getElementById('userRole').selectedIndex = 0;
+    }
+
+    //VALIDATION
 
     const validateContact = (contact) => {
         const trimmed = contact.trim();
@@ -58,54 +60,47 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     function validateForm(data) {
-    let isValid = true;
-    clearErrors();
+        let isValid = true;
+        clearErrors();
 
-    // Username validation
-    if (!data.username.trim()) {
-        showError("userNameError", "Username is required");
-        isValid = false;
+        if (!data.username.trim()) {
+            showError("userNameError", "Username is required");
+            isValid = false;
+        } else if (/^\d/.test(data.username)) {
+            showError("userNameError", "Username must not start with a number");
+            isValid = false;
+        } else if (data.username.length < 3) {
+            showError("userNameError", "Username must be at least 3 characters");
+            isValid = false;
+        }
 
-    } else if (/^\d/.test(data.username)) {
-        showError("userNameError", "Username must not start with a number");
-        isValid = false;
-    } else if (data.username.length < 3) {
-        showError("userNameError", "Username must be at least 3 characters");
-        isValid = false;
-    } 
+        if (!data.email.trim()) {
+            showError("userEmailError", "Email is required");
+            isValid = false;
+        } else if (!/\S+@\S+\.\S+/.test(data.email)) {
+            showError("userEmailError", "Please enter a valid email");
+            isValid = false;
+        }
 
-    // Email validation
-    if (!data.email.trim()) {
-        showError("userEmailError", "Email is required");
-        isValid = false;
-    } else if (!/\S+@\S+\.\S+/.test(data.email)) {
-        showError("userEmailError", "Please enter a valid email");
-        isValid = false;
+        const contactResult = validateContact(data.contact);
+        if (!contactResult.valid) {
+            showError("userContactError", contactResult.msg);
+            isValid = false;
+        }
+
+        if (!data.password) {
+            showError("passwordError", "Password is required");
+            isValid = false;
+        } else if (data.password.length < 8) {
+            showError("passwordError", "Password must be at least 8 characters");
+            isValid = false;
+        }
+
+        return isValid;
     }
-
-    // Contact validation
-    const contactResult = validateContact(data.contact);
-    if (!contactResult.valid) {
-        showError("userContactError", contactResult.msg);
-        isValid = false;
-    }
-
-    // Password validation
-    if (!data.password) {
-        showError("passwordError", "Password is required");
-        isValid = false;
-    } else if (data.password.length < 8) {
-        showError("passwordError", "Password must be at least 8 characters");
-        isValid = false;
-    }
-
-    return isValid;
-}
-
 
     function handleBackendErrors(error) {
         if (!error.detail) return;
-
         error.detail.forEach(err => {
             const field = err.loc[1];
             if (field === "username") showError("userNameError", err.msg);
@@ -115,39 +110,33 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    //LOAD ADMINS
+
     const loadAdmins = async () => {
-        const token = getToken();
-        if (!token) {
-            alert("Please login first");
-            return;
-        }
+    const token = getToken();
+    if (!token) return;
 
-        try {
-            const res = await fetch("http://127.0.0.1:8000/admins/", {
-                method: "GET",
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
+    try {
+        const res = await fetch("http://127.0.0.1:8000/admins/", {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
 
-            if (!res.ok) {
-                if (res.status === 401) {
-                    alert("Session expired. Please login again.");
-                    localStorage.removeItem("token");
-                    return;
-                }
-                if (res.status === 403) {
-                    alert("You do not have permission to view admins.");
-                    return;
-                }
-                throw new Error("Failed to load admins");
-            }
+        if (!res.ok) throw new Error("Failed to load admins");
 
-            const admins = await res.json();
+        const admins = await res.json();
 
-            tableBody.innerHTML = '';
+        // Remove "No admin found" row
+        tableBody.innerHTML = "";
+
+        if (admins.length === 0) {
+            // If no admins, show message
+            const tr = document.createElement("tr");
+            tr.innerHTML = `<td colspan="5" class="no-data">No admin found</td>`;
+            tableBody.appendChild(tr);
+        } else {
+            // Add all admin rows
             admins.forEach(admin => {
-                const tr = document.createElement('tr');
+                const tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td>${admin.id}</td>
                     <td>${admin.username}</td>
@@ -164,59 +153,61 @@ document.addEventListener('DOMContentLoaded', () => {
                 `;
                 tableBody.appendChild(tr);
             });
-
-            totalAdminEl.textContent = admins.length;
-
-        } catch (err) {
-            console.error("Load admins error:", err);
-            alert("Cannot load admins. Server may be down.");
         }
-    };
 
-    // Form submission
+        totalAdminEl.textContent = admins.length;
+
+    } catch (err) {
+        console.error(err);
+        alert("Unable to load admins");
+    }
+};
+
+    // CREATE ADMIN 
+
     submitButton.addEventListener('click', async (e) => {
         e.preventDefault();
 
         const data = {
-            username: document.getElementById('userName').value.trim(),
-            email: document.getElementById('userEmail').value.trim(),
-            contact: document.getElementById('userContact').value.trim(),
-            role: document.getElementById('userRole').value,
-            password: document.getElementById('Password').value
+            username: userName.value.trim(),
+            email: userEmail.value.trim(),
+            contact: userContact.value.trim(),
+            role: userRole.value,
+            password: Password.value
         };
 
-        // Frontend validation
         if (!validateForm(data)) return;
 
         try {
+            const token = getToken();
+
             const response = await fetch("http://127.0.0.1:8000/admins/", {
                 method: "POST",
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
                 },
                 body: JSON.stringify(data)
             });
 
             const result = await response.json();
 
-            // Backend validation errors
             if (!response.ok) {
                 handleBackendErrors(result);
                 return;
             }
 
-            // Success : close modal & clear form
-            form.classList.remove('show');
-            document.getElementById('userName').value = '';
-            document.getElementById('userEmail').value = '';
-            document.getElementById('userContact').value = '';
-            document.getElementById('Password').value = '';
-
+            closeForm();
+            await loadAdmins(); //  AUTO UPDATE TABLE
             alert("User created successfully");
 
         } catch (error) {
             console.error(error);
-            alert("Server error. Please try again.");
+            alert("Server error");
         }
     });
+
+    //INITIAL LOAD 
+
+    loadAdmins();
 });
