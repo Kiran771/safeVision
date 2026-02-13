@@ -1,10 +1,12 @@
+from collections import deque
+import time
 import cv2
 import os
 import tempfile
 from pathlib import Path
 import numpy as np
 import tensorflow as tf
-from io import BytesIO
+
 
 
 # Load model 
@@ -20,7 +22,7 @@ IMG_SIZE = 256
 ANOMALY_THRESHOLD = 0.0040  
 
 # number of consecutive frames to confirm anomaly
-ANOMALY_CONSECUTIVE_FRAMES = 3  
+ANOMALY_CONSECUTIVE_FRAMES = 6  
 # threshold for borderline cases
 BORDERLINE_THRESHOLD = 0.0025
 
@@ -84,66 +86,130 @@ def send_for_review(frame, video_name, frame_count, mse):
     cv2.imwrite(review_path, frame)
     print(f"Borderline detection saved for human review: {review_path} (MSE: {mse:.4f})")
 
+def generate_detection_frames(
+    video_bytes: bytes | None = None,
+    video_name: str = "video",
+    video_path: str | None = None
+):
+    print(f"[ANALYSIS START] Video: {video_name}, path: {video_path or 'from bytes'}")
 
-# Main function to process video frames
-def generate_detection_frames(video_bytes: bytes, video_name: str):
-    """Process video frames for anomaly detection and yield annotated frames"""
-    with tempfile.NamedTemporaryFile(delete=False, suffix=".mp4") as temp_video:
-        temp_video.write(video_bytes)
-        video_path = temp_video.name
-    cap = cv2.VideoCapture(video_path)
+    cap_source = None
+    temp_file_to_clean = None
 
-
-    frame_count = 0
-    consecutive_high_mse = 0  
-
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
-
-        frame_count += 1
-
-        # Preprocess and predict
-        input_frame = preprocess_frame(frame)
-        recon = model.predict(input_frame, verbose=0)
-
-        # Post-processing: Masked MSE
-        mse = calculate_masked_mse(input_frame, recon)
-
-        # Post-processing: Temporal consistency
-        if mse > ANOMALY_THRESHOLD:
-            consecutive_high_mse += 1
+    try:
+        # Prepare video source
+        if video_path:
+            cap_source = video_path
+        elif video_bytes:
+            tmp_fd, tmp_name = tempfile.mkstemp(suffix=".mp4")
+            with os.fdopen(tmp_fd, "wb") as f:
+                f.write(video_bytes)
+                f.flush()
+                os.fsync(f.fileno())
+            cap_source = tmp_name
+            temp_file_to_clean = tmp_name
         else:
-            consecutive_high_mse = 0
+            raise ValueError("Either video_bytes or video_path required")
 
-        # Final status based on temporal check
-        status = "NORMAL"
-        color = (0, 255, 0)  # Green for normal
+        time.sleep(0.2)  # filesystem settle time
 
-        if consecutive_high_mse >= ANOMALY_CONSECUTIVE_FRAMES:
-            status = "ACCIDENT"
-            color = (0, 0, 255)  # Red for accident
-            # Post-processing: Save ONLY confirmed accident frames
-            save_accident_frame(frame, video_name, frame_count, mse)
+        cap = cv2.VideoCapture(cap_source)
+        if not cap.isOpened():
+            raise RuntimeError(f"Cannot open video: {cap_source}")
 
-        # Post-processing: Human-in-the-Loop for borderline detections
-        if BORDERLINE_THRESHOLD < mse <= ANOMALY_THRESHOLD:
-            send_for_review(frame, video_name, frame_count, mse)
+        fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
+        frame_interval = 1.0 / fps
+        print(f"[INFO] FPS: {fps:.2f}")
 
-        # Draw text on original frame
-        cv2.putText(frame, f"{status} (MSE: {mse:.4f})", (10, 40),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1.2, color, 3)
-        cv2.putText(frame, f"Consecutive: {consecutive_high_mse}", (10, 80),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
-        cv2.putText(frame, f"Frame: {frame_count}", (10, 120),
-                    cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2)
+        frame_count = 0
+        consecutive_high_mse = 0
+        running_normal_mse = None
+        last_mse = []
+        last_yield_time = time.time()
 
-        # Encode as JPEG and yield (no saving of normal frames!)
-        _, buffer = cv2.imencode('.jpg', frame)
-        frame_bytes = buffer.tobytes()
+        while cap.isOpened():
+            ret, frame = cap.read()
+            if not ret:
+                print(f"[INFO] Video ended after {frame_count} frames")
+                break
 
-        yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' + frame_bytes + b'\r\n')
+            frame_count += 1
+            if frame_count % 3 != 0:
+                continue
+            print(f"[FRAME] Processing frame {frame_count}", end="\r") 
 
-    cap.release()
-    os.remove(video_path)
+            if frame is None or frame.size == 0:
+                print(f"[WARNING] Skipping invalid frame {frame_count}")
+                continue
+
+            input_frame = preprocess_frame(frame)
+            recon = model.predict(input_frame, verbose=0)[0]
+            mse = calculate_masked_mse(input_frame[0], recon)
+
+            last_mse.append(mse)
+            if len(last_mse) > 5:
+                last_mse.pop(0)
+            smoothed_mse = np.median(last_mse)
+
+            if running_normal_mse is None:
+                running_normal_mse = smoothed_mse
+            else:
+                running_normal_mse = 0.9 * running_normal_mse + 0.1 * smoothed_mse
+
+            dynamic_threshold = max(ANOMALY_THRESHOLD, running_normal_mse + 0.002)
+            dynamic_borderline_threshold = max(BORDERLINE_THRESHOLD, running_normal_mse + 0.001)
+
+            if smoothed_mse > dynamic_threshold:
+                consecutive_high_mse += 1
+            else:
+                consecutive_high_mse = 0
+
+            is_accident = consecutive_high_mse >= ANOMALY_CONSECUTIVE_FRAMES
+            is_borderline = dynamic_borderline_threshold < smoothed_mse <= dynamic_threshold
+
+            if is_accident or is_borderline:
+                current_time = time.time()
+                if current_time - last_yield_time < frame_interval:
+                    time.sleep(frame_interval - (current_time - last_yield_time))
+                last_yield_time = current_time
+
+                status = "ACCIDENT DETECTED" if is_accident else "BORDERLINE"
+                color = (0, 0, 255) if is_accident else (0, 165, 255)
+
+                cv2.putText(frame, f"{status} MSE: {smoothed_mse:.4f}", (30, 80),
+                            cv2.FONT_HERSHEY_DUPLEX, 1.0, color, 6, cv2.LINE_AA)
+                cv2.putText(frame, f"Frame {frame_count} Consec: {consecutive_high_mse}", (30, 140),
+                            cv2.FONT_HERSHEY_DUPLEX, 1.0, color, 6, cv2.LINE_AA)
+
+                if is_accident:
+                    h, w = frame.shape[:2]
+                    cv2.rectangle(frame, (40, 40), (w-40, h-40), (0, 0, 255), 8)
+
+                success, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
+                if not success:
+                    print(f"[WARNING] JPEG encode failed at frame {frame_count}")
+                    continue
+
+                yield (
+                    b"--frame\r\n"
+                    b"Content-Type: image/jpeg\r\n"
+                    b"X-Frame-Number: " + str(frame_count).encode() + b"\r\n\r\n" +
+                    buffer.tobytes() +
+                    b"\r\n"
+                )
+
+    except Exception as e:
+        print(f"[ERROR] During processing: {e}")
+        raise
+
+    finally:
+        if 'cap' in locals():
+            cap.release()
+        if temp_file_to_clean and os.path.exists(temp_file_to_clean):
+            try:
+                os.remove(temp_file_to_clean)
+                print(f"[CLEANUP] Removed temp file: {temp_file_to_clean}")
+            except Exception as cleanup_err:
+                print(f"[CLEANUP ERROR] {cleanup_err}")
+
+    print(f"[ANALYSIS END] Video: {video_name}")

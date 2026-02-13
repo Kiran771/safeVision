@@ -25,7 +25,7 @@ app.add_middleware(
 )
 
 # Include routers
-app.include_router(admin_registration_router.router, prefix="/admins")
-app.include_router(auth.router, prefix="/auth")
-app.include_router(detection_router.router, prefix="/detection")
-app.include_router(emergency_contact_router.router, prefix="/contacts")
+app.include_router(admin_registration_router.router)
+app.include_router(auth.router)
+app.include_router(detection_router.router)
+app.include_router(emergency_contact_router.router)

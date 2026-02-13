@@ -7,7 +7,7 @@
     <title>Accident Detection System</title>
     <link rel="stylesheet" href="/frontend/css/detection.css">
     <link rel="stylesheet" href="/frontend/css/admin_side_menu.css">
-    <script src="/frontend/js/upload_video.js" defer></script>
+    <script src="/frontend/js/detection.js" defer></script>
     <script src="/frontend/js/admin_sidebar_loder.js" defer></script>
 
 </head>
@@ -28,17 +28,20 @@
                 <section class="live-feed">
                     <h2>Live feed: Camera 2</h2>
                     <div class="video-container">
-                        <video id="cameraFeed" autoplay loop muted playsinline>
+                        <video id="cameraFeed" autoplay muted playsinline>
                             <source src=" " type="video/mp4">
                         </video>
+                        <div id="videoOverlay" class="video-overlay" style="display:none;">
+                            <img src="/frontend/resources/stopbutton.png">
+                        </div>
                         <div class="video-info">
                             <span>Camera id : 2</span>
                             <span class="status">
                                 <span class="status-dot"></span>
                                 Active
                             </span>
-                            <span class="fps">fps</span>
-                            <span class="fps">30fps</span>
+                            <span>fps</span>
+                            <span id='videoFps' class="fps">20 fps</span>
                         </div>
                     </div>
                     <div class="video-upload">
@@ -49,9 +52,18 @@
                 <section class="detection-frames-section">
                     <h2>Detected Frames</h2>
                     <div id="detectionFramesContainer" class="frames-container">
-                        
-                        <p class="no-frames">No accident detected yet</p>
+
+                        <div id="streamActiveSection" style="display: none;">
+                            <h3>Live Accident Detection Stream</h3>
+                            <img id="detectionStreamImg" alt="Live accident detection stream">
+                        </div>
+
+                        <!-- Default message – always inside the same div -->
+                        <p class="no-frames" id="noFramesMessage">
+                            No accident detected yet
+                        </p>
                     </div>
+
                 </section>
 
 
