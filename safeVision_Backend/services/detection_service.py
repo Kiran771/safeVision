@@ -6,6 +6,8 @@ import tempfile
 from pathlib import Path
 import numpy as np
 import tensorflow as tf
+from safeVision_Backend.core.psql_db import SessionLocal
+from safeVision_Backend.models.table_creation import Accident
 
 
 
@@ -72,11 +74,12 @@ def calculate_masked_mse(input_frame, recon):
 
 # Save only confirmed accident frames
 def save_accident_frame(frame, video_name, frame_count, mse):
-    """Save only confirmed accident frames (post-processing step 3)"""
+    """Save only confirmed accident frames"""
     accident_path = os.path.join(ACCIDENT_FOLDER, 
                                 f"accident_{video_name}_frame_{frame_count:06d}_mse_{mse:.4f}.jpg")
     cv2.imwrite(accident_path, frame)
     print(f"Accident frame saved: {accident_path}")
+    return accident_path
 
 
 # Human-in-the-Loop: Save borderline frames for manual review
@@ -86,15 +89,39 @@ def send_for_review(frame, video_name, frame_count, mse):
     cv2.imwrite(review_path, frame)
     print(f"Borderline detection saved for human review: {review_path} (MSE: {mse:.4f})")
 
+# Save accident details to database for further processing
+def save_accident_to_db(camera_id, mse, frame_path):
+    db = SessionLocal()
+    try:
+        accident = Accident(
+            cameraid=camera_id,
+            reconstruction_error=float(mse),
+            frame_path=frame_path,
+            status="new"
+        )
+        db.add(accident)
+        db.commit()
+        db.refresh(accident)
+
+        print(f"[DB] Accident saved ID={accident.accidentid}")
+
+    finally:
+        db.close()
+
+
 def generate_detection_frames(
     video_bytes: bytes | None = None,
     video_name: str = "video",
-    video_path: str | None = None
+    video_path: str | None = None,
+    camera_id: int = 1
 ):
     print(f"[ANALYSIS START] Video: {video_name}, path: {video_path or 'from bytes'}")
 
     cap_source = None
     temp_file_to_clean = None
+    last_saved_time = 0
+    SAVE_COOLDOWN = 8 
+
 
     try:
         # Prepare video source
@@ -111,7 +138,7 @@ def generate_detection_frames(
         else:
             raise ValueError("Either video_bytes or video_path required")
 
-        time.sleep(0.2)  # filesystem settle time
+        time.sleep(0.2) 
 
         cap = cv2.VideoCapture(cap_source)
         if not cap.isOpened():
@@ -184,6 +211,31 @@ def generate_detection_frames(
                 if is_accident:
                     h, w = frame.shape[:2]
                     cv2.rectangle(frame, (40, 40), (w-40, h-40), (0, 0, 255), 8)
+                    if current_time - last_saved_time > SAVE_COOLDOWN:
+                        frame_path = save_accident_frame(
+                            frame,
+                            video_name,
+                            frame_count,
+                            smoothed_mse
+                        )
+
+                        save_accident_to_db(
+                            camera_id=camera_id,
+                            mse=smoothed_mse,
+                            frame_path=frame_path
+                        )
+
+                        last_saved_time = current_time
+
+                elif is_borderline:
+                    if current_time - last_saved_time > SAVE_COOLDOWN:
+                        send_for_review(
+                            frame,
+                            video_name,
+                            frame_count,
+                            smoothed_mse
+                        )
+                        last_saved_time = current_time
 
                 success, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
                 if not success:

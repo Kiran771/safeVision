@@ -10,7 +10,7 @@ from safeVision_Backend.services.detection_service import generate_detection_fra
 
 router = APIRouter(prefix="/detection", tags=["Accident Detection"])
 
-# Global storage for the last uploaded video (single-user / development only)
+# Global storage for the last uploaded video
 last_uploaded = {
     "path": None,
     "name": None,
@@ -82,7 +82,8 @@ async def stream_detection():
         generate_detection_frames(
             video_bytes=None,
             video_name=last_uploaded["name"],
-            video_path=last_uploaded["path"]
+            video_path=last_uploaded["path"],
+            camera_id=1
         ),
         media_type="multipart/x-mixed-replace; boundary=frame",
         headers={

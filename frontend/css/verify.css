@@ -1,0 +1,287 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: sans-serif;
+    background: linear-gradient(135deg, #d4dce5 0%, #b8c5d6 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.main-content {
+    margin-left: 230px;
+    padding: 0;
+    min-height: 100vh;
+    width: calc(100% - 230px);
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}
+
+/* Adjust for collapsed sidebar */
+body.sidebar-collapsed .main-content {
+    margin-left: 80px;
+    width: calc(100% - 80px);
+}
+
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+    background: white;
+    padding: 15px 40px;
+    border-radius: 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.page-header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+}
+
+.user-profile {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.profile-circle {
+    width: 45px;
+    height: 45px;
+    background: #1e293b;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.user-name {
+    font-weight: 500;
+    color: #1e293b;
+}
+
+.incidents-container {
+    background: transparent;
+    padding: 30px 40px;
+    width: 100%;
+    min-height: calc(100vh - 85px);
+}
+
+.incidents-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+    margin-bottom: 40px;
+    width: 100%;
+}
+
+.incident-card {
+    background: linear-gradient(135deg, #3b6d8f 0%, #2d5570 100%);
+    border-radius: 16px;
+    padding: 30px 24px;
+    color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    cursor: pointer;
+}
+
+.incident-card:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.incident-id {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 24px;
+}
+
+.incident-info {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.info-item {
+    font-size: 16px;
+    font-weight: 400;
+}
+
+.info-label {
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.verify-button {
+    width: 100%;
+    padding: 14px;
+    background: #e5e7eb;
+    color: #1e293b;
+    border: none;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.verify-button:hover {
+    background: #d1d5db;
+    transform: scale(1.02);
+}
+
+.verify-button:active {
+    transform: scale(0.98);
+}
+
+/* Pagination */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    margin-top: 30px;
+}
+
+.pagination button {
+    padding: 10px 16px;
+    background: white;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    color: #1e293b;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.pagination button:hover:not(:disabled) {
+    background: #f3f4f6;
+    border-color: #3b6d8f;
+}
+
+.pagination button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination button.active {
+    background: #3b6d8f;
+    color: white;
+    border-color: #3b6d8f;
+}
+
+.pagination .page-info {
+    padding: 0 16px;
+    color: #64748b;
+    font-size: 14px;
+}
+
+/* Loading & No Data */
+.loading, .no-data {
+    text-align: center;
+    padding: 60px 20px;
+    color: #64748b;
+}
+
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid #e5e7eb;
+    border-top-color: #3b6d8f;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 20px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.no-data p {
+    font-size: 18px;
+}
+
+
+.verify-btn {
+    background: #10b981;
+    color: white;
+}
+
+.verify-btn:hover {
+    background: #059669;
+}
+
+.reject-btn {
+    background: #ef4444;
+    color: white;
+}
+
+.reject-btn:hover {
+    background: #dc2626;
+}
+
+.cancel-btn {
+    background: #e5e7eb;
+    color: #1e293b;
+}
+
+.cancel-btn:hover {
+    background: #d1d5db;
+}
+
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 15px;
+    }
+
+    body.sidebar-collapsed .main-content {
+        margin-left: 0;
+    }
+
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+
+    .incidents-grid {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+        padding: 20px;
+    }
+
+    .pagination {
+        flex-wrap: wrap;
+    }
+}
+
+@media (max-width: 480px) {
+    .page-header h1 {
+        font-size: 22px;
+    }
+
+    .incident-card {
+        padding: 24px 20px;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+}

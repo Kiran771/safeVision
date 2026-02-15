@@ -1,18 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accident Detection System</title>
-    <link rel="stylesheet" href="/frontend/css/detection.css">
+    <title>Verify Incidents - Accident Detection System</title>
+    <link rel="stylesheet" href="/frontend/css/verify.css">
     <link rel="stylesheet" href="/frontend/css/admin_side_menu.css">
-    <script src="/frontend/js/detection.js" defer></script>
+    <script src="/frontend/js/verify_incidents.js" defer></script>
     <script src="/frontend/js/admin_sidebar_loder.js" defer></script>
-
 </head>
-
 <body>
     <div id="sidebar-container"></div>
+    
+    <div class="main-content">
+        <header class="page-header">
+            <h1>Verify Incidents</h1>
+            <div class="user-profile">
+                <div class="profile-circle">
+                    <span>A</span>
+                </div>
+                <span class="user-name">Admin</span>
+            </div>
+        </header>
+
+        <div class="incidents-container">
+            <div id="incidents-grid" class="incidents-grid">
+                
+            </div>
+
+            <div id="pagination" class="pagination">
+                
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <div class="spinner"></div>
+                <p>Loading incidents...</p>
+            </div>
+
+            <div id="no-data" class="no-data" style="display: none;">
+                <p>No incidents found</p>
+            </div>
+        </div>
+    </div>
+
+    
 </body>
 </html>

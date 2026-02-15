@@ -317,7 +317,9 @@ tbody tr:nth-child(odd) {
     text-align: center;
     font-size: 16px;
     font-weight: 500;
-    border-radius: 4px;
+    border:none;
+    width:22rem;
+    cursor:pointer;
 }
 
 /* Stat Boxes */

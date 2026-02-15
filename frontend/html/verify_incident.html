@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Incident - Accident Detection System</title>
+    <link rel="stylesheet" href="/frontend/css/verify_incident_detail.css">
+    <script src="/frontend/js/verify_incident_detail.js" defer></script>
+</head>
+<body>
+    <div class="verify-container">
+        <header class="verify-header">
+            <h1>Verify Incident</h1>
+        </header>
+
+        <div class="content-wrapper">
+            <!-- Main Content Section -->
+            <div class="left-section">
+                <!-- Top Row: Anomaly Score and Incident Details -->
+                <div class="top-row">
+                    <!-- Anomaly Score -->
+                    <div class="anomaly-section">
+                        <h2>Anomaly Score</h2>
+                        <div class="anomaly-bar-container">
+                            <div class="anomaly-bar" id="anomaly-bar">
+                                <div class="anomaly-fill" id="anomaly-fill"></div>
+                            </div>
+                        </div>
+                        <div class="anomaly-score-text" id="anomaly-score-text">
+                            Anomaly Score: 0.92 mse
+                        </div>
+                    </div>
+
+                    <!-- Location Information -->
+                    <div class="new-element location-info">
+                        <h2>Location</h2>
+                        <div class="location-card">
+                            <div class="location-item">
+                                <strong>Address:</strong>
+                                <span id="location-address">Main St & 5th Ave</span>
+                            </div>
+                        
+                            <div class="location-item">
+                                <strong>Coordinates:</strong>
+                                <span id="location-coords">40.7128° N, 74.0060° W</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Incident Details -->
+                    <div class="incident-details-card">
+                        <h2>Incident Details</h2>
+                        <div class="incident-details-inner">
+                            <div class="detail-item">
+                                <span class="detail-label">Time:</span>
+                                <span class="detail-value" id="incident-time">1:11 PM</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Confidence:</span>
+                                <span class="detail-value" id="confidence">90%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Original and Reconstructed Frames -->
+                <div class="frames-section">
+                    <div class="frame-container">
+                        
+                        <div class="frame-box" id="original-frame">
+                            <img src="" alt="Original Frame" id="original-img">
+                        </div>
+                        <h3>Original Frame</h3>
+                    </div>
+
+                    <div class="frame-container">
+                        
+                        <div class="frame-box" id="reconstructed-frame">
+                            <img src="" alt="Reconstructed Frame" id="reconstructed-img">
+                        </div>
+                        <h3>Reconstructed Frame</h3>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="action-buttons">
+                    <button class="btn btn-confirm" id="confirm-btn">Confirm</button>
+                    <button class="btn btn-reject" id="reject-btn">Reject</button>
+                </div>
+
+                <button class="btn btn-cancel" id="cancel-btn">Cancel</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

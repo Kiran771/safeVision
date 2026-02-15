@@ -57,8 +57,6 @@
                             <h3>Live Accident Detection Stream</h3>
                             <img id="detectionStreamImg" alt="Live accident detection stream">
                         </div>
-
-                        <!-- Default message – always inside the same div -->
                         <p class="no-frames" id="noFramesMessage">
                             No accident detected yet
                         </p>
@@ -96,9 +94,9 @@
                         <span class="alert-icon">⚠</span>
                         <span class="alert-title">Alert</span>
                     </div>
-                    <div class="alert-message" id="alertMessage">
+                    <button class="alert-message" id="alertMessage"  onclick="window.location.href='/frontend/html/verify.html'">
                         Accident Detected
-                    </div>
+                    </button>
                 </section>
 
                 <section class="stat-box unverified">
