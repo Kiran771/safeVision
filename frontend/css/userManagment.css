@@ -156,9 +156,33 @@ th {
 }
 
 td {
-    padding: 16px 24px;
+    padding: 10px 20px;
     border-bottom: 1px solid #f3f4f6;
-    color:white;
+    color:rgb(108, 108, 108);
+}
+
+.action-cell {
+    display: flex;
+    gap: 10px;
+}
+
+.btn-edit, .btn-delete {
+    background: transparent;
+    border: none;
+    padding: 6px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background 0.15s;
+}
+
+.btn-edit:hover { background: #e3f2fd; }
+.btn-delete:hover { background: #ffebee; }
+
+
+.btn-edit img, .btn-delete img {
+    width: 20px;
+    height: 20px;
+    display: block;
 }
 
 .no-data {
@@ -350,15 +374,6 @@ td {
     transition: all 0.2s;
 }
 
-.btn-cancel {
-    background-color: white;
-    border: 1px solid #d1d5db;
-    color: #374151;
-}
-
-.btn-cancel:hover {
-    background-color: #f9fafb;
-}
 
 .btn-submit {
     background-color: #111827;

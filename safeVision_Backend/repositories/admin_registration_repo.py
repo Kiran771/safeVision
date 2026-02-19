@@ -30,7 +30,7 @@ def get_all_admins(db: Session, skip: int = 0, limit: int = 20) -> List[User]:
     """
     return (
         db.query(User)
-        .filter(User.role == "admin")
+        .filter(User.role == "Admin")
         .offset(skip)
         .limit(limit)
         .all()

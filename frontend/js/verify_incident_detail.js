@@ -11,46 +11,40 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load incident data
 async function loadIncidentData() {
     try {
-        // Replace with your actual API endpoint
-        // const response = await fetch(`/api/incidents/${incidentId}`);
-        // const incident = await response.json();
-        
-        // Mock data for demonstration
-        const incident = {
-            id: incidentId || 1,
-            time: '1:11 PM',
-            confidence: 0.90,
-            anomalyScore: 0.60,
-            originalFrameUrl: '/path/to/original-frame.jpg',
-            reconstructedFrameUrl: '/path/to/reconstructed-frame.jpg',
-            date: new Date().toLocaleDateString(),
-            location: {
-                address: 'Main St & 5th Ave',
-                zone: 'Downtown District',
-                coordinates: '40.7128° N, 74.0060° W'
-            }
-        };
-        
-        document.getElementById('incident-time').textContent = incident.time;
-        document.getElementById('confidence').textContent = `${Math.round(incident.confidence * 100)}%`;
-        
+        const response = await fetch(`http://127.0.0.1:8000/accidents/${incidentId}`);
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.detail || 'Failed to load incident data');
+        }
+
+        const incident = await response.json();
+
+        // Populate fields
+        document.getElementById('incident-time').textContent = incident.timestamp
+            ? new Date(incident.timestamp).toLocaleTimeString()
+            : 'Unknown';
+        document.getElementById('confidence').textContent = incident.confidence
+            ? `${Math.round(incident.confidence * 100)}%`
+            : 'N/A';
+
         // Populate location information
         if (incident.location) {
-            document.getElementById('location-address').textContent = incident.location.address;
-            document.getElementById('location-coords').textContent = incident.location.coordinates;
+            document.getElementById('location-address').textContent = incident.location.address || incident.location;
+            document.getElementById('location-coords').textContent = incident.location.coordinates || '';
         }
-        
-        // Set anomaly score
-        setAnomalyScore(incident.anomalyScore);
-        
-        // Load images (if available)
-        loadFrameImages(incident.originalFrameUrl, incident.reconstructedFrameUrl);
-        
+
+        // Set anomaly score bar using reconstruction error
+        setAnomalyScore(incident.reconstruction_error || 0);
+
+        // Load original and reconstructed frames
+        loadFrameImages(incident.frame_path, incident.reconstructed_frame_path);
+
     } catch (error) {
         console.error('Error loading incident data:', error);
-        alert('Failed to load incident data. Please try again.');
+        alert(`Failed to load incident data: ${error.message}`);
     }
 }
+
 
 // Set anomaly score bar
 function setAnomalyScore(score) {
@@ -110,47 +104,55 @@ function setupEventListeners() {
 async function confirmIncident() {
     const confirmed = confirm('Are you sure you want to CONFIRM this incident?');
     if (!confirmed) return;
-    
+
     try {
-        // Replace with your actual API endpoint
-        // await fetch(`/api/incidents/${incidentId}/confirm`, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' }
-        // });
-        
+        const response = await fetch(`http://127.0.0.1:8000/accidents/${incidentId}/verify`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.detail || 'Failed to confirm incident');
+        }
+
         alert('Incident confirmed successfully!');
-        
+
         // Redirect back to verify incidents page
         window.location.href = '/frontend/html/verify.html';
-        
     } catch (error) {
         console.error('Error confirming incident:', error);
-        alert('Failed to confirm incident. Please try again.');
+        alert(`Failed to confirm incident: ${error.message}`);
     }
 }
+
 
 // Reject incident
 async function rejectIncident() {
     const confirmed = confirm('Are you sure you want to REJECT this incident?');
     if (!confirmed) return;
-    
+
     try {
-        // Replace with your actual API endpoint
-        // await fetch(`/api/incidents/${incidentId}/reject`, {
-        //     method: 'POST',
-        //     headers: { 'Content-Type': 'application/json' }
-        // });
-        
+        const response = await fetch(`http://127.0.0.1:8000/accidents/${incidentId}/reject`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' }
+        });
+
+        if (!response.ok) {
+            const data = await response.json();
+            throw new Error(data.detail || 'Failed to reject incident');
+        }
+
         alert('Incident rejected successfully!');
-        
+
         // Redirect back to verify incidents page
         window.location.href = '/frontend/html/verify.html';
-        
     } catch (error) {
         console.error('Error rejecting incident:', error);
-        alert('Failed to reject incident. Please try again.');
+        alert(`Failed to reject incident: ${error.message}`);
     }
 }
+
 
 // Cancel and go back
 function cancel() {

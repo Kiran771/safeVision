@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 import tensorflow as tf
 from safeVision_Backend.core.psql_db import SessionLocal
-from safeVision_Backend.models.table_creation import Accident
+from safeVision_Backend.models.table_creation import Accident,Camera
 
 
 
@@ -90,25 +90,52 @@ def send_for_review(frame, video_name, frame_count, mse):
     print(f"Borderline detection saved for human review: {review_path} (MSE: {mse:.4f})")
 
 # Save accident details to database for further processing
-def save_accident_to_db(camera_id, mse, frame_path):
+def save_accident_to_db(camera_id, mse, confidence, frame_path, reconstructed_path):
     db = SessionLocal()
     try:
+        # Fetch camera location
+        camera = db.query(Camera).filter(Camera.cameraid == camera_id).first()
+        camera_location = camera.location if camera else None
+
         accident = Accident(
             cameraid=camera_id,
+            location=camera_location,  # save location from camera
             reconstruction_error=float(mse),
+            confidence=float(confidence),
             frame_path=frame_path,
-            status="new"
+            reconstructed_frame_path=reconstructed_path,
+            status="pending"
         )
         db.add(accident)
         db.commit()
         db.refresh(accident)
-
         print(f"[DB] Accident saved ID={accident.accidentid}")
 
     finally:
         db.close()
 
 
+# Compute confidence score for detected anomaly based on error, baseline, and threshold
+def compute_confidence(error, baseline, threshold):
+    """
+    Hybrid confidence:
+    - compares error to baseline behavior
+    - scales relative to detection threshold
+    """
+
+    if error <= baseline:
+        return 0.0
+
+    # how far above normal behavior
+    relative_spike = (error - baseline) / (threshold - baseline + 1e-6)
+
+    # sigmoid smoothing for stability
+    confidence = 1 / (1 + np.exp(-5 * (relative_spike - 0.5)))
+
+    return float(np.clip(confidence, 0, 1))
+
+
+# Main function to process video frames and yield detected accident frames as JPEG bytes
 def generate_detection_frames(
     video_bytes: bytes | None = None,
     video_name: str = "video",
@@ -171,8 +198,13 @@ def generate_detection_frames(
 
             input_frame = preprocess_frame(frame)
             recon = model.predict(input_frame, verbose=0)[0]
-            mse = calculate_masked_mse(input_frame[0], recon)
 
+            recon_image = (recon * 255).astype(np.uint8)
+            reconstructed_path = os.path.join(ACCIDENT_FOLDER, 
+            f"recon_{video_name}_frame_{frame_count:06d}.jpg")
+            cv2.imwrite(reconstructed_path, recon_image)
+
+            mse = calculate_masked_mse(input_frame[0], recon)
             last_mse.append(mse)
             if len(last_mse) > 5:
                 last_mse.pop(0)
@@ -185,6 +217,13 @@ def generate_detection_frames(
 
             dynamic_threshold = max(ANOMALY_THRESHOLD, running_normal_mse + 0.002)
             dynamic_borderline_threshold = max(BORDERLINE_THRESHOLD, running_normal_mse + 0.001)
+
+            confidence = compute_confidence(
+                error=smoothed_mse,
+                baseline=running_normal_mse,
+                threshold=dynamic_threshold
+            )
+
 
             if smoothed_mse > dynamic_threshold:
                 consecutive_high_mse += 1
@@ -222,7 +261,10 @@ def generate_detection_frames(
                         save_accident_to_db(
                             camera_id=camera_id,
                             mse=smoothed_mse,
+                            confidence=confidence,
+                            reconstructed_path=reconstructed_path,
                             frame_path=frame_path
+
                         )
 
                         last_saved_time = current_time

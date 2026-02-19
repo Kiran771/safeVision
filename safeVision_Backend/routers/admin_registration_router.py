@@ -14,42 +14,56 @@ router = APIRouter(
 )
 
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
-def register_admin(admin: AdminCreate, db: Session = Depends(get_db), current_user = Depends(get_current_user)):
+def register_admin(
+    admin: AdminCreate,
+    db: Session = Depends(get_db),
+    current_user: User | None = Depends(get_current_user)
+):
     """
-    Register a new admin user. Only Super Admin can create new admins.
+    Register a new admin user. Only Super Admin can create new admins,
+    except for the first admin (Super Admin) which can be created without authentication.
     """
-    # Check if current user is super admin
-    if current_user.role != "Super Admin":
-        raise HTTPException(status_code=403, detail="Only super admin can create admin users")
+    # Check if this is the first admin
+    existing_admins = db.query(User).count()
+    if existing_admins == 0:
+        # Allow creation without token, force role to Super Admin
+        admin.role = "Super Admin"
+        new_admin = create_admin(db, admin)
+        return {"message": "First Super Admin created successfully", "admin_id": new_admin.userid}
 
-    # Check if username or email already exists
+    # For subsequent admins, only Super Admin can create
+    if current_user.role != "Super Admin":
+        raise HTTPException(status_code=403, detail="Only Super Admin can create admin users")
+
+    # Check if username/email/contact already exists
     if get_admin_by_username(db, admin.username):
         raise HTTPException(status_code=400, detail="Username already exists")
-    
     if db.query(User).filter(User.email == admin.email).first():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered"
-        )
+        raise HTTPException(status_code=400, detail="Email already registered")
     if db.query(User).filter(User.contact == admin.contact).first():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Contact number already registered"
-        )
+        raise HTTPException(status_code=400, detail="Contact number already registered")
 
-    # Create admin using repository function
+    # Create admin
     new_admin = create_admin(db, admin)
-
     return {"message": "Admin created successfully", "admin_id": new_admin.userid}
 
-@router.get("/",response_model=List[Dict[str, Any]])
+
+@router.get("/", response_model=List[Dict[str, Any]])
 def list_admins(
-    skip: int = Query(0, ge=0, description="Skip N records"),
-    limit: int = Query(20, ge=1, le=100, description="Max records to return"),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
+    token_user: User | None = Depends(get_current_user)  
 ):
-    admins = get_all_admins(db, skip=skip, limit=limit)
+    total_admins = db.query(User).filter(User.role == "Admin").count()
+
+    if total_admins == 0:
+        return []
+
+    if not token_user or token_user.role != "Super Admin":
+        raise HTTPException(status_code=403, detail="Unauthorized")
+
+    admins = db.query(User).filter(User.role == "Admin").offset(skip).limit(limit).all()
 
     return [
         {
@@ -63,6 +77,9 @@ def list_admins(
         }
         for admin in admins
     ]
+
+
+
 
 @router.get("/{admin_id}", response_model=Dict[str, Any])
 def get_admin_detail(
@@ -85,18 +102,22 @@ def get_admin_detail(
     }
 
 
-@router.patch("/{admin_id}",response_model=Dict[str, str])
+@router.patch("/{admin_id}", response_model=Dict[str, str])
 def update_admin_user(
     admin_id: int,
     admin_update: AdminUpdate,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role != "super_admin":
+    if current_user.role != "Super Admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only super_admin can update admin users"
+            detail="Only Super Admin can update admin users"
         )
+
+    # If password is empty, ignore it in update
+    if not admin_update.password:
+        admin_update.password = None  
 
     updated = update_admin(db, admin_id, admin_update)
     if not updated:
@@ -104,16 +125,17 @@ def update_admin_user(
 
     return {"message": "Admin updated successfully"}
 
+
 @router.delete("/{admin_id}", response_model=Dict[str, str])
 def delete_admin_user(
     admin_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    if current_user.role != "super_admin":
+    if current_user.role != "Super Admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Only super_admin can delete admin users"
+            detail="Only Super Admin can delete admin users"
         )
 
     success = delete_admin(db, admin_id)

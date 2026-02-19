@@ -1,6 +1,9 @@
 (function () {
     const sidebar = document.querySelector(".sidebar");
     if (!sidebar) return;
+    sidebar.classList.remove("collapsed");
+    document.body.classList.remove("sidebar-collapsed");
+
 
     // Sidebar toggle setup
     let toggleBtn = sidebar.querySelector(".sidebar-toggle");
@@ -11,15 +14,7 @@
         sidebar.prepend(toggleBtn);
     }
 
-    // Restore sidebar state from localStorage
-    const isCollapsed = localStorage.getItem("sidebar-collapsed") === "true";
-    if (isCollapsed) {
-        sidebar.classList.add("collapsed");
-        document.body.classList.add("sidebar-collapsed");
-    } else {
-        sidebar.classList.remove("collapsed");
-        document.body.classList.remove("sidebar-collapsed");
-    }
+
 
     //  Toggle button logic 
     toggleBtn.addEventListener("click", () => {
@@ -29,8 +24,6 @@
             sidebar.classList.contains("collapsed")
         );
 
-        // Save state to localStorage
-        localStorage.setItem("sidebar-collapsed", sidebar.classList.contains("collapsed"));
     });
 
     //  Active link highlighting 

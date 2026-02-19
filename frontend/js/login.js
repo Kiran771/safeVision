@@ -1,69 +1,96 @@
 document.addEventListener("DOMContentLoaded", function () {
   const loginForm = document.getElementById("loginForm");
-  const username = document.getElementById("username");
-  const password = document.getElementById("password");
+  if (!loginForm) {
+    console.error("Login form not found");
+    return;
+  }
+
+  const usernameInput = document.getElementById("username");
+  const passwordInput = document.getElementById("password");
   const usernameError = document.getElementById("usernameError");
   const passwordError = document.getElementById("passwordError");
+  const submitButton = loginForm.querySelector('button[type="submit"]');
 
   loginForm.addEventListener("submit", async function (e) {
     e.preventDefault();
 
-    // Reset errors
+    // Reset UI state
     usernameError.innerText = "";
     passwordError.innerText = "";
-    username.classList.remove("error");
-    password.classList.remove("error");
+    usernameInput.classList.remove("error");
+    passwordInput.classList.remove("error");
+
+    const username = usernameInput.value.trim();
+    const password = passwordInput.value;
 
     let hasError = false;
-    if (!username.value.trim()) {
+
+    if (!username) {
       usernameError.innerText = "Username is required";
-      username.classList.add("error");
+      usernameInput.classList.add("error");
       hasError = true;
     }
-    if (!password.value.trim()) {
+
+    if (!password) {
       passwordError.innerText = "Password is required";
-      password.classList.add("error");
+      passwordInput.classList.add("error");
       hasError = true;
     }
+
     if (hasError) return;
 
+    // Disable button + loading state
+    submitButton.disabled = true;
+    submitButton.textContent = "Logging in...";
+
     try {
-      const res = await fetch("http://127.0.0.1:8000/login/token", {
+      const res = await fetch("http://127.0.0.1:8000/auth/token", {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
         body: new URLSearchParams({
-          username: username.value,
-          password: password.value,
+          username: username,
+          password: password,
         }),
       });
 
       const data = await res.json();
 
       if (!res.ok) {
-        // Show generic invalid credentials error
-        usernameError.innerText = "Invalid username or password";
-        passwordError.innerText = "Invalid username or password";
-        username.classList.add("error");
-        password.classList.add("error");
+        // 401 or 400 from backend
+        passwordError.innerText = data.detail || "Login failed. Please check your credentials.";
+        usernameInput.classList.add("error");
+        passwordInput.classList.add("error");
         return;
       }
 
-      // Save token and role in sessionStorage
-      sessionStorage.setItem("access_token", data.access_token);
-      sessionStorage.setItem("role", data.role);
-
-      // Redirect based on role
-      if (data.role === "Super Admin") {
-        window.location.href = "/admin-dashboard.html";
-      } else if (data.role === "Admin") {
-        window.location.href = "/responder-dashboard.html";
-      } else {
-        window.location.href = "/dashboard.html";
+      // Success – backend returns access_token + user object
+      if (!data.access_token) {
+        throw new Error("No access token received");
       }
+
+      // Save token & role (use sessionStorage as you already do)
+      sessionStorage.setItem("access_token", data.access_token);
+      sessionStorage.setItem("role", data.user.role);
+      sessionStorage.setItem("user", JSON.stringify(data.user)); // optional – full user info
+
+      // Role-based redirect (matches your current logic)
+      if (data.user.role === "Super Admin") {
+        window.location.href = "/frontend/html/dashboard.html";
+      } else if (data.user.role === "Admin") {
+        window.location.href = "/frontend/html/verify_incident.html";
+      } else {
+        window.location.href = "/frontend/html/dashboard.html";
+      }
+
     } catch (err) {
-      console.error(err);
-      passwordError.innerText = "Server error. Try again.";
+      console.error("Login error:", err);
+      passwordError.innerText = "Server error. Please try again later.";
+    } finally {
+      // Always restore button
+      submitButton.disabled = false;
+      submitButton.textContent = "Login";
     }
   });
-
 });

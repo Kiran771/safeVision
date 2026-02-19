@@ -45,7 +45,9 @@ class Accident(Base):
     cameraid  = Column(Integer, ForeignKey('cameras.cameraid'), nullable=False, index=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
     reconstruction_error = Column(Float, nullable=True)
-    status = Column(String(30), nullable=False, default='new')
+    confidence = Column(Float, nullable=True)
+    status = Column(String(30), nullable=False, default='pending')
+    reconstructed_frame_path = Column(String(500), nullable=True)
     frame_path = Column(String(500), nullable=True)
 
 

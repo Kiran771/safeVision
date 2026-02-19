@@ -16,7 +16,7 @@ from ..models.table_creation import User
 pwd_context = PasswordHash.recommended()
 
 # OAuth2 scheme — points to your actual login endpoint
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token",auto_error=False)
 
 
 def hash_password(password: str) -> str:
@@ -44,8 +44,8 @@ def create_access_token(
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=expire_minutes))
 
     to_encode.update({
-        "exp": expire,
-        "iat": datetime.now(timezone.utc),  # Issued at — good practice
+        "exp": int(expire.timestamp()),
+        "iat": int(datetime.now(timezone.utc).timestamp()),  # Issued at — good practice
     })
 
     encoded_jwt = jwt.encode(
@@ -66,6 +66,10 @@ def get_current_user(
     Raises 401 if:
     - Token is missing, invalid, expired, or user not found
     """
+
+    if not token:
+        return None
+    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",

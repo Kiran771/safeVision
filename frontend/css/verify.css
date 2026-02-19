@@ -6,7 +6,7 @@
 
 body {
     font-family: sans-serif;
-    background: linear-gradient(135deg, #d4dce5 0%, #b8c5d6 100%);
+    background: linear-gradient(135deg, #d4dce5 0%, #dde6f1 100%);
     min-height: 100vh;
     margin: 0;
     padding: 0;
@@ -191,6 +191,17 @@ body.sidebar-collapsed .main-content {
     text-align: center;
     padding: 60px 20px;
     color: #64748b;
+}
+
+#no-data {
+    display: none; 
+    position: absolute;
+    top: 50%;
+    left: 58%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    color: #555;
+    text-align: center;
 }
 
 .spinner {
