@@ -37,13 +37,13 @@
                     Enter the emergency responder information
                 </p>
 
-                <form id="authorityForm">
+                <form id="authorityForm" novalidate>
                     <div class="form-group">
                         <label class="form-label" for="authorityName">
                             Authority Name
                         </label>
                         <input type="text" id="authorityName" class="form-input" required />
-                        <div class="error-message" id="authorityName-error"></div>
+                        <small class="error-message" id="authorityName-error"></small>
                     </div>
 
                     <div class="form-group">
@@ -51,31 +51,30 @@
                             Contact Number
                         </label>
                         <input type="tel" id="contactNumber" class="form-input" required />
-                        <div class="error-message" id="contactNumber-error"></div>
+                        <small class="error-message" id="contactNumber-error"></small>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="category"> Category </label>
                         <select id="category" class="form-select" required>
-                            <option value="">Select Category</option>
                             <option value="fire">Fire Department</option>
                             <option value="police">Police Department</option>
-                            <option value="medical">Medical Services</option>
+                            <option value="medical" selected>Medical Services</option>
                             <option value="rescue">Rescue Services</option>
                         </select>
-                        <div class="error-message" id="category-error"></div>
+                        <small class="error-message" id="category-error"></small>
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="email"> Email Address </label>
                         <input type="email" id="email" class="form-input" />
-                        <div class="error-message" id="email-error"></div>
+                        <small class="error-message" id="email-error"></small>
                     </div>
 
                     <div class="emergency-badge">Emergency Response Authority</div>
 
                     <button type="submit" class="btn-submit">Add Authority</button>
-                </form>
+                
             </div>
 
             <!-- Map Section -->
@@ -97,9 +96,10 @@
                     <div class="location-value" id="selectedLocation">
                         Click on the map to select a location
                     </div>
-                    <div class="error-message" id="location-error"></div>
+                   
                 </div>
             </div>
+            </form>
         </div>
 
 <section class="table-section">

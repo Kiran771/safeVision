@@ -79,7 +79,7 @@ document.addEventListener("DOMContentLoaded", function () {
       if (data.user.role === "Super Admin") {
         window.location.href = "/frontend/html/dashboard.html";
       } else if (data.user.role === "Admin") {
-        window.location.href = "/frontend/html/verify_incident.html";
+        window.location.href = "/frontend/html/detection.html";
       } else {
         window.location.href = "/frontend/html/dashboard.html";
       }

@@ -19,33 +19,11 @@ document.addEventListener("DOMContentLoaded", function () {
     window.selectedLng = lng;
   }
 
-  // Add default marker after small delay to fix rendering
-  setTimeout(() => {
-    addMarker(defaultLat, defaultLng);
+    window.selectedLat = undefined;
+    window.selectedLng = undefined;
 
-    // Reverse geocode for default marker
-    fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=json&lat=${defaultLat}&lon=${defaultLng}`
-    )
-      .then((res) => res.json())
-      .then((data) => {
-        const addr = data.address || {};
-        const simpleAddress = [
-          addr.suburb || addr.neighbourhood,
-          addr.city || addr.town,
-        ]
-          .filter(Boolean)
-          .join(", ");
-        window.selectedAddress = simpleAddress || "Kathmandu";
-        document.getElementById("selectedLocation").innerText =
-          window.selectedAddress;
-      })
-      .catch(() => {
-        document.getElementById("selectedLocation").innerText = "Kathmandu";
-      });
-
-    map.invalidateSize();
-  }, 300);
+    document.getElementById("selectedLocation").innerText =
+      "Click on the map to select a location";
 
 
   // Click map to move marker

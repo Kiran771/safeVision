@@ -283,25 +283,20 @@ body {
 /* Error Styles */
 .error-message {
     display: none;
-    color: var(--primary);
-    font-size: 0.875rem;
-    margin-top: 0.5rem;
-    padding: 0.5rem 0.75rem;
-    background: rgba(214, 52, 71, 0.05);
-    border-radius: 8px;
+    color: black;
+    font-size: 0.9rem;
+    margin-top: 0.3rem;
+    min-height: 13px;
     border-left: 3px solid var(--primary);
 }
 
 .form-input.error,
 .form-select.error {
-    border-color: var(--primary);
-    background: rgba(214, 52, 71, 0.02);
+    box-shadow: 0 0 0 4px rgba(110, 34, 43, 0.09);
+    background: rgba(239, 239, 239, 0.867);
 }
 
-.form-input.error:focus,
-.form-select.error:focus {
-    box-shadow: 0 0 0 4px rgba(214, 52, 71, 0.15);
-}
+
 
 .emergency-badge {
     display: inline-flex;
@@ -372,6 +367,8 @@ body {
 }
 
 
+
+
 .btn-edit, .btn-delete {
     background: transparent;
     border: none;
@@ -382,6 +379,12 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.btn-eidt,.btn-delete img{
+    width: 20px;
+    height: 20px;
+    display: block;
 }
 
 .icon-btn:hover {

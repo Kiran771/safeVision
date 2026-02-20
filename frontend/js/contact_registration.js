@@ -1,9 +1,54 @@
 window.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("authorityForm");
     const tableBody = document.getElementById("authorityTableBody");
-    let selectedContactId = null; // for editing
+    let selectedContactId = null; 
+
+    const authorityName=document.getElementById("authorityName");
+    const contact=document.getElementById("contactNumber")
+    const selectedLocation=document.getElementById("selectedLocation")
+    const category=document.getElementById("category");
+    const email=document.getElementById("email");
+
 
     const API_BASE = "http://127.0.0.1:8000/contacts"; 
+
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        if (el) 
+        {
+            el.textContent = msg;
+            el.style.display = "block";
+        }
+    }
+
+    function markFieldAsError(fieldId, hasError = true) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+    if (hasError) {
+        field.classList.add("error");
+    } else {
+        field.classList.remove("error");
+    }
+    }
+    function clearErrors() {
+    document.querySelectorAll(".error-message").forEach(el => {
+        el.textContent = "";
+        el.style.display = "none";         
+    });
+    document.querySelectorAll(".form-input.error, .form-select.error")
+        .forEach(el => el.classList.remove("error"));
+    
+    }
+    function resetForm(){
+        authorityName.value="",
+        contact.value="",
+        email.value='',
+        category.value="",
+        selectedLocation.textContent="Click on the map to select a location",
+        window.selectedLat = null;
+        window.selectedLng = null;
+    }
+
 
 
     const validateContact = (contact) => {
@@ -16,53 +61,86 @@ window.addEventListener("DOMContentLoaded", () => {
         }
         return { valid: true };
     };
-    function validateForm() {
-    let isValid = true;
 
-    // Clear previous error messages
-    document.querySelectorAll(".error-message").forEach(el => el.textContent = "");
+    // Utility to show error messages
+    function validateForm(data) {
+    let isValid = true;
+    clearErrors();                    
 
     // Authority Name
-    const name = document.getElementById("authorityName").value.trim();
-    if (name.length < 2) {
-        document.getElementById("authorityName-error").textContent = "Name must be at least 2 characters";
+    const name = data.authorityName.trim();
+    if (!name) {
+        showError("authorityName-error", "Authority Name is required");
+        markFieldAsError("authorityName", true);
         isValid = false;
+    } else if (/^\d/.test(name)) {
+        showError("authorityName-error", "Authority Name cannot start with a number");
+        markFieldAsError("authorityName", true);
+        isValid = false;
+    } else if (name.length < 2) {
+        showError("authorityName-error", " Authority Name must be at least 2 characters");
+        markFieldAsError("authorityName", true);
+        isValid = false;
+    } else {
+        markFieldAsError("authorityName", false);
     }
 
-    // Contact Number
-    const contactResult = validateContact(data.contact);
-        if (!contactResult.valid) {
-            showError("contactNumber-error", contactResult.msg);
-            isValid = false;
-        }
+    // Contact
+    const contactResult = validateContact(data.contactNumber);
+    if (!contactResult.valid) {
+        showError("contactNumber-error", contactResult.msg);
+        markFieldAsError("contactNumber", true);
+        isValid = false;
+    } else {
+        markFieldAsError("contactNumber", false);
+    }
 
     // Category
-    const category = document.getElementById("category").value;
-    if (!category) {
-        document.getElementById("category-error").textContent = "Please select a category";
+    if (!data.category) {
+        showError("category-error", "Please select a category");
+        markFieldAsError("category", true);
         isValid = false;
+    } else {
+        markFieldAsError("category", false);
     }
 
-    // Email (optional)
-    const email = document.getElementById("email").value.trim();
-    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-        document.getElementById("email-error").textContent = "Enter a valid email";
+    // Email
+    const emailVal = data.email.trim();
+    if (!emailVal) {
+        showError("email-error", "Email is required");
+        markFieldAsError("email", true);
         isValid = false;
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailVal)) {
+        showError("email-error", "Invalid email format");
+        markFieldAsError("email", true);
+        isValid = false;
+    } else {
+        markFieldAsError("email", false);
     }
 
-    // Location
-    const location = document.getElementById("selectedLocation").textContent;
-    if (!window.selectedLat || !window.selectedLng || location === "Click on the map to select a location") {
-        document.getElementById("location-error").textContent = "Please select a location on the map";
+        // Location validation
+        if (typeof window.selectedLat !== "number" || typeof window.selectedLng !== "number" || 
+        window.selectedLat === 0 || window.selectedLng === 0) {
+        
+        
+        selectedLocation.textContent = "Please select a location on the map";
+        selectedLocation.style.color = 'red';         
+        selectedLocation.style.fontWeight = "500";              
+        
         isValid = false;
+    } else {
+        selectedLocation.style.color = "";                        
+        selectedLocation.style.fontWeight = "";
+
     }
 
-    return isValid;
-}
+        return isValid;
+    }
 
 
     // Fetch and populate table 
     async function loadContacts() {
+        
         tableBody.innerHTML = ""; // clear table first
         try {
             const res = await fetch(API_BASE);
@@ -116,16 +194,21 @@ window.addEventListener("DOMContentLoaded", () => {
     // Form submit (create/update)
     form.addEventListener("submit", async (e) => {
         e.preventDefault();
+        
+        
 
         const contactData = {
-            authority_name: document.getElementById("authorityName").value,
-            contact_number: document.getElementById("contactNumber").value,
+            authorityName: document.getElementById("authorityName").value,
+            contactNumber: document.getElementById("contactNumber").value,
             category: document.getElementById("category").value,
             email: document.getElementById("email").value,
-            latitude: window.selectedLat || 0, // set by your leaflet map
+            latitude: window.selectedLat || 0, 
             longitude: window.selectedLng || 0,
             location: document.getElementById("selectedLocation").textContent
         };
+        if (!validateForm(contactData)) {
+            return;
+        }
 
         try {
             let res;
