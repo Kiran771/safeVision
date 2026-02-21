@@ -1,6 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel, EmailStr, Field
-from datetime import datetime
+
 
 
 # Admin / User Schemas 
@@ -33,11 +33,10 @@ class EmergencyContactBase(BaseModel):
     latitude: float
     longitude: float
     location: str = Field(..., max_length=255)
-    email: Optional[EmailStr] = None
+    email: EmailStr
 
 class EmergencyContactCreate(EmergencyContactBase):
-    class Config:
-        from_attributes = True
+    pass
 
 
 class EmergencyContactOut(BaseModel):
@@ -66,8 +65,4 @@ class EmergencyContactUpdate(BaseModel):
     email: Optional[EmailStr] = None
 
 
-class EmergencyContactResponse(EmergencyContactBase):
-    id: int
-
-    class Config:
-        from_attributes = True   
+ 

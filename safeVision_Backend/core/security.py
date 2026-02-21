@@ -1,16 +1,15 @@
-# safeVision_Backend/core/security.py
 import jwt
 from pwdlib import PasswordHash
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm  # ← added this
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm 
 from sqlalchemy.orm import Session
 
-from .config import settings
-from .psql_db import get_db
-from ..models.table_creation import User
+from safeVision_Backend.core.config import settings
+from safeVision_Backend.core.psql_db import get_db
+from safeVision_Backend.models.table_creation import User
 
 # Password hashing
 pwd_context = PasswordHash.recommended()

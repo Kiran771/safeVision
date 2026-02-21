@@ -54,6 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
       document.getElementById("selectedLocation").innerText =
         "Location selected";
     }
+    
   });
 
 
