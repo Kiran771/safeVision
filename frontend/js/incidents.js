@@ -1,5 +1,5 @@
 // Configuration
-const ITEMS_PER_PAGE = 8; 
+const ITEMS_PER_PAGE = 8;
 let currentPage = 1;
 let totalPages = 1;
 let allIncidents = [];
@@ -107,7 +107,7 @@ function changePage(page) {
 
 // Open single incident page
 function openModal(incidentId) {
-    window.location.href = `/frontend/html/verify_incident.html?id=${incidentId}`;
+    window.location.href = `/html/verify_incident.html?id=${incidentId}`;
 }
 
 // Utility functions

@@ -51,12 +51,12 @@ function setAnomalyScore(score) {
     const anomalyFill = document.getElementById('anomaly-fill');
     const anomalyText = document.getElementById('anomaly-score-text');
     const percentage = Math.round(score * 100);
-    
+
     // Set width with animation
     setTimeout(() => {
         anomalyFill.style.width = `${percentage}%`;
     }, 100);
-    
+
     // Change color based on score
     if (score >= 0.7) {
         anomalyFill.style.background = 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)';
@@ -65,7 +65,7 @@ function setAnomalyScore(score) {
     } else {
         anomalyFill.style.background = 'linear-gradient(90deg, #10b981 0%, #059669 100%)';
     }
-    
+
     // Update score text
     if (anomalyText) {
         anomalyText.textContent = `Anomaly Score: ${score.toFixed(2)} mse`;
@@ -76,7 +76,7 @@ function setAnomalyScore(score) {
 function loadFrameImages(originalUrl, reconstructedUrl) {
     const originalImg = document.getElementById('original-img');
     const reconstructedImg = document.getElementById('reconstructed-img');
-    
+
     // Set image sources if URLs are provided
     if (originalUrl && originalUrl !== '/path/to/original-frame.jpg') {
         originalImg.src = originalUrl;
@@ -84,7 +84,7 @@ function loadFrameImages(originalUrl, reconstructedUrl) {
     } else {
         originalImg.style.display = 'none';
     }
-    
+
     if (reconstructedUrl && reconstructedUrl !== '/path/to/reconstructed-frame.jpg') {
         reconstructedImg.src = reconstructedUrl;
         reconstructedImg.style.display = 'block';
@@ -119,7 +119,7 @@ async function confirmIncident() {
         alert('Incident confirmed successfully!');
 
         // Redirect back to verify incidents page
-        window.location.href = '/frontend/html/verify.html';
+        window.location.href = '/html/verify.html';
     } catch (error) {
         console.error('Error confirming incident:', error);
         alert(`Failed to confirm incident: ${error.message}`);
@@ -146,7 +146,7 @@ async function rejectIncident() {
         alert('Incident rejected successfully!');
 
         // Redirect back to verify incidents page
-        window.location.href = '/frontend/html/verify.html';
+        window.location.href = '/html/verify.html';
     } catch (error) {
         console.error('Error rejecting incident:', error);
         alert(`Failed to reject incident: ${error.message}`);
@@ -157,16 +157,16 @@ async function rejectIncident() {
 // Cancel and go back
 function cancel() {
     // Go back to verify incidents page
-    window.location.href = '/frontend/html/verify.html';
+    window.location.href = '/html/verify.html';
 }
 
 // Handle image load errors
-document.getElementById('original-img').addEventListener('error', function() {
+document.getElementById('original-img').addEventListener('error', function () {
     this.style.display = 'none';
     this.parentElement.classList.add('loading');
 });
 
-document.getElementById('reconstructed-img').addEventListener('error', function() {
+document.getElementById('reconstructed-img').addEventListener('error', function () {
     this.style.display = 'none';
     this.parentElement.classList.add('loading');
 });

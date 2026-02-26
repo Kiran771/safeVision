@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Register Authority</title>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="/js/sideMenu_loder.js"></script>
+    <script src="/js/camera_management.js"></script>
+    <link rel="stylesheet" href="/css/header.css"/>
+    <link rel="stylesheet" href="/css/camera_management.css" />
+    
+    <script> window.HEADER_CONFIG = { title  : "Camera Management",subtitle: "" };</script>
+</head>
+
+<body>
+    <div id="sidebar-container"></div>
+    <div class="main-column">
+    <main class="page-content">
+      <div id="header-container"></div>
+      <div class="top-row">
+        <div class="stat-card">
+          <div class="label">Total Cameras</div>
+          <div class="value" id="total-count">0</div>
+        </div>
+        <button class="btn-register" id="open-form">
+          <img src="/resources/plus.png" alt="add"></img>
+          Register Camera
+        </button>
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Camera ID</th>
+              <th>Location</th>
+              <th>Assigned To</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="camera-table-body">
+            <tr class="empty-row">
+              <td colspan="5">No camera found</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+<form id="cameraForm">
+  <div class="form-overlay" id="camera-modal-overlay">
+    <div class="modal">
+      <h2>Register New Camera</h2>
+      <div class="form-group">
+      </div>
+      <div class="form-group">
+        <label>Location</label>
+        <select id="cam-location">
+
+          <option value="" disabled selected>-- Select Location --</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Assigned To</label>
+        <select id="cam-assigned" >
+          <option value="" disabled selected>-- Select Admin --</option>
+        </select>
+
+        </div>
+      <div class="form-group">
+        <label>Status</label>
+        <select id="cam-status">
+          <option value="Active">Active</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-cancel" id="close-btn">Cancel</button>
+        <button type="button" class="btn-submit" id="submit-camera">Register</button>
+      </div>
+    </div>
+  </div>
+</form>
+ <script src="/js/header.js"></script>
+</body>
+</html>

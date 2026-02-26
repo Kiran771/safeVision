@@ -24,7 +24,6 @@ class Camera(Base):
     cameraid = Column(Integer, primary_key=True, autoincrement=True, index=True)
     location = Column(String(200), nullable=False)
     status = Column(String(20), nullable=False, default='active')
-    userid = Column(Integer, ForeignKey('users.userid'), nullable=True, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
 
@@ -36,6 +35,14 @@ class UserCamera(Base):
     cameraid = Column(Integer, ForeignKey('cameras.cameraid'), nullable=False, index=True)
     assigned_date  = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     is_active  = Column(Boolean, default=True, nullable=False)
+
+
+class Location(Base):
+    __tablename__ = "locations"
+    location_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
+    location_name = Column(String(120), nullable=False)
+    city = Column(String(100), nullable=False)
+    province = Column(String(50), nullable=False)
 
 
 class Accident(Base):

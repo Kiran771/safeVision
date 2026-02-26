@@ -76,7 +76,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const token = sessionStorage.getItem("access_token");
         if (!token) {
             alert("Please login first");
-            window.location.href = "/frontend/html/login.html";
+            window.location.href = "/html/login.html";
             return;
         }
         try {
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.status === 401 || res.status === 403) {
                     alert("Session expired or unauthorized. Please login again.");
                     sessionStorage.removeItem("access_token");
-                    window.location.href = "/frontend/html/login.html";
+                    window.location.href = "/html/login.html";
                     return;
                 }
                 throw new Error("Failed to load admins");
@@ -114,8 +114,8 @@ document.addEventListener('DOMContentLoaded', () => {
                         <td>${admin.email}</td>
                         <td>${admin.role}</td>
                         <td>
-                            <button class="btn-edit" data-id="${admin.id}"><img src="/frontend/resources/edit.png" alt="Edit"></button>
-                            <button class="btn-delete" data-id="${admin.id}"><img src="/frontend/resources/delete.png" alt="Delete"></button>
+                            <button class="btn-edit" data-id="${admin.id}"><img src="/resources/edit.png" alt="Edit"></button>
+                            <button class="btn-delete" data-id="${admin.id}"><img src="/resources/delete.png" alt="Delete"></button>
                         </td>`;
                     tableBody.appendChild(tr);
                 });
@@ -136,7 +136,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!token) {
             alert("Please login first");
-            window.location.href = "/frontend/html/login.html";
+            window.location.href = "/html/login.html";
             return;
         }
 
@@ -199,7 +199,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!token) {
             alert("Please login first");
-            window.location.href = "/frontend/html/login.html";
+            window.location.href = "/html/login.html";
             return;
         }
         try {
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.status === 401 || res.status === 403) {
                     alert("Session expired or unauthorized. Please login again.");
                     sessionStorage.removeItem("access_token");
-                    window.location.href = "/frontend/html/login.html";
+                    window.location.href = "/html/login.html";
                     return;
                 }
                 throw new Error("Failed to load admin");
@@ -252,7 +252,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!token) {
             alert("Please login first");
-            window.location.href = "/frontend/html/login.html";
+            window.location.href = "/html/login.html";
             return;
         }
 
@@ -268,7 +268,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (res.status === 401 || res.status === 403) {
                     alert("Session expired or unauthorized. Please login again.");
                     sessionStorage.removeItem("access_token");
-                    window.location.href = "/frontend/html/login.html";
+                    window.location.href = "/html/login.html";
                     return;
                 }
                 throw new Error("Delete failed");
@@ -290,19 +290,20 @@ document.addEventListener('DOMContentLoaded', () => {
         submitButton.textContent = "Add Admin";
 
         document.querySelectorAll('.password-section').forEach(group => {
-            group.style.display = 'block';});
-            CRUD.textContent = "Add New Admin";
-            selectedAdminId = null;
-
-            // Always show role dropdown if adding after first Super Admin
-            userRole.style.display = 'block';
+            group.style.display = 'block';
         });
+        CRUD.textContent = "Add New Admin";
+        selectedAdminId = null;
 
-        closeButton.addEventListener('click', closeForm);
-
-        // Initial load
-        console.log("loadAdmins started");
-
-        console.log("tableBody element:", tableBody);
-        loadAdmins();
+        // Always show role dropdown if adding after first Super Admin
+        userRole.style.display = 'block';
     });
+
+    closeButton.addEventListener('click', closeForm);
+
+    // Initial load
+    console.log("loadAdmins started");
+
+    console.log("tableBody element:", tableBody);
+    loadAdmins();
+});

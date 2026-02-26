@@ -4,23 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>User Management</title>
-    <link rel="stylesheet" href="/frontend/css/userManagment.css" />
-    <script src="/frontend/js/userManagement.js"></script>
-    <script src="/frontend/js/sideMenu_loder.js"></script>
+    <link rel="stylesheet" href="/css/userManagment.css" />
+    <link rel="stylesheet" href="/css/header.css"/>
+    <script src="/js/userManagement.js"></script>
+    <script src="/js/sideMenu_loder.js"></script>
+    <script> window.HEADER_CONFIG = { title  : "User Management", subtitle:"" };</script>
   </head>
   <body>
     <div id="sidebar-container"></div>
+    
     <main class="main-content">
-      <div class="top-bar">
-        <h1 class="page-title">User Management</h1>
-        <div class="admin-profile">
-          <div class="admin-image">JD</div>
-          <div class="admin-info">
-            <div class="admin-name">James</div>
-            <div class="admin-role">Administrator</div>
-          </div>
-        </div>
-      </div>
+      <div id="header-container"></div>
       <div class="stats-area">
         <div class="stat-card">
           <h3>Total Admin</h3>
@@ -37,7 +31,10 @@
       </div>
 
       <div class="add-button-container">
-        <button class="add-button">Add user</button>
+        <button class="add-button">
+          
+        <b> + </b> Add user
+        </button>
       </div>
 
       <div class="table-container">
@@ -109,7 +106,7 @@
                 placeholder="Enter password"
                 required
               />
-              <img class="toggle-password" src="/frontend/resources/password.png" alt="toggle-password">
+              <img class="toggle-password" src="/resources/password.png" alt="toggle-password">
             </div>
             <small class="error" id="passwordError"></small>
           </div>
@@ -123,7 +120,7 @@
                 placeholder="Re-enter password"
                 required
               />
-              <img class="toggle-password" src="/frontend/resources/password.png" alt="toggle-password">
+              <img class="toggle-password" src="/resources/password.png" alt="toggle-password">
             </div>
             <small class="error" id="rePasswordError"></small>
           </div>
@@ -143,16 +140,17 @@
 
       if (input.type === 'password') {
         input.type = 'text'; 
-        icon.src = '/frontend/resources/visible-password.png'; 
+        icon.src = '/resources/visible-password.png'; 
       } else {
         input.type = 'password'; 
-        icon.src = '/frontend/resources/password.png'; 
+        icon.src = '/resources/password.png'; 
       }
     });
     
 
   });
 </script>
+<script src="/js/header.js"></script>
 
   </body>
 </html>

@@ -6,37 +6,22 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Register Authority</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-    <link rel="stylesheet" href="/frontend/css/register_contact.css" />
+    <link rel="stylesheet" href="/css/register_contact.css" />
+    <link rel="stylesheet" href="/css/header.css"/>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/frontend/js/sideMenu_loder.js"></script>
-    <script src="/frontend/js/contact_registration.js"></script>
+    <script src="/js/sideMenu_loder.js"></script>
+    <script src="/js/contact_registration.js"></script>
+    <script> window.HEADER_CONFIG = { title  : "Register Contact",subtitle:"Add Emergency Responder for SafeVision"  };</script>
 </head>
 
 <body>
     <div id="sidebar-container"></div>
 
     <main class="main-content">
-        <header class="header">
-            <div class="header-content">
-                <h1>Register Authority</h1>
-                <p class="subtitle">Add Emergency Responder for SafeVision</p>
-            </div>
-            <div class="user-profile">
-                <div class="user-image">JD</div>
-                <div class="user-info">
-                    <div class="admin-name">James</div>
-                    <div class="admin-role">Administrator</div>
-                </div>
-            </div>
-        </header>
-
+        <div id="header-container"></div>
         <div class="registration-container">
             <!-- Form Section -->
             <div class="form-section">
-                <h2 class="section-title">Authority Details</h2>
-                <p class="section-subtitle">
-                    Enter the emergency responder information
-                </p>
 
                 <form id="authorityForm" novalidate>
                     <div class="form-group">
@@ -131,7 +116,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
         integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 
-    <script src="/frontend/js/mapleaflet.js"></script>
+    <script src="/js/mapleaflet.js"></script>
 </body>
-
+<script src="/js/header.js"></script>
 </html>

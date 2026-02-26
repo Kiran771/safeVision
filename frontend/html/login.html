@@ -5,19 +5,19 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>safeVision - Login</title>
-    <link rel="stylesheet" href="/frontend/css/login.css" />
-    <script src="/frontend/js/login.js"></script>
+    <link rel="stylesheet" href="/css/login.css" />
+    <script src="/js/login.js"></script>
 </head>
 
 <body>
     <div class="container">
         <div class="left-panel">
-            <img class="illustration" src="/frontend/resources/login.png" alt="car" />
+            <img class="illustration" src="/resources/login.png" alt="car" />
         </div>
 
         <div class="right-panel">
             <div class="logo">
-                <img class="logo-icon" src="/frontend/resources/logo.png" alt="Logo" />
+                <img class="logo-icon" src="/resources/logo.png" alt="Logo" />
                 <div class="logo-text">safeVision</div>
             </div>
 
@@ -36,7 +36,7 @@
                     <div class="input-wrapper">
                         <input type="password" id="password" placeholder="Enter your password" required />
                         <img class="toggle-password" id="togglePassword" onclick="togglePassword()"
-                            src="/frontend/resources/password.png" alt="Toggle password" />
+                            src="/resources/password.png" alt="Toggle password" />
                     </div>
                     <small class="error-text" id="passwordError"></small>
                     <div class="forgot-password">
@@ -57,10 +57,10 @@
 
             if (passwordInput.type === "password") {
                 passwordInput.type = "text";
-                icon.src = "/frontend/resources/visible-password.png";
+                icon.src = "/resources/password.png";
             } else {
                 passwordInput.type = "password";
-                icon.src = "/frontend/resources/password.png";
+                icon.src = "/resources/visible-password.png";
             }
         }
 

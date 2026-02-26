@@ -12,7 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const email=document.getElementById("email");
 
 
-    const API_BASE = "http://127.0.0.1:8000/contacts"; 
+    const API_BASE = "http://127.0.0.1:8000/contacts/"; 
 
     function showError(id, msg) {
         const el = document.getElementById(id);
@@ -138,8 +138,15 @@ window.addEventListener("DOMContentLoaded", () => {
 
     // Fetch and populate table 
     async function loadContacts() {
+
+        const token = sessionStorage.getItem("access_token");
+        if (!token) {
+            alert("Please login first");
+            window.location.href = "/html/login.html";
+            return;
+        }
         
-        tableBody.innerHTML = ""; // clear table first
+        tableBody.innerHTML = ""; 
         try {
             const res = await fetch(API_BASE);
             const contacts = await res.json();
@@ -165,10 +172,10 @@ window.addEventListener("DOMContentLoaded", () => {
                     
                     <td class="action-buttons">
                         <button class="icon-btn btn-edit" data-id="${contact.contactid}">
-                            <img src="/frontend/resources/edit.png" alt="Edit">
+                            <img src="/resources/edit.png" alt="Edit">
                         </button>
                         <button class="icon-btn btn-delete" data-id="${contact.contactid}">
-                            <img src="/frontend/resources/delete.png" alt="Delete">
+                            <img src="/resources/delete.png" alt="Delete">
                         </button>
                     </td>
                 `;
@@ -218,7 +225,7 @@ window.addEventListener("DOMContentLoaded", () => {
         let alertTitle = "";
         if (selectedContactId) {
             // Fetch the existing contact to compare changes
-            const existingRes = await fetch(`${API_BASE}/${selectedContactId}`);
+            const existingRes = await fetch(`${API_BASE}${selectedContactId}`);
             const existingContact = await existingRes.json();
 
             // Check if any field changed
@@ -241,7 +248,7 @@ window.addEventListener("DOMContentLoaded", () => {
             return;
             }
             // Update existing contact
-            res = await fetch(`${API_BASE}/${selectedContactId}`, {
+            res = await fetch(`${API_BASE}${selectedContactId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(contactData)
@@ -292,7 +299,7 @@ window.addEventListener("DOMContentLoaded", () => {
     async function editContact(e) {
         const id = e.currentTarget.dataset.id;
         try {
-            const res = await fetch(`${API_BASE}/${id}`);
+            const res = await fetch(`${API_BASE}${id}`);
             if (!res.ok) throw new Error("Failed to fetch contact");
             const contact = await res.json();
 
@@ -327,7 +334,7 @@ window.addEventListener("DOMContentLoaded", () => {
         if (!confirm("Are you sure you want to delete this contact?")) return;
 
         try {
-            const res = await fetch(`${API_BASE}/${id}`, { method: "DELETE" });
+            const res = await fetch(`${API_BASE}${id}`, { method: "DELETE" });
             if (!res.ok) throw new Error("Delete failed");
             Swal.fire({
                 icon: 'success',

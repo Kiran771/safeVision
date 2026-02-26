@@ -77,11 +77,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
       // Role-based redirect (matches your current logic)
       if (data.user.role === "Super Admin") {
-        window.location.href = "/frontend/html/dashboard.html";
+        window.location.href = "/html/dashboard.html";
       } else if (data.user.role === "Admin") {
-        window.location.href = "/frontend/html/detection.html";
+        window.location.href = "/html/detection.html";
       } else {
-        window.location.href = "/frontend/html/dashboard.html";
+        window.location.href = "/html/dashboard.html";
       }
 
     } catch (err) {
