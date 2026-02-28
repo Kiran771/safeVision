@@ -64,5 +64,14 @@ class EmergencyContactUpdate(BaseModel):
     location: Optional[str] = None
     email: Optional[EmailStr] = None
 
+class Camera(BaseModel):
+    location_id: int
+    admin_id:int
+    status: str = "Active"
 
- 
+class CameraUpdate(BaseModel):
+    location_id: int
+    admin_id: int
+    status: str = "Active"
+
+

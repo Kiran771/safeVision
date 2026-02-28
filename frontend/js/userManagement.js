@@ -177,7 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const result = await res.json();
 
             if (!res.ok) {
-                if (result.detail) alert(result.detail);
+                if (result.detail) {
+                    if (result.detail.includes("Username")) showError("userNameError", result.detail);
+                    else if (result.detail.includes("Email")) showError("userEmailError", result.detail);
+                    else if (result.detail.includes("Contact")) showError("userContactError", result.detail);
+                    else alert(result.detail);
+                }
                 return;
             }
 

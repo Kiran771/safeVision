@@ -76,12 +76,12 @@ def get_current_user(
     )
 
     try:
-        payload = jwt.decode(
+        data = jwt.decode(
             token,
             settings.SECRET_KEY,
             algorithms=[settings.ALGORITHM]
         )
-        username: str | None = payload.get("sub")
+        username: str | None = data.get("sub")
         if username is None:
             raise credentials_exception
 

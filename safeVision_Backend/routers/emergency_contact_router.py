@@ -18,6 +18,11 @@ router = APIRouter(
 # Create a new contact
 @router.post("/", response_model=EmergencyContactOut)
 def create_contact(contact: EmergencyContactCreate, background_tasks: BackgroundTasks,db: Session = Depends(get_db)):
+    if db.query(EmergencyContact).filter(EmergencyContact.email == contact.email).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    if db.query(EmergencyContact).filter(EmergencyContact.contact_number == contact.contact_number).first():
+        raise HTTPException(status_code=400, detail="Phone number already registered")
     db_contact= crud.create_contact(db, contact)
     token=generate_verification_token(contact.email)
     background_tasks.add_task(

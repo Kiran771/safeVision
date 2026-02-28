@@ -23,6 +23,7 @@ class Camera(Base):
 
     cameraid = Column(Integer, primary_key=True, autoincrement=True, index=True)
     location = Column(String(200), nullable=False)
+    location_id=Column(Integer, ForeignKey('locations.location_id'))
     status = Column(String(20), nullable=False, default='active')
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

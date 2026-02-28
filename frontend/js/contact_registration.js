@@ -269,12 +269,21 @@ window.addEventListener("DOMContentLoaded", () => {
         }
 
         if (!res.ok) {
-            const errorBody = await res.json();               
+            const errorBody = await res.json();
             console.error("Backend validation error:", errorBody);
-            alert(`Server error: ${errorBody.detail || "Unknown"}`);
-            throw new Error("Failed to save");
+    
+            const detail = errorBody.detail || "";
+            if (detail.includes("Email")) {
+                showError("email-error", detail);
+                markFieldAsError("email", true);
+            } else if (detail.includes("Phone") || detail.includes("phone") || detail.includes("Contact") || detail.includes("contact")) {
+                showError("contactNumber-error", detail);
+                markFieldAsError("contactNumber", true);
+            } else {
+                alert(`Server error: ${detail || "Unknown"}`);
+            }
+            return;  
         }
-
         
         Swal.fire({
         icon: 'success',
@@ -299,6 +308,7 @@ window.addEventListener("DOMContentLoaded", () => {
     async function editContact(e) {
         const id = e.currentTarget.dataset.id;
         try {
+            clearErrors();
             const res = await fetch(`${API_BASE}${id}`);
             if (!res.ok) throw new Error("Failed to fetch contact");
             const contact = await res.json();

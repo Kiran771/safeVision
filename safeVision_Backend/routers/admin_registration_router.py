@@ -114,6 +114,15 @@ def update_admin_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Only Super Admin can update admin users"
         )
+    
+    if db.query(User).filter(User.username == admin_update.username, User.userid != admin_id).first():
+        raise HTTPException(status_code=400, detail="Username already exists")
+
+    if db.query(User).filter(User.email == admin_update.email, User.userid != admin_id).first():
+        raise HTTPException(status_code=400, detail="Email already registered")
+
+    if db.query(User).filter(User.contact == admin_update.contact, User.userid != admin_id).first():
+        raise HTTPException(status_code=400, detail="Contact number already registered")
 
     # If password is empty, ignore it in update
     if not admin_update.password:
