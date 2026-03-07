@@ -97,6 +97,7 @@ def update_camera(db: Session, camera_id: int, location_id: int, admin_id: int, 
     if not location: 
       return{"error": "Invalid location"} 
     camera.location = f"{location.location_name},{location.city}"
+    camera.location_id=location_id
     camera.status = status 
     db.query(UserCamera).filter(UserCamera.cameraid ==camera_id).update({"is_active": False}) 
     new_assignment = UserCamera(userid=admin_id, cameraid=camera_id,is_active=True) 

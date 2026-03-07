@@ -1,385 +1,376 @@
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: 'DM Sans', sans-serif;
-    background: white;
-    line-height: 1.6;
-    overflow-x: hidden;
+  font-family: "DM Sans", sans-serif;
+  background: white;
+  line-height: 1.6;
+  overflow-x: hidden;
 }
 
 
-/* Main Content Styles */
 .main-content {
-    margin-left: 255px;   
-    padding: 3rem 4rem;
-    max-width: calc(1600px - 255px);
-    position: relative;
-    z-index: 1;
+  margin-left: 240px;
+  padding: 3rem 4rem;
+  position: relative;
+  z-index: 1;
 }
-
 
 @keyframes slideDown {
-    from {
-        opacity: 0;
-        transform: translateY(-20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-
 
 /* Registration Container */
 .registration-container {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 3rem;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3rem;
 }
 
 @keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* Form Section Styles */
 .form-section {
-    background: rgba(72, 108, 141, 0.726);
-    border-radius: 24px;
-    padding: 3rem;
-    position: relative;
-    overflow: hidden;
+  background: rgba(72, 108, 141, 0.726);
+  border-radius: 24px;
+  padding: 3rem;
+  position: relative;
+  overflow: hidden;
 }
 
 .form-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
 }
 
 .section-title {
-    font-size: 1.5rem;
-    font-weight: 700;
-    margin-bottom: 0.5rem;
-    color:white;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: white;
 }
 
 .section-subtitle {
-    margin-bottom: 1.2rem;
-    font-size: 0.95rem;
-    color:white;
+  margin-bottom: 1.2rem;
+  font-size: 0.95rem;
+  color: white;
 }
 
 .form-group {
-    margin-bottom: 1.8rem;
+  margin-bottom: 1.8rem;
 }
 
 .form-label {
-    display: block;
-    margin-bottom: 1rem;
-    font-weight: 500;
-    font-size: 0.95rem;
-    color:white;
+  display: block;
+  margin-bottom: 1rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  color: white;
 }
 
 .form-input,
 .form-select {
-    width: 100%;
-    padding: 0.875rem 1.25rem;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    font-size: 1rem;
-    font-family: 'DM Sans', sans-serif;
-    background: white;
-    height:2.3rem;
+  width: 100%;
+  padding: 0.875rem 1.25rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: "DM Sans", sans-serif;
+  background: white;
+  height: 2.3rem;
 }
 
 .form-input:focus,
 .form-select:focus {
-    outline: grey;
-    background: white;
-    box-shadow: 0 0 0 4px rgba(85, 168, 245, 0.08);
-    
+  outline: grey;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(85, 168, 245, 0.08);
 }
-
-
 
 /* Map Section Styles */
 .map-section {
-    background: rgba(72, 108, 141, 0.726);;
-    border-radius: 24px;
-    padding: 3rem;
-    box-shadow: var(--shadow-md);
-    position: relative;
-    overflow: hidden;
+  background: rgba(72, 108, 141, 0.726);
+  border-radius: 24px;
+  padding: 3rem;
+  box-shadow: var(--shadow-md);
+  position: relative;
+  overflow: hidden;
 }
 
 .map-section::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
 }
 
 .search-container {
-    position: relative;
-    margin-bottom: 1.5rem;
+  position: relative;
+  margin-bottom: 1.5rem;
 }
 
 .search-input {
-    width: 100%;
-    padding: 0.875rem 3rem 0.875rem 1.25rem;
-    border: 2px solid var(--border);
-    border-radius: 12px;
-    font-size: 1rem;
-    font-family: 'DM Sans', sans-serif;;
-
+  width: 100%;
+  padding: 0.875rem 3rem 0.875rem 1.25rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  font-size: 1rem;
+  font-family: "DM Sans", sans-serif;
 }
 
 .search-input:focus {
-    outline: none;
-    border-color: #4285f4;
-    background: white;
-    box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.08);
+  outline: none;
+  border-color: #4285f4;
+  background: white;
+  box-shadow: 0 0 0 4px rgba(66, 133, 244, 0.08);
 }
 
 .search-icon {
-    position: absolute;
-    right: 1.25rem;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: auto; 
-    cursor: pointer;
-    font-size: 1.25rem;
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: auto;
+  cursor: pointer;
+  font-size: 1.25rem;
 }
 
 /* Map Container */
 #map {
-    height: 450px;
-    width: 100%;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: var(--shadow-sm);
-    margin-bottom: 1.5rem;
-    z-index: 1;
-    position: relative;
+  height: 450px;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.5rem;
+  z-index: 1;
+  position: relative;
 }
 
 .leaflet-container {
-    height: 100%;
-    width: 100%;
+  height: 100%;
+  width: 100%;
 }
 
 .location-display {
-    padding: 1.25rem;
-    background: white;
-    border-radius: 12px;
-    border-left: 4px solid #4285f4;
+  padding: 1.25rem;
+  background: white;
+  border-radius: 12px;
+  border-left: 4px solid #4285f4;
 }
 
 .location-label {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin-bottom: 0.5rem;
-    font-weight: 500;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  font-weight: 500;
 }
 
 .location-value {
-    font-size: 1rem;
-    color: var(--text-dark);
-    font-weight: 500;
+  font-size: 1rem;
+  color: var(--text-dark);
+  font-weight: 500;
 }
 
 /* Button Styles */
 .btn-submit {
-    width: 100%;
-    padding: 1.125rem 2rem;
-    border: none;
-    border-radius: 12px;
-    font-size: 1.125rem;
-    font-weight: 600;
-    cursor: pointer;
-    margin-top: 2rem;
-    font-family: 'DM Sans', sans-serif;
-    background: white;
+  width: 100%;
+  padding: 1.125rem 2rem;
+  border: none;
+  border-radius: 12px;
+  font-size: 1.125rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 2rem;
+  font-family: "DM Sans", sans-serif;
+  background: white;
 }
 
 .btn-submit:hover {
-    transform: translateY(-1px);
+  transform: translateY(-1px);
 }
 
 .btn-submit:active {
-    transform: translateY(0);
+  transform: translateY(0);
 }
 
 /* Error Styles */
 .error-message {
-    display: none;
-    color: black;
-    font-size: 0.9rem;
-    margin-top: 0.3rem;
-    min-height: 13px;
-    border-left: 3px solid var(--primary);
+  display: none;
+  color: black;
+  font-size: 0.9rem;
+  margin-top: 0.3rem;
+  min-height: 13px;
+  border-left: 3px solid var(--primary);
 }
 
 .form-input.error,
 .form-select.error {
-    box-shadow: 0 0 0 4px rgba(110, 34, 43, 0.09);
-    background: rgba(239, 239, 239, 0.867);
+  box-shadow: 0 0 0 4px rgba(110, 34, 43, 0.09);
+  background: rgba(239, 239, 239, 0.867);
 }
 
-
-
 .emergency-badge {
-    display: inline-flex;
-    align-items: center;
-    background:white;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    margin-top: 1rem;
+  display: inline-flex;
+  align-items: center;
+  background: white;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin-top: 1rem;
 }
 
 .emergency-badge::before {
-    content: '🚨';
-    animation: rotate 2s linear infinite;
+  content: "🚨";
+  animation: rotate 2s linear infinite;
 }
 
 /* Table Section */
 .table-section {
-    margin-top: 4rem;
-    border-radius: 24px;
+  margin-top: 4rem;
+  border-radius: 24px;
 }
 
 .table-wrapper {
-    overflow-x: auto;
-    margin-top: 1.5rem;
+  overflow-x: auto;
+  margin-top: 1.5rem;
 }
 
 .authority-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 16px;
-    overflow: hidden;
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
 }
 
 .authority-table thead {
-    background: rgb(2, 51, 79);
-    color: white;
+  background: rgb(2, 51, 79);
+  color: white;
 }
 
 .authority-table th,
 .authority-table td {
-    padding: 1rem;
-    text-align: left;
-    font-size: 0.95rem;
+  padding: 1rem;
+  text-align: left;
+  font-size: 0.95rem;
 }
 
 .authority-table tbody tr {
-    border-bottom: 1px solid #eee;
+  border-bottom: 1px solid #eee;
 }
 
 .authority-table tbody tr:hover {
-    background: rgba(188, 200, 211, 0.764);
+  background: rgba(188, 200, 211, 0.764);
 }
 
 /* Action Buttons */
 .action-buttons {
-    display: flex;
-    gap: 0.75rem;
+  display: flex;
+  gap: 0.75rem;
 }
 .icon-btn img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain; 
-    display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
 }
 
-
-
-
-.btn-edit, .btn-delete {
-    background: transparent;
-    border: none;
-    padding: 0; 
-    cursor: pointer;
-    width: 20px; 
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.btn-edit,
+.btn-delete {
+  background: transparent;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.btn-eidt,.btn-delete img{
-    width: 20px;
-    height: 20px;
-    display: block;
+.btn-eidt,
+.btn-delete img {
+  width: 20px;
+  height: 20px;
+  display: block;
 }
 
 .icon-btn:hover {
-    opacity: 0.7;
-    transform: scale(1.1);
-    transition: all 0.2s ease;
+  opacity: 0.7;
+  transform: scale(1.1);
+  transition: all 0.2s ease;
 }
 
-
 @keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Leaflet Customization */
 .leaflet-popup-content-wrapper {
-    border-radius: 12px;
-    box-shadow: var(--shadow-md);
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
 }
 
 .leaflet-popup-content {
-    font-family: 'DM Sans', sans-serif;
+  font-family: "DM Sans", sans-serif;
 }
 
 /* Responsive Design */
 @media (max-width: 1200px) {
-    .registration-container {
-        grid-template-columns: 1fr;
-    }
+  .registration-container {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 768px) {
-    .main-content {
-        padding: 2rem 1.5rem;
-    }
+  .main-content {
+    padding: 2rem 1.5rem;
+  }
 
-    .header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1.5rem;
-    }
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1.5rem;
+  }
 
-    .header-content h1 {
-        font-size: 2rem;
-    }
+  .header-content h1 {
+    font-size: 2rem;
+  }
 
-    #map {
-        height: 350px;
-    }
+  #map {
+    height: 350px;
+  }
 }

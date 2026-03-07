@@ -11,10 +11,6 @@ body {
   min-height: 100vh;
 }
 
-#sidebar-container {
-  width: 240px;
-  flex-shrink: 0;
-}
 
 .main-column {
   flex: 1;
@@ -23,11 +19,15 @@ body {
   min-width: 0;
 }
 
+.main
+
 #header-container {
   width: 100%;
 }
 
 .page-content {
+  
+  margin-left: 240px;
   flex: 1;
   padding: 36px 48px;
 }

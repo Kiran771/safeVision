@@ -21,7 +21,7 @@ body {
     transition: margin-left 0.3s ease, width 0.3s ease;
 }
 
-/* Adjust for collapsed sidebar */
+
 body.sidebar-collapsed .main-content {
     margin-left: 80px;
     width: calc(100% - 80px);

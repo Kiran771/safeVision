@@ -1,33 +1,46 @@
-<aside class="sidebar">
-  <img style="width: 105px; height: 80px; align-self: center"
-      src="/resources/logo.png" />
-
-  <div class="logo">safeVision</div>
-
-  <nav>
-    <div class="nav-item">
-      <img src="/resources/dashboard_icon.png" />
-      <a href="/html/dashboard.html">Dashboard</a>
-    </div>
-
-    <div class="nav-item">
-      <img src="/resources/detect.png" />
-      <a href="/html/detection.html">Accident Detection</a>
-    </div>
-
-    <div class="nav-item">
-      <img src="/resources/verify.png" />
-      <a href="/html/verify.html">Verify</a>
-    </div>
-
-    <div class="nav-item">
-      <img src="/resources/profile.png" />
-      <a href="/html/profile.html">Profile</a>
-    </div>
-  </nav>
-
-  <div class="logout-section">
-    <img src="/resources/logout.png" />
-    <a href="/html/login.html">Log out</a>
-  </div>
-</aside>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Menu</title>
+    <link rel="stylesheet" href="/css/admin_side_Menu.css" />
+</head>
+<body>
+    <aside class="sidebar">
+        <img 
+            style="width: 105px; height: 80px; align-self: center" 
+            src="/resources/logo.png" 
+            alt="SafeVision Logo"
+        />
+        <div class="logo">safeVision</div>
+        
+        <nav>
+            <div class="nav-item" data-role="Admin">
+                <img src="/resources/dashboard_icon.png" alt="dashboard" />
+                <a href="/html/dashboard.html">Dashboard</a>
+            </div>
+            
+            <div class="nav-item" data-role="Admin">
+                <img src="/resources/detect.png" alt="detect" />
+                <a href="/html/detection.html">Accident Detection</a>
+            </div>
+            
+            <div class="nav-item" data-role="Admin">
+                <img src="/resources/verify.png" alt="verify" />
+                <a href="/html/verify.html">Verify</a>
+            </div>
+            
+            <div class="nav-item" data-role="Admin">
+                <img src="/resources/profile.png" alt="profile" />
+                <a href="/html/profile.html">Profile</a>
+            </div>
+        </nav>
+        
+        <div class="logout-section">
+            <img src="/resources/logout.png" alt="logout" />
+            <a href="/html/login.html">Log out</a>
+        </div>
+    </aside>
+</body>
+</html>

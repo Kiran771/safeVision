@@ -70,16 +70,15 @@ document.addEventListener("DOMContentLoaded", function () {
         throw new Error("No access token received");
       }
 
-      // Save token & role (use sessionStorage as you already do)
       sessionStorage.setItem("access_token", data.access_token);
       sessionStorage.setItem("role", data.user.role);
-      sessionStorage.setItem("user", JSON.stringify(data.user)); // optional – full user info
+      sessionStorage.setItem("user", JSON.stringify(data.user)); 
 
       // Role-based redirect (matches your current logic)
       if (data.user.role === "Super Admin") {
         window.location.href = "/html/dashboard.html";
       } else if (data.user.role === "Admin") {
-        window.location.href = "/html/detection.html";
+        window.location.href = "/html/dashboard.html";
       } else {
         window.location.href = "/html/dashboard.html";
       }

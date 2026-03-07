@@ -1,51 +1,47 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>side menu</title>
-  <link rel="stylesheet" href="/css/sideMenu.css" />
-  <script src="/js/active_menu.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Superadmin Menu</title>
+    <link rel="stylesheet" href="/css/sideMenu.css" />
 </head>
 <body>
-  <aside class="sidebar">
-  <img
-    style="width: 105px; height: 80px; align-self: center"
-    src="/resources/logo.png"
-  />
-  <div class="logo">safeVision</div>
+    <aside class="sidebar">
+        <img 
+            style="width: 105px; height: 80px; align-self: center" 
+            src="/resources/logo.png" 
+            alt="SafeVision Logo"
+        />
+        <div class="logo">safeVision</div>
+        
+        <nav>
+            <div class="nav-item" data-role="Super Admin">
+                <img src="/resources/dashboard_icon.png" alt="dashboard" />
+                <a href="/html/dashboard.html">Dashboard</a>
+            </div>
+            
 
-  <nav>
-    <div class="nav-item" data-role="Super Admin,Admin">
-      <img src="/resources/dashboard_icon.png" alt="dashboard" />
-      <a href="/html/dashboard.html">Dashboard</a>
-    </div>
-
-    <div class="nav-item" data-role="Super Admin">
-      <img src="/resources/person_icon.png" alt="user" />
-      <a href="/html/userManagement.html">User Management</a>
-    </div>
-
-    <div class="nav-item" data-role="Super Admin">
-      <img src="/resources/camera_icon.png" alt="camera" />
-      <a href="/html/camera_management.html">Camera Management</a>
-    </div>
-
-    <div class="nav-item" data-role="Super Admin">
-      <img
-        src="/resources/emergency_contact_icon.png"
-        alt="emergency"
-      />
-      <a href="/html/register_contact.html">Emergency Contacts</a>
-    </div>
-
-  </nav>
-
-  <div class="logout-section">
-    <img src="/resources/logout.png" alt="logout" />
-    <a href="/html/login.html">Log out</a>
-  </div>
-</aside>
-
+            <div class="nav-item" data-role="Super Admin">
+                <img src="/resources/person_icon.png" alt="register user" />
+                <a href="/html/userManagement.html">Admin Management</a>
+            </div>
+            
+            <div class="nav-item" data-role="Super Admin">
+                <img src="/resources/camera_icon.png" alt="register camera" />
+                <a href="/html/camera_management.html">Camera Management</a>
+            </div>
+            
+            <div class="nav-item" data-role="Super Admin">
+                <img src="/resources/emergency_contact_icon.png" alt="register contact" />
+                <a href="/html/register_contact.html">Emergency Contact</a>
+            </div>
+        </nav>
+        
+        <div class="logout-section">
+            <img src="/resources/logout.png" alt="logout" />
+            <a href="/html/login.html">Log out</a>
+        </div>
+    </aside>
 </body>
 </html>

@@ -99,14 +99,12 @@ document.getElementById("startDetection").addEventListener("click", async () => 
         streamActive = false;
     }
 
-    // When original video ends
     videoElement.onended = () => {
         console.log("[VIDEO] Playback ended");
 
         if (overlay) overlay.style.display = "flex";
 
-        // Do NOT show "no accident" yet — wait for stream to finish
-        // We check streamActive in the interval below
+
     };
 
     // Hide overlay when playing again
@@ -116,7 +114,6 @@ document.getElementById("startDetection").addEventListener("click", async () => 
 
     // Detect when backend stream actually ends
     const checkStreamEnd = setInterval(() => {
-        // If we've received at least one frame OR stream has stopped
         if (anyFrameReceived || !streamActive) {
             clearInterval(checkStreamEnd);
             console.log("[STREAM] Processing completed (no more frames expected)");
