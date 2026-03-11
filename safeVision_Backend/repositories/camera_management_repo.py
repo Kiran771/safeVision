@@ -1,6 +1,7 @@
-from safeVision_Backend.models.table_creation import Camera,User,UserCamera,Location
-from sqlalchemy import not_
 from sqlalchemy.orm import Session
+from sqlalchemy import not_
+from safeVision_Backend.models.table_creation import Camera,User,UserCamera,Location
+
 
 
 

@@ -1,6 +1,5 @@
 from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boolean
 from sqlalchemy.sql import func
-from datetime import datetime
 from safeVision_Backend.core.psql_db import Base
 
 
@@ -52,11 +51,10 @@ class Accident(Base):
     accidentid = Column(Integer, primary_key=True, autoincrement=True, index=True)
     cameraid  = Column(Integer, ForeignKey('cameras.cameraid'), nullable=False, index=True)
     timestamp = Column(DateTime(timezone=True), server_default=func.now(), nullable=False, index=True)
-    reconstruction_error = Column(Float, nullable=True)
     confidence = Column(Float, nullable=True)
     status = Column(String(30), nullable=False, default='pending')
-    reconstructed_frame_path = Column(String(500), nullable=True)
     frame_path = Column(String(500), nullable=True)
+    detection_type = Column(String(20), nullable=True, default='accident')
 
 
 class EmergencyContact(Base):

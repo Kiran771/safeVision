@@ -1,0 +1,23 @@
+ * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f9fafb;
+    display: flex;
+    min-height: 100vh;
+}
+
+.dashboard-container {
+    margin-left: 255px;
+    padding: 3rem 4rem;
+    position: relative;
+    z-index: 1;
+    width:calc(100%-255px)
+}
+
+
+

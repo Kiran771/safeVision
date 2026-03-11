@@ -40,7 +40,7 @@ document.getElementById("startDetection").addEventListener("click", async () => 
     console.log("[UPLOAD] Starting...");
 
     try {
-        const resp = await fetch("http://127.0.0.1:8000/detection/upload-video", {
+        const resp = await fetch("http://127.0.0.1:8000/detection/upload-video?camera_id=3", {
             method: "POST",
             body: formData
         });
@@ -126,5 +126,8 @@ document.getElementById("startDetection").addEventListener("click", async () => 
     }, 2000); 
 
     // Cleanup on page unload or new click
-    window.addEventListener('beforeunload', () => clearInterval(checkStreamEnd));
+    window.addEventListener('beforeunload', () => {
+        clearInterval(checkStreamEnd)
+        navigator.sendBeacon('http://127.0.0.1:8000/detection/clear-video')
+    });
 });

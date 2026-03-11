@@ -19,15 +19,14 @@ body {
   min-width: 0;
 }
 
-.main
+
 
 #header-container {
   width: 100%;
 }
 
 .page-content {
-  
-  margin-left: 240px;
+  margin-left: 255px;
   flex: 1;
   padding: 36px 48px;
 }

@@ -1,309 +1,362 @@
-from collections import deque
 import time
 import cv2
 import os
 import tempfile
 from pathlib import Path
-import numpy as np
-import tensorflow as tf
+from ultralytics import YOLO
 from safeVision_Backend.core.psql_db import SessionLocal
-from safeVision_Backend.models.table_creation import Accident,Camera
+from safeVision_Backend.repositories.accident_repo import save_detection,save_borderline_detection
 
 
 
 # Load model 
 BASE_DIR = Path(__file__).resolve().parent
-accident_detection_model_path = BASE_DIR.parent / "accident_detection_model" / "accident_detection_final.keras"
-model = tf.keras.models.load_model(accident_detection_model_path)
+accident_detection_model_path = BASE_DIR.parent / "accident_fire_detection_model" / "best_accident_detection2.pt"
+fire_detection_model_path = BASE_DIR.parent / "accident_fire_detection_model" / "best_fire_detection.pt"
+
+accident_model=YOLO(str(accident_detection_model_path))
+fire_model=YOLO(str(fire_detection_model_path))
 
 
-# input image size for the model
-IMG_SIZE = 256
+# lower confidence threshold prioritizing recall for safety critical application
+accident_confidence_threshold =0.55
 
-# anomaly detection threshold
-ANOMALY_THRESHOLD = 0.0040  
+# fire detection threshold
+fire_confidence_threshold =0.50
 
-# number of consecutive frames to confirm anomaly
-ANOMALY_CONSECUTIVE_FRAMES = 6  
-# threshold for borderline cases
-BORDERLINE_THRESHOLD = 0.0025
+# Borderline threshold for human review
+border_line_threshold = 0.20
 
-# Applying static masking to focus on vehicles rather than surroundings
-mask = np.ones((IMG_SIZE, IMG_SIZE, 3), dtype=np.float32)
-mask[:int(IMG_SIZE * 0.09), :, :] = 0.4 # Downweight sky region
+# consecutive frames required to confirm accident
+consecutive_frames_needed = 6
 
+# accident confirmation cooldown to prevent multiple detections of same event
+accident_cooldown_seconds =8
 
-# Folder to save ONLY accident frames (no storage for normal frames)
+# frame skip interval to balance perfromance and detection speed
+frame_skip_interval =3
+
 ACCIDENT_FOLDER = "accident_frames"
+FIRE_FOLDER     = "fire_frames"
+REVIEW_FOLDER   = "review_frames"
 os.makedirs(ACCIDENT_FOLDER, exist_ok=True)
-
-# Preprocessing input frame for model prediction
-def preprocess_frame(frame):
-    """Resize with aspect ratio preserved + black padding, then normalize"""
-    h, w = frame.shape[:2]  
-    # Calculate scale to fit inside target size without stretching
-    scale = min(IMG_SIZE / w, IMG_SIZE / h)
-    new_w = int(w * scale)
-    new_h = int(h * scale)
-
-    # Resize proportionally (aspect ratio preserved)
-    resized = cv2.resize(frame, (new_w, new_h))
-
-    # Create black canvas of target size
-    padded = np.zeros((IMG_SIZE, IMG_SIZE, 3), dtype=np.uint8)
-
-    # Center the resized image
-    start_x = (IMG_SIZE - new_w) // 2
-    start_y = (IMG_SIZE - new_h) // 2
-    padded[start_y:start_y + new_h, start_x:start_x + new_w] = resized
-
-    # Normalize to 0 & 1
-    padded = padded.astype(np.float32) / 255.0
-
-    # Add batch dimension for model
-    padded = np.expand_dims(padded, axis=0)
-
-    return padded
-
-# Post-processing: calculate masked MSE after downweighting background
-def calculate_masked_mse(input_frame, recon):
-    """Compute MSE with mask (downweight background - post-processing)"""
-    error = (input_frame - recon) ** 2
-    masked_error = error * mask
-    return np.mean(masked_error)
-
-# Save only confirmed accident frames
-def save_accident_frame(frame, video_name, frame_count, mse):
-    """Save only confirmed accident frames"""
-    accident_path = os.path.join(ACCIDENT_FOLDER, 
-                                f"accident_{video_name}_frame_{frame_count:06d}_mse_{mse:.4f}.jpg")
-    cv2.imwrite(accident_path, frame)
-    print(f"Accident frame saved: {accident_path}")
-    return accident_path
+os.makedirs(FIRE_FOLDER, exist_ok=True)
+os.makedirs(REVIEW_FOLDER, exist_ok=True)
 
 
-# Human-in-the-Loop: Save borderline frames for manual review
-def send_for_review(frame, video_name, frame_count, mse):
-    """Human-in-the-Loop: Save borderline frames for manual review"""
-    review_path = os.path.join(ACCIDENT_FOLDER, f"review{video_name}_frame_{frame_count:06d}_mse_{mse:.4f}.jpg")
-    cv2.imwrite(review_path, frame)
-    print(f"Borderline detection saved for human review: {review_path} (MSE: {mse:.4f})")
+def annotate_accident_frame(frame,boxes,model_name):
+    has_accident=False
+    max_conf=0.0
+    for box in boxes:
+        class_id = int(box.cls[0]) 
+        conf = float(box.conf[0])
+        label = model_name[class_id]
+        x1,y1,x2,y2 = map(int,box.xyxy[0])
 
-# Save accident details to database for further processing
-def save_accident_to_db(camera_id, mse, confidence, frame_path, reconstructed_path):
-    db = SessionLocal()
-    try:
-        # Fetch camera location
-        camera = db.query(Camera).filter(Camera.cameraid == camera_id).first()
-        camera_location = camera.location if camera else None
+        if label != 'ACCIDENT':
+            continue
+        has_accident = True
+        max_conf=max(max_conf,conf)
+        cv2.rectangle(frame,(x1,y1),(x2,y2),(0,0,255),3)
+        label_text = f"ACCIDENT {conf:.0%}" 
+        (tw, th), _ = cv2.getTextSize(label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.7,2)  
+        cv2.rectangle(frame, (x1, y1 - th - 10), (x1 + tw, y1), (0, 0, 255), -1) 
+        cv2.putText(frame, label_text, (x1, y1 - 5),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+    
+    return frame,has_accident,max_conf
 
-        accident = Accident(
-            cameraid=camera_id,
-            location=camera_location,  # save location from camera
-            reconstruction_error=float(mse),
-            confidence=float(confidence),
-            frame_path=frame_path,
-            reconstructed_frame_path=reconstructed_path,
-            status="pending"
-        )
-        db.add(accident)
-        db.commit()
-        db.refresh(accident)
-        print(f"[DB] Accident saved ID={accident.accidentid}")
+def annotate_fire_frame(frame,boxes,model_name):
+    has_fire=False
+    max_conf=0.0
 
-    finally:
-        db.close()
+    FIRE_COLOR  = (0, 140, 255)   
+    SMOKE_COLOR = (128, 128, 128)
+
+    for box in boxes:
+        class_id = int(box.cls[0]) 
+        conf = float(box.conf[0])
+        label = model_name[class_id]
+        x1,y1,x2,y2 = map(int,box.xyxy[0])
+
+        has_fire = True
+        max_conf=max(max_conf,conf)
+
+        color= SMOKE_COLOR if 'smoke' in label.lower() else FIRE_COLOR
+        cv2.rectangle(frame,(x1,y1),(x2,y2),color,3)
+        label_text = f"{label} {conf:.0%}"
+        (tw, th), _ = cv2.getTextSize(label_text, cv2.FONT_HERSHEY_SIMPLEX, 0.7, 2)
+        cv2.rectangle(frame, (x1, y1 - th - 10), (x1 + tw, y1), color, -1)
+        cv2.putText(frame, label_text, (x1, y1 - 5),
+            cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+
+    return frame,has_fire,max_conf
+
+def draw_status_overlay(frame,frame_count,acc_conf,fire_conf,
+                    is_accident,is_fire,  is_borderline ,vehicle_count):
+    h,w= frame.shape[:2]
+
+    overlay=frame.copy()
+    cv2.rectangle(overlay, (0,h - 90),(w,h),(0,0,0),-1)
+
+    cv2.addWeighted(overlay,0.6,frame,0.4,0,frame)
+
+    if is_accident:
+        status_text='ACCIDENT DETECTED'
+        status_color=(0,0,255)
+    elif is_fire:
+        status_text='FIRE DETECTED'
+        status_color=(0,140,255)
+    elif is_borderline:
+        status_text='BORDERLINE REVIEW'
+        status_color=(0,165,255)
+    else: 
+        status_text='MONITORING'
+        status_color=(0,255,0)
+
+    cv2.putText(frame,status_text,(15,h-55),
+                    cv2.FONT_HERSHEY_DUPLEX, 0.9, status_color, 2
+                )
+    
+    cv2.putText(frame, f"Accident Conf:{acc_conf:.0%} Fire Conf:{fire_conf:.0%} Vehicles:{vehicle_count}",
+                    (15, h - 20), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1
+                )
+    cv2.putText(frame, f"Frame: {frame_count}", (w - 160, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 2
+                )
+    
+    return frame
+
+def save_frame_img(frame,folder,prefix, video_name, frame_count, conf):
+    
+    filename = f"{prefix}_{video_name}_frame_{frame_count:06d}_conf{conf:.2f}.jpg"
+    path = os.path.join(folder, filename)
+    cv2.imwrite(path, frame)
+    print(f"[SAVE] {path}")
+    return path
 
 
-# Compute confidence score for detected anomaly based on error, baseline, and threshold
-def compute_confidence(error, baseline, threshold):
-    """
-    Hybrid confidence:
-    - compares error to baseline behavior
-    - scales relative to detection threshold
-    """
 
-    if error <= baseline:
-        return 0.0
-
-    # how far above normal behavior
-    relative_spike = (error - baseline) / (threshold - baseline + 1e-6)
-
-    # sigmoid smoothing for stability
-    confidence = 1 / (1 + np.exp(-5 * (relative_spike - 0.5)))
-
-    return float(np.clip(confidence, 0, 1))
-
-
-# Main function to process video frames and yield detected accident frames as JPEG bytes
 def generate_detection_frames(
     video_bytes: bytes | None = None,
     video_name: str = "video",
     video_path: str | None = None,
-    camera_id: int = 1
+    camera_id: int = 1,
+    playback_time: float = 0.0
 ):
-    print(f"[ANALYSIS START] Video: {video_name}, path: {video_path or 'from bytes'}")
-
-    cap_source = None
-    temp_file_to_clean = None
+    temp_file = None
     last_saved_time = 0
-    SAVE_COOLDOWN = 8 
-
+    consecutive_accident = 0
+    consecutive_fire = 0
 
     try:
-        # Prepare video source
         if video_path:
             cap_source = video_path
         elif video_bytes:
-            tmp_fd, tmp_name = tempfile.mkstemp(suffix=".mp4")
-            with os.fdopen(tmp_fd, "wb") as f:
+            tmp_fd,tmp_name = tempfile.mkstemp(suffix=".mp4")
+            with os.fdopen(tmp_fd, 'wb') as f:
                 f.write(video_bytes)
                 f.flush()
                 os.fsync(f.fileno())
             cap_source = tmp_name
-            temp_file_to_clean = tmp_name
+            temp_file = tmp_name
         else:
-            raise ValueError("Either video_bytes or video_path required")
+            raise ValueError("Either video_bytes or video_path must be provided")
+        time.sleep(0.2)
 
-        time.sleep(0.2) 
+        cap=cv2.VideoCapture(cap_source)
 
-        cap = cv2.VideoCapture(cap_source)
         if not cap.isOpened():
             raise RuntimeError(f"Cannot open video: {cap_source}")
-
+        
         fps = cap.get(cv2.CAP_PROP_FPS) or 30.0
         frame_interval = 1.0 / fps
-        print(f"[INFO] FPS: {fps:.2f}")
+        print(f"[INFO] Video opened: {cap_source}, FPS: {fps:.2f}")
 
-        frame_count = 0
-        consecutive_high_mse = 0
-        running_normal_mse = None
-        last_mse = []
-        last_yield_time = time.time()
-
-        while cap.isOpened():
-            ret, frame = cap.read()
+        frame_count  = 0 
+        while cap.isOpened(): 
+            loop_start = time.time()
+            ret, frame = cap.read() 
             if not ret:
-                print(f"[INFO] Video ended after {frame_count} frames")
                 break
-
             frame_count += 1
-            if frame_count % 3 != 0:
+            if frame_count % frame_skip_interval != 0:
+                time.sleep(frame_interval)
                 continue
-            print(f"[FRAME] Processing frame {frame_count}", end="\r") 
-
+            
             if frame is None or frame.size == 0:
                 print(f"[WARNING] Skipping invalid frame {frame_count}")
                 continue
 
-            input_frame = preprocess_frame(frame)
-            recon = model.predict(input_frame, verbose=0)[0]
+            
+            accident_results  = accident_model(frame, conf= accident_confidence_threshold, verbose=False)
+            fire_results = fire_model(frame, conf= fire_confidence_threshold,verbose=False)
+    
+            acc_boxes = accident_results[0].boxes
+            frame, is_accident, acc_conf = annotate_accident_frame(
+                frame, acc_boxes, accident_model.names)
+            
+            fire_boxes = fire_results[0].boxes
+            frame, is_fire, fire_conf = annotate_fire_frame(
+                frame, fire_boxes, fire_model.names)
+            
+            is_borderline_accident = False
+            if not is_accident  and len(acc_boxes)>0:
+                for box in acc_boxes:
+                    raw_conf = float(box.conf[0])
+                    if border_line_threshold <=raw_conf < accident_confidence_threshold:
+                        is_borderline_accident = True
+                        break
+            is_borderline_fire = False
+            if not is_fire and len(fire_boxes)>0:
+                for box in fire_boxes:
+                    raw_conf= float(box.conf[0])
+                    if border_line_threshold <= raw_conf < fire_confidence_threshold:
+                        is_borderline_fire = True
+                        break
+            is_borderline = is_borderline_accident or is_borderline_fire
+            consecutive_accident = consecutive_accident + 1 if is_accident else 0 
+            consecutive_fire  = consecutive_fire  + 1 if is_fire else 0 
 
-            recon_image = (recon * 255).astype(np.uint8)
-            reconstructed_path = os.path.join(ACCIDENT_FOLDER, 
-            f"recon_{video_name}_frame_{frame_count:06d}.jpg")
-            cv2.imwrite(reconstructed_path, recon_image)
-
-            mse = calculate_masked_mse(input_frame[0], recon)
-            last_mse.append(mse)
-            if len(last_mse) > 5:
-                last_mse.pop(0)
-            smoothed_mse = np.median(last_mse)
-
-            if running_normal_mse is None:
-                running_normal_mse = smoothed_mse
-            else:
-                running_normal_mse = 0.9 * running_normal_mse + 0.1 * smoothed_mse
-
-            dynamic_threshold = max(ANOMALY_THRESHOLD, running_normal_mse + 0.002)
-            dynamic_borderline_threshold = max(BORDERLINE_THRESHOLD, running_normal_mse + 0.001)
-
-            confidence = compute_confidence(
-                error=smoothed_mse,
-                baseline=running_normal_mse,
-                threshold=dynamic_threshold
+            accident_box_count = sum(
+                1 for box in acc_boxes 
+                if accident_model.names[int(box.cls[0])] == 'ACCIDENT' 
+                and  float(box.conf[0]) >= accident_confidence_threshold 
             )
 
+            confirmed_accident = (
+                consecutive_accident >= consecutive_frames_needed 
+                and acc_conf >= 0.70 
+                and accident_box_count >= 2
+                )
+            confirmed_fire  =consecutive_fire  >= consecutive_frames_needed
 
-            if smoothed_mse > dynamic_threshold:
-                consecutive_high_mse += 1
-            else:
-                consecutive_high_mse = 0
+            vehicle_count = len(acc_boxes) 
+            heavy_traffic =vehicle_count >= 8
 
-            is_accident = consecutive_high_mse >= ANOMALY_CONSECUTIVE_FRAMES
-            is_borderline = dynamic_borderline_threshold < smoothed_mse <= dynamic_threshold
+            frame = draw_status_overlay(
+                    frame, 
+                    frame_count, 
+                    acc_conf, 
+                    fire_conf, 
+                    confirmed_accident, 
+                    confirmed_fire,
+                    is_borderline,
+                    vehicle_count 
+            )
 
-            if is_accident or is_borderline:
-                current_time = time.time()
-                if current_time - last_yield_time < frame_interval:
-                    time.sleep(frame_interval - (current_time - last_yield_time))
-                last_yield_time = current_time
+            current_time = time.time()
 
-                status = "ACCIDENT DETECTED" if is_accident else "BORDERLINE"
-                color = (0, 0, 255) if is_accident else (0, 165, 255)
+            if current_time - last_saved_time > accident_cooldown_seconds:
+                if confirmed_accident:
+                    frame_path = save_frame_img(
+                        frame, 
+                        ACCIDENT_FOLDER, 
+                        "accident", 
+                        video_name, 
+                        frame_count, 
+                        acc_conf)
+                    db = SessionLocal()
+                    try: 
+                        save_detection(
+                            db = db,
+                            camera_id      = camera_id,
+                            detection_type = "accident",
+                            confidence     = acc_conf,
+                            frame_path     = frame_path,
+                            status='confirmed'
+                        )
+                    finally:
+                        db.close()
+                    last_saved_time = current_time
 
-                cv2.putText(frame, f"{status} MSE: {smoothed_mse:.4f}", (30, 80),
-                            cv2.FONT_HERSHEY_DUPLEX, 1.0, color, 6, cv2.LINE_AA)
-                cv2.putText(frame, f"Frame {frame_count} Consec: {consecutive_high_mse}", (30, 140),
-                            cv2.FONT_HERSHEY_DUPLEX, 1.0, color, 6, cv2.LINE_AA)
-
-                if is_accident:
-                    h, w = frame.shape[:2]
-                    cv2.rectangle(frame, (40, 40), (w-40, h-40), (0, 0, 255), 8)
-                    if current_time - last_saved_time > SAVE_COOLDOWN:
-                        frame_path = save_accident_frame(
-                            frame,
+                elif confirmed_fire:
+                    frame_path = save_frame_img(frame, 
+                            FIRE_FOLDER,
+                            "fire",
                             video_name,
                             frame_count,
-                            smoothed_mse
-                        )
-
-                        save_accident_to_db(
-                            camera_id=camera_id,
-                            mse=smoothed_mse,
-                            confidence=confidence,
-                            reconstructed_path=reconstructed_path,
-                            frame_path=frame_path
+                            fire_conf
 
                         )
-
-                        last_saved_time = current_time
+                    db = SessionLocal()
+                    try:
+                        save_detection(
+                            db = db,
+                            camera_id      = camera_id,
+                            detection_type = "fire",
+                            confidence     = fire_conf,
+                            frame_path     = frame_path,
+                            status='confirmed'
+                        )
+                    finally:
+                        db.close()
+                    last_saved_time = current_time
 
                 elif is_borderline:
-                    if current_time - last_saved_time > SAVE_COOLDOWN:
-                        send_for_review(
-                            frame,
-                            video_name,
-                            frame_count,
-                            smoothed_mse
-                        )
-                        last_saved_time = current_time
+                    borderline_type = 'borderline_accident' if is_borderline_accident else 'borderline_fire'
+                    frame_path = save_frame_img( frame, 
+                        REVIEW_FOLDER, 
+                        "review", 
+                        video_name, frame_count, 
+                        acc_conf if is_borderline_accident else fire_conf 
+                    ) 
+                    db = SessionLocal()
 
-                success, buffer = cv2.imencode('.jpg', frame, [int(cv2.IMWRITE_JPEG_QUALITY), 85])
-                if not success:
-                    print(f"[WARNING] JPEG encode failed at frame {frame_count}")
-                    continue
+                    try: 
 
-                yield (
-                    b"--frame\r\n"
-                    b"Content-Type: image/jpeg\r\n"
-                    b"X-Frame-Number: " + str(frame_count).encode() + b"\r\n\r\n" +
-                    buffer.tobytes() +
-                    b"\r\n"
+                        save_borderline_detection( 
+                            db = db, 
+                            camera_id  = camera_id, 
+                            confidence  = acc_conf  if is_borderline_accident else fire_conf,
+                            frame_path  = frame_path, 
+                            detection_type = borderline_type 
+                        ) 
+                    finally:
+                        db.close()
+
+                    last_saved_time =current_time
+        
+            should_stream = (
+                    confirmed_accident or confirmed_fire or
+                    is_borderline      or is_accident    or
+                    is_fire            or heavy_traffic
                 )
+            should_stream = True 
+            if should_stream:
+                success, buffer = cv2.imencode(
+                        ".jpg", frame,
+                        [int(cv2.IMWRITE_JPEG_QUALITY), 85]
+                )
+                if success:
+                    yield (
+                        b"--frame\r\n"
+                        b"Content-Type: image/jpeg\r\n"
+                        b"X-Frame-Number: "  + str(frame_count).encode() + b"\r\n"
+                        b"X-Accident-Conf: " + f"{acc_conf:.3f}".encode() + b"\r\n"
+                        b"X-Fire-Conf: "     + f"{fire_conf:.3f}".encode() + b"\r\n\r\n" +
+                        buffer.tobytes() + b"\r\n"
+                    )
 
-    except Exception as e:
-        print(f"[ERROR] During processing: {e}")
+            processing_time = time.time() - loop_start
+            sleep_time = (frame_interval * frame_skip_interval) - processing_time
+
+            if sleep_time > 0:
+                time.sleep(sleep_time)
+
+    except Exception as e: 
+        print(f"[ERROR] {str(e)}")
         raise
-
     finally:
         if 'cap' in locals():
             cap.release()
-        if temp_file_to_clean and os.path.exists(temp_file_to_clean):
-            try:
-                os.remove(temp_file_to_clean)
-                print(f"[CLEANUP] Removed temp file: {temp_file_to_clean}")
-            except Exception as cleanup_err:
-                print(f"[CLEANUP ERROR] {cleanup_err}")
+        if temp_file and os.path.exists(temp_file):
+            try: 
+                os.remove(temp_file)
+                print(f"[CLEANUP] removed: {temp_file}")
+            except Exception as e:
+                print(f"[CLEANUP ERROR]{e}")
 
-    print(f"[ANALYSIS END] Video: {video_name}")
+    print(f"[Detection end] {frame_count} frame from: {video_name}")
+

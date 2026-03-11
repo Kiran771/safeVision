@@ -1,12 +1,11 @@
-from fastapi import APIRouter, UploadFile, File, HTTPException
-from fastapi.responses import JSONResponse, StreamingResponse
 import cv2
 import tempfile
 import os
 import time
-
-# Import your detection generator
+from fastapi import APIRouter, UploadFile, File, HTTPException,Query
+from fastapi.responses import JSONResponse, StreamingResponse
 from safeVision_Backend.services.detection_service import generate_detection_frames
+
 
 router = APIRouter(prefix="/detection", tags=["Accident Detection"])
 
@@ -15,11 +14,17 @@ last_uploaded = {
     "path": None,
     "name": None,
     "fps": None,
+    'camera_id':1,
     "uploaded_at": 0.0
 }
 
+
+
 @router.post("/upload-video")
-async def upload_video(file: UploadFile = File(...)):
+async def upload_video(
+    file: UploadFile = File(...),
+    camera_id:int = Query(default=1) 
+):
     global last_uploaded
 
     allowed_extensions = {'.mp4', '.avi', '.mov', '.mkv'}
@@ -51,6 +56,7 @@ async def upload_video(file: UploadFile = File(...)):
         "path": video_path,
         "name": file.filename.rsplit(".", 1)[0],
         "fps": fps,
+        "camera_id": camera_id,
         "uploaded_at": time.time()
     }
 
@@ -62,7 +68,9 @@ async def upload_video(file: UploadFile = File(...)):
 
 
 @router.get("/stream-detection")
-async def stream_detection():
+async def stream_detection(
+    playback_time: float = Query(default=0.0)
+):
     global last_uploaded
 
     if not last_uploaded["path"]:
@@ -83,7 +91,8 @@ async def stream_detection():
             video_bytes=None,
             video_name=last_uploaded["name"],
             video_path=last_uploaded["path"],
-            camera_id=1
+            camera_id     = last_uploaded["camera_id"], 
+            playback_time = playback_time  
         ),
         media_type="multipart/x-mixed-replace; boundary=frame",
         headers={
@@ -93,3 +102,11 @@ async def stream_detection():
             "Connection": "keep-alive"
         }
     )
+
+@router.post("/clear-video")
+async def clear_video():
+	global last_uploaded 
+	if last_uploaded["path"] and os.path.exists(last_uploaded["path"]): 
+		os.unlink(last_uploaded["path"]) 
+	last_uploaded = {"path": None, "name": None,"fps": None, "camera_id": 1, "uploaded_at": 0.0} 
+	return JSONResponse({"status": "cleared"})

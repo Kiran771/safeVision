@@ -4,7 +4,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 
 from fastapi import Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm 
+from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm import Session
 
 from safeVision_Backend.core.config import settings
@@ -14,7 +14,7 @@ from safeVision_Backend.models.table_creation import User
 # Password hashing
 pwd_context = PasswordHash.recommended()
 
-# OAuth2 scheme — points to your actual login endpoint
+# OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token",auto_error=False)
 
 
@@ -96,7 +96,7 @@ def get_current_user(
     except jwt.PyJWTError:
         raise credentials_exception
 
-    # Fetch user — using correct snake_case column
+    # Fetch user 
     user = db.query(User).filter(User.username == username).first()
     if user is None:
         raise credentials_exception

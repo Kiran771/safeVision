@@ -12,7 +12,7 @@ body {
 }
 
 .main-content {
-    margin-left: 240px;          
+    margin-left: 255px;          
     flex: 1;
     padding: 32px;
     min-height: 100vh;           

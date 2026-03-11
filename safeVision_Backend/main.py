@@ -3,7 +3,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from safeVision_Backend.core.psql_db import engine, Base
-from safeVision_Backend.routers import auth,accident_verify_router, admin_registration_router, detection_router, emergency_contact_router,accident_details_router,emergency_contact_router,camera_router
+from safeVision_Backend.routers import auth,accident_verify_router, admin_registration_router, detection_router, emergency_contact_router,emergency_contact_router,camera_router
+from safeVision_Backend.routers import accident_verify_router
 
 
 # Create all tables in the database
@@ -33,7 +34,7 @@ app.include_router(auth.router)
 app.include_router(detection_router.router)
 app.include_router(emergency_contact_router.router)
 app.include_router(accident_verify_router.router)
-app.include_router(accident_details_router.router)
+app.include_router(accident_verify_router.router)
 app.include_router(camera_router.router)
 
 

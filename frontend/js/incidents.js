@@ -14,7 +14,7 @@ async function fetchIncidents() {
     showLoading();
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/accidents/');
+        const response = await fetch('http://127.0.0.1:8000/accidents/pending');
         if (!response.ok) throw new Error('Failed to fetch accidents');
 
         allIncidents = await response.json();
@@ -132,9 +132,10 @@ function showNoData() {
 
 
 function startAutoRefresh(intervalMs = 30000) {
-    setInterval(() => {
+    setInterval(async () => {
         const scrollPos = window.scrollY;
-        fetchIncidents().then(() => window.scrollTo(0, scrollPos));
+        await fetchIncidents();
+        window.scrollTo(0, scrollPos);
     }, intervalMs);
 }
 

@@ -9,7 +9,7 @@ load_dotenv()
 
 # Get config from .env
 BREVO_API_KEY = os.getenv("BREVO_API_KEY")
-FROM_EMAIL = os.getenv("BREVO_EMAIL_FROM")  # Must match your .env key name
+FROM_EMAIL = os.getenv("BREVO_EMAIL_FROM") 
 
 if not BREVO_API_KEY:
     raise ValueError("BREVO_API_KEY is missing in .env")

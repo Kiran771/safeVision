@@ -34,10 +34,10 @@ async function loadIncidentData() {
         }
 
         // Set anomaly score bar using reconstruction error
-        setAnomalyScore(incident.reconstruction_error || 0);
+        setConfidenceBar(incident.confidence || 0)
 
         // Load original and reconstructed frames
-        loadFrameImages(incident.frame_path, incident.reconstructed_frame_path);
+        loadFrameImage(incident.frame_path)
 
     } catch (error) {
         console.error('Error loading incident data:', error);
@@ -46,50 +46,42 @@ async function loadIncidentData() {
 }
 
 
-// Set anomaly score bar
-function setAnomalyScore(score) {
-    const anomalyFill = document.getElementById('anomaly-fill');
-    const anomalyText = document.getElementById('anomaly-score-text');
-    const percentage = Math.round(score * 100);
 
-    // Set width with animation
-    setTimeout(() => {
-        anomalyFill.style.width = `${percentage}%`;
-    }, 100);
+function setConfidenceBar(confidence) {
+    const fill     = document.getElementById('anomaly-fill')
+    const textEl   = document.getElementById('anomaly-score-text')
+    const percentage = Math.round(confidence * 100)
 
-    // Change color based on score
-    if (score >= 0.7) {
-        anomalyFill.style.background = 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)';
-    } else if (score >= 0.4) {
-        anomalyFill.style.background = 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)';
+    setTimeout(() => { fill.style.width = `${percentage}%` }, 100)
+
+    if (confidence >= 0.7) {
+        fill.style.background = 'linear-gradient(90deg, #ef4444 0%, #dc2626 100%)'
+    } else if (confidence >= 0.4) {
+        fill.style.background = 'linear-gradient(90deg, #f59e0b 0%, #d97706 100%)'
     } else {
-        anomalyFill.style.background = 'linear-gradient(90deg, #10b981 0%, #059669 100%)';
+        fill.style.background = 'linear-gradient(90deg, #10b981 0%, #059669 100%)'
     }
 
-    // Update score text
-    if (anomalyText) {
-        anomalyText.textContent = `Anomaly Score: ${score.toFixed(2)} mse`;
+    if (textEl) {
+        textEl.textContent = `Confidence: ${percentage}%`
     }
 }
 
-// Load frame images
-function loadFrameImages(originalUrl, reconstructedUrl) {
-    const originalImg = document.getElementById('original-img');
-    const reconstructedImg = document.getElementById('reconstructed-img');
 
-    // Set image sources if URLs are provided
-    if (originalUrl && originalUrl !== '/path/to/original-frame.jpg') {
-        originalImg.src = originalUrl;
-        originalImg.style.display = 'block';
-    } else {
-        originalImg.style.display = 'none';
+function loadFrameImage(frameUrl) {
+    const originalImg = document.getElementById('original-img')
+
+    // Hide reconstructed image container entirely (no longer exists)
+    const reconstructedContainer = document.getElementById('reconstructed-img')
+    if (reconstructedContainer) {
+        reconstructedContainer.style.display = 'none'
     }
 
-    if (reconstructedUrl && reconstructedUrl !== '/path/to/reconstructed-frame.jpg') {
-        reconstructedImg.src = reconstructedUrl;
-        reconstructedImg.style.display = 'block';
+    if (frameUrl) {
+        originalImg.src = `http://127.0.0.1:8000/accidents/frame-image?path=${encodeURIComponent(frameUrl)}`
+        originalImg.style.display = 'block'
     } else {
-        reconstructedImg.style.display = 'none';
+        originalImg.style.display = 'none'
     }
 }
 
