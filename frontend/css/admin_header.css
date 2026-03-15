@@ -1,0 +1,43 @@
+.admin-header {
+    width: 100%;
+    padding: 20px 40px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+}
+
+.admin-header h3 {
+    font-size: 25px;
+}
+
+.admin {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.admin-icon {
+    width: 30px;
+    height: 30px;
+    background-color: #000;
+    border-radius: 50%;
+}
+
+.admin div {
+    display: flex;
+    flex-direction: column;
+}
+
+.admin-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #333;
+}
+
+.admin-role {
+    font-size: 12px;
+    font-weight: 400;
+    color: #888;
+}

@@ -17,7 +17,7 @@ body {
 
 .sidebar {
     width: 255px;
-    background-color: white;
+    background: linear-gradient(135deg, #8ac9d2 0%, #2f4476 100%);
     border-right: 1px solid #e5e7eb;
     padding: 24px;
     position: fixed;
@@ -118,7 +118,7 @@ nav {
     text-decoration: none;
     padding: 12px;
     gap: 12px;
-    color: inherit;
+    color: black;
     display: flex;
     align-items: center;
     white-space: nowrap;
@@ -185,7 +185,7 @@ nav {
 .logout-section a {
     flex: 1;
     text-decoration: none;
-    color: inherit;
+    color: black;
     white-space: nowrap;
     padding: 12px;
     display: flex;

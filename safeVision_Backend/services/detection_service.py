@@ -18,8 +18,8 @@ accident_model=YOLO(str(accident_detection_model_path))
 fire_model=YOLO(str(fire_detection_model_path))
 
 
-# lower confidence threshold prioritizing recall for safety critical application
-accident_confidence_threshold =0.55
+# accident detection threshold
+accident_confidence_threshold =0.60
 
 # fire detection threshold
 fire_confidence_threshold =0.50
@@ -28,13 +28,13 @@ fire_confidence_threshold =0.50
 border_line_threshold = 0.20
 
 # consecutive frames required to confirm accident
-consecutive_frames_needed = 6
+consecutive_frames_needed = 8
 
 # accident confirmation cooldown to prevent multiple detections of same event
 accident_cooldown_seconds =8
 
 # frame skip interval to balance perfromance and detection speed
-frame_skip_interval =3
+frame_skip_interval = 4
 
 ACCIDENT_FOLDER = "accident_frames"
 FIRE_FOLDER     = "fire_frames"
@@ -114,13 +114,13 @@ def draw_status_overlay(frame,frame_count,acc_conf,fire_conf,
         status_text='MONITORING'
         status_color=(0,255,0)
 
-    cv2.putText(frame,status_text,(15,h-55),
+    cv2.putText(frame,status_text,(20,h-55),
                     cv2.FONT_HERSHEY_DUPLEX, 0.9, status_color, 2
                 )
     
     cv2.putText(frame, f"Accident Conf:{acc_conf:.0%} Fire Conf:{fire_conf:.0%} Vehicles:{vehicle_count}",
-                    (15, h - 20), 
-                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 1
+                    (20, h - 20), 
+                    cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2
                 )
     cv2.putText(frame, f"Frame: {frame_count}", (w - 160, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 2
@@ -261,11 +261,11 @@ def generate_detection_frames(
                     try: 
                         save_detection(
                             db = db,
-                            camera_id      = camera_id,
+                            camera_id = camera_id,
                             detection_type = "accident",
-                            confidence     = acc_conf,
-                            frame_path     = frame_path,
-                            status='confirmed'
+                            confidence = acc_conf,
+                            frame_path = frame_path,
+                            status ='confirmed'
                         )
                     finally:
                         db.close()
@@ -320,8 +320,8 @@ def generate_detection_frames(
         
             should_stream = (
                     confirmed_accident or confirmed_fire or
-                    is_borderline      or is_accident    or
-                    is_fire            or heavy_traffic
+                    is_borderline or is_accident    or
+                    is_fire or heavy_traffic
                 )
             should_stream = True 
             if should_stream:

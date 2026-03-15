@@ -19,38 +19,6 @@ body.sidebar-collapsed .page-wrapper {
     margin-left: 75px;
 }
 
-header {
-    width: 100%;
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 1px 2px 4px rgba(0, 0, 0, 0.1);
-    background-color: #fff;
-}
-
-header h1 {
-    font-size: 24px;
-    font-weight: 500;
-}
-
-.admin {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.admin-icon {
-    width: 20px;
-    height: 20px;
-    background-color: #000;
-    border-radius: 50%;
-}
-
-.admin span {
-    font-size: 12px;
-    font-weight: 500;
-}
 
 .container {
     align-items: stretch;
@@ -66,7 +34,7 @@ header h1 {
 .right-section {
     display: flex;
     flex-direction: column;
-    gap: 55px;
+    gap: 66px;
 }
 
 section {
@@ -227,6 +195,26 @@ section h3 {
     border-radius: 6px;
 }
 
+.status-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: capitalize;
+
+}
+
+.status-pending  { 
+    background: #fff3cd; color: #856404;
+}
+.status-reviewed {
+    background: #d1e7dd; color: #0a5c36; 
+}
+.status-rejected { 
+    background: #f8d7da; color: #842029; 
+}
+
 @keyframes pulse {
 
     0%,
@@ -260,7 +248,7 @@ thead {
 
 thead th {
     padding: 15px 20px;
-    text-align: left;
+    text-align: center;
     font-weight: 600;
     font-size: 14px;
 }
@@ -285,7 +273,7 @@ tbody tr:nth-child(odd) {
     padding: 30px !important;
 }
 
-/* Alert Box */
+
 .alert-box {
     background-color: #d4d4d4;
     padding: 25px;
@@ -321,7 +309,7 @@ tbody tr:nth-child(odd) {
     cursor:pointer;
 }
 
-/* Stat Boxes */
+
 .stat-box {
     background-color: #6ba3d4;
     color: #000;
@@ -342,7 +330,7 @@ tbody tr:nth-child(odd) {
     font-weight: 700;
 }
 
-/* Location Section */
+
 .location-section {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
@@ -375,7 +363,197 @@ tbody tr:nth-child(odd) {
     pointer-events: auto;
 }
 
-/* Responsive Design */
+
+
+.detection-frames-section {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding-bottom: 16px;
+}
+
+.no-frames {
+    color: #666;
+    font-size: 14px;
+    padding: 40px;
+    text-align: center;
+}
+
+.frames-layout {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 14px;
+    padding: 0 16px 8px;
+}
+
+/* Center frame */
+.frame-center {
+    position: relative;
+    background: #d8d8d8;
+    border-radius: 8px;
+    border: 2px solid #bbb;
+    overflow: hidden;
+    cursor: pointer;
+    min-height: 260px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: border-color 0.2s;
+}
+
+.frame-center:hover {
+    border-color: #6ba3d4;
+}
+
+.frame-center img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+
+.frame-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.frame-thumb {
+    position: relative;
+    background: #d8d8d8;
+    border-radius: 7px;
+    border: 2px solid #bbb;
+    overflow: hidden;
+    flex: 1;
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+
+.frame-view-label {
+    position: absolute;
+    top: 6px;
+    left: 8px;
+    background: rgba(0, 0, 0, 0.55);
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.3px;
+    pointer-events: none;
+}
+
+/* Expand hint shown on hover */
+.expand-hint {
+    position: absolute;
+    bottom: 8px;
+    right: 10px;
+    background: rgba(107, 163, 212, 0.88);
+    color: #fff;
+    font-size: 11px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    pointer-events: none;
+}
+
+.frame-center:hover .expand-hint {
+    opacity: 1;
+}
+
+
+
+
+.frame-modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.80);
+    z-index: 9999;
+    align-items: center;
+    justify-content: center;
+    animation: modalFadeIn 0.2s ease;
+}
+
+.frame-modal-overlay.open {
+    display: flex;
+}
+
+@keyframes modalFadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+.frame-modal {
+    background: #1a1a1a;
+    border-radius: 12px;
+    overflow: hidden;
+    max-width: 92vw;
+    max-height: 92vh;
+    width: 900px;
+    box-shadow: 0 24px 64px rgba(0, 0, 0, 0.7);
+    display: flex;
+    flex-direction: column;
+    animation: modalSlideUp 0.22s ease;
+}
+
+@keyframes modalSlideUp {
+    from { transform: translateY(18px); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+}
+
+.frame-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    background: #111;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.modal-close-btn {
+    background: #333;
+    border: none;
+    color: #fff;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    line-height: 1;
+}
+
+.modal-close-btn:hover {
+    background: #555;
+}
+
+.frame-modal-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #222;
+    padding: 20px;
+    overflow: auto;
+}
+
+.frame-modal-body img {
+    max-width: 100%;
+    max-height: 78vh;
+    object-fit: contain;
+    border-radius: 6px;
+    display: block;
+}
+
+
 @media (max-width: 1200px) {
     .container {
         grid-template-columns: 1fr;
@@ -396,14 +574,6 @@ tbody tr:nth-child(odd) {
 }
 
 @media (max-width: 768px) {
-    header {
-        padding: 15px 20px;
-    }
-
-    header h1 {
-        font-size: 20px;
-    }
-
     .container {
         padding: 20px;
         gap: 15px;
@@ -426,23 +596,6 @@ tbody tr:nth-child(odd) {
 @media (max-width: 480px) {
     .container {
         padding: 15px;
-    }
-
-    header {
-        padding: 15px;
-    }
-
-    header h1 {
-        font-size: 18px;
-    }
-
-    .admin span {
-        font-size: 16px;
-    }
-
-    .admin-icon {
-        width: 35px;
-        height: 35px;
     }
 
     .map-container {

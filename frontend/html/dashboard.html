@@ -1,22 +1,61 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>dashboard</title>
-    <script src="/js/sideMenu_loader.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css"> 
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <link rel="stylesheet" href="/css/dashboard.css" />
 
-  </head>
-  <body>
-      <div id="sidebar-container"></div>
-      <div class="dashboard-container"> 
-        <h1 id="pageTitle">Dashboard</h1> 
-        <div id="roleBasedContent"> 
-        </div> 
-      </div>
-  </body>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <link rel="stylesheet" href="/css/dashboard.css" />
+  <script>
+    function loadHeaderCSS() {
+      let userRole = 'Admin';
+      let storedUser = {};
+      try {
+        storedUser = JSON.parse(sessionStorage.getItem('user')) || {};
+        if (storedUser.role) {
+          userRole = storedUser.role.toLowerCase();
+        }
+      } catch (e) { }
+      if (!userRole || userRole === 'Admin') {
+        userRole = (sessionStorage.getItem('role') || 'Admin').toLowerCase();
+      }
+      if (userRole.includes('Super Admin') || userRole.includes('superadmin')) {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/css/header.css';
+        document.head.appendChild(link);
+      }
+      else {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = '/css/admin_header.css?v=1';
+        document.head.appendChild(link);
+      }
+    }
+    loadHeaderCSS();
+  </script>
+</head>
+
+<body>
+  <div id="sidebar-container"></div>
+  <div class="main-wrapper">
+    <div id="header-container"></div>
+    <div class="welcome-section">
+            <div class="welcome-left">
+                <h2 id="welcome-greeting" class="welcome-greeting"></h2>
+                <p id="welcome-name" class="welcome-name"></p>
+            </div>
+            <div class="welcome-calendar">
+                <div id="calendar-widget" class="calendar-widget"></div>
+            </div>
+        </div>
+    <main id="dashboard-content" class="dashboard-content"></main>
+  </div>
+  <script src="/js/sideMenu_loader.js"></script>
+  <script src="/js/header.js"></script>
+  <script src="/js/dashboard_api.js"></script>
+  <script src="/js/role_based_dashboard.js"></script>
+</body>
+
 </html>

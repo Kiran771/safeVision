@@ -13,7 +13,7 @@ body {
 
 .sidebar {
     width: 240px;
-    background-color: white;
+    background: linear-gradient(135deg, #8ac9d2 0%, #2f4476 100%);
     border-right: 1px solid #e5e7eb;
     padding: 24px;
     position: fixed;
@@ -63,20 +63,23 @@ body {
 .sidebar-toggle {
     position: absolute;
     top: 20px;
+    display:inline-flex;
+    align-items: center;
+    justify-content: center;
     right: 10px;
     background: none;
     border: none;
     font-size: 20px;
     cursor: pointer;
     color: #4b5563;
-    padding: 8px;
+    padding: 8px 12px;
     border-radius: 6px;
     transition: background-color 0.2s ease;
     z-index: 10;
 }
 
 .sidebar-toggle:hover {
-    background-color: #f3f4f6;
+    background-color: #f8f9fcdf;
 }
 
 .sidebar.collapsed .sidebar-toggle {
@@ -117,14 +120,13 @@ nav {
     cursor: pointer;
     border-radius: 8px;
     margin-bottom: 20px;
-    transition: background-color 0.2s ease;
     position: relative;
-    padding: 0;
     flex-shrink: 0;
     flex-grow: 0;
     height: 54px;
     box-sizing: border-box;
     border: 0 solid transparent;
+    padding-left:10px;
 }
 
 .nav-item img {
@@ -144,7 +146,7 @@ nav {
 
 .nav-item a {
     text-decoration: none;
-    color: inherit;
+    color: black;
     display: flex;
     align-items: center;
     white-space: nowrap;
@@ -214,7 +216,7 @@ nav {
 
 .logout-section a {
     text-decoration: none;
-    color: inherit;
+    color: black;
     width: 100%;
     display: flex;
     align-items: center;

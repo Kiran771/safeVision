@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const sidebarPath = getSidebarPath(userRole);
         console.log("Loading sidebar from:", sidebarPath);
-
         await loadSidebar(sidebarPath);
 
         initializeSidebarToggle();

@@ -69,7 +69,6 @@ def get_pending_reviews(db:Session):
 
 
 def update_detection_status(db:Session,accident_id:int, status:str):
-    
     detection=db.query(Accident).filter(
         Accident.accidentid==accident_id
         ).first()

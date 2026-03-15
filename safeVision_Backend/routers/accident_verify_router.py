@@ -27,13 +27,12 @@ def verify_incident(accident_id: int, db: Session = Depends(get_db)):
     updated = update_detection_status(
         db = db,
         accident_id = accident_id,
-        status = "reviewed"   
+        status = "confirmed"   
     )
     if not updated:
         raise HTTPException(status_code=500, detail="Failed to update status")
 
-    return {"message": "Incident confirmed successfully", "status": "reviewed"}
-
+    return {"message": "Incident confirmed successfully", "status":"confirmed"}
 
 @router.post("/{accident_id}/reject")
 def reject_incident(accident_id: int, db: Session = Depends(get_db)):
@@ -82,7 +81,22 @@ def get_frame_image(path: str):
 
     return FileResponse(path, media_type="image/jpeg")
 
+# Get recent incidents 
+@router.get("/recent")
+def get_recent(limit: int = 10, db: Session = Depends(get_db)):
+    detections = get_all_detections(db=db, skip=0, limit=limit)
+    return [
+        {
+            "accidentid":     d.accidentid,
+            "timestamp":      d.timestamp,
+            "confidence":     d.confidence,
+            "detection_type": d.detection_type,
+            "status":         d.status,
+        }
+        for d in detections
+    ]
 
+# Get details of incident by id 
 @router.get("/{accident_id}")
 def get_incident(accident_id: int, db: Session = Depends(get_db)):
     detection = get_detection_by_id(db=db, accident_id=accident_id)
@@ -101,17 +115,5 @@ def get_incident(accident_id: int, db: Session = Depends(get_db)):
         "frame_path":     detection.frame_path,
     }
 
-@router.get("/recent")
-def get_recent(limit: int = 10, db: Session = Depends(get_db)):
-    detections = get_all_detections(db=db, skip=0, limit=limit)
-    return [
-        {
-            "accidentid":     d.accidentid,
-            "timestamp":      d.timestamp,
-            "confidence":     d.confidence,
-            "detection_type": d.detection_type,
-            "status":         d.status,
-        }
-        for d in detections
-    ]
+
 

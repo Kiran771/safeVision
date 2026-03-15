@@ -2,7 +2,7 @@ import cv2
 import tempfile
 import os
 import time
-from fastapi import APIRouter, UploadFile, File, HTTPException,Query
+from fastapi import APIRouter, Response, UploadFile, File, HTTPException,Query
 from fastapi.responses import JSONResponse, StreamingResponse
 from safeVision_Backend.services.detection_service import generate_detection_frames
 
@@ -18,7 +18,7 @@ last_uploaded = {
     "uploaded_at": 0.0
 }
 
-
+frame_generator = None
 
 @router.post("/upload-video")
 async def upload_video(
@@ -59,49 +59,14 @@ async def upload_video(
         "camera_id": camera_id,
         "uploaded_at": time.time()
     }
-
+    global frame_generator
+    frame_generator = None 
     return JSONResponse({
         "status": "uploaded",
         "fps": fps,
         "video_id": f"vid_{int(time.time() * 1000)}"
     })
 
-
-@router.get("/stream-detection")
-async def stream_detection(
-    playback_time: float = Query(default=0.0)
-):
-    global last_uploaded
-
-    if not last_uploaded["path"]:
-        raise HTTPException(status_code=404, detail="No video has been uploaded yet. Please upload a video first.")
-
-    if not os.path.exists(last_uploaded["path"]):
-        last_uploaded["path"] = None
-        raise HTTPException(status_code=410, detail="Uploaded video file no longer exists")
-
-    # Optional: check if file is too old
-    if time.time() - last_uploaded["uploaded_at"] > 3600:  # 1 hour
-        os.unlink(last_uploaded["path"])
-        last_uploaded["path"] = None
-        raise HTTPException(status_code=410, detail="Uploaded video has expired")
-
-    return StreamingResponse(
-        generate_detection_frames(
-            video_bytes=None,
-            video_name=last_uploaded["name"],
-            video_path=last_uploaded["path"],
-            camera_id     = last_uploaded["camera_id"], 
-            playback_time = playback_time  
-        ),
-        media_type="multipart/x-mixed-replace; boundary=frame",
-        headers={
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-            "Expires": "0",
-            "Connection": "keep-alive"
-        }
-    )
 
 @router.post("/clear-video")
 async def clear_video():
@@ -110,3 +75,64 @@ async def clear_video():
 		os.unlink(last_uploaded["path"]) 
 	last_uploaded = {"path": None, "name": None,"fps": None, "camera_id": 1, "uploaded_at": 0.0} 
 	return JSONResponse({"status": "cleared"})
+
+
+
+@router.get("/next-frame")
+async def get_next_frame():
+    global frame_generator, last_uploaded
+
+    if not last_uploaded["path"]:
+        raise HTTPException(status_code=404, detail="No video uploaded")
+
+    if frame_generator is None:
+        frame_generator = generate_detection_frames(
+            video_path = last_uploaded["path"],
+            video_name = last_uploaded["name"],
+            camera_id  = last_uploaded["camera_id"]
+        )
+
+    try:
+        chunk = next(frame_generator)
+        frame_number = 0
+        acc_conf     = 0.0
+        fire_conf    = 0.0
+        image_bytes  = b""
+
+        lines = chunk.split(b"\r\n")
+        image_start = False
+
+        for i, line in enumerate(lines):
+            if line.startswith(b"X-Frame-Number:"):
+                frame_number = int(line.split(b":")[1].strip())
+            elif line.startswith(b"X-Accident-Conf:"):
+                acc_conf = float(line.split(b":")[1].strip())
+            elif line.startswith(b"X-Fire-Conf:"):
+                fire_conf = float(line.split(b":")[1].strip())
+            elif line == b"" and not image_start:
+                # Everything after blank line = image bytes
+                image_bytes  = b"\r\n".join(lines[i+1:]).strip()
+                image_start  = True
+                break
+        return Response(
+            content    = image_bytes,
+            media_type = "image/jpeg",
+            headers    = {
+                "X-Frame-Number":  str(frame_number),
+                "X-Accident-Conf": f"{acc_conf:.3f}",
+                "X-Fire-Conf":     f"{fire_conf:.3f}",
+                "Cache-Control":   "no-cache",
+                "Access-Control-Expose-Headers": "X-Frame-Number, X-Accident-Conf, X-Fire-Conf"
+            }
+        )
+    except StopIteration:
+        frame_generator = None
+        return Response (status_code=204)
+    
+
+
+@router.post("/reset-generator")
+async def reset_generator():
+    global frame_generator
+    frame_generator = None
+    return JSONResponse({"status": "reset"})

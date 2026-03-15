@@ -5,23 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Verify Incidents - Accident Detection System</title>
     <link rel="stylesheet" href="/css/verify.css">
-    <script src="/js/incidents.js" defer></script>
-    <script src="/js/sideMenu_loader.js" defer></script>
+    <link rel="stylesheet" href="/css/admin_header.css?v=1">
 </head>
 <body>
     <div id="sidebar-container"></div>
-    
     <div class="main-content">
-        <header class="page-header">
-            <h1>Verify Incidents</h1>
-            <div class="user-profile">
-                <div class="profile-circle">
-                    <span>A</span>
-                </div>
-                <span class="user-name">Admin</span>
-            </div>
-        </header>
-
+        <div id="header-container"></div>
         <div class="incidents-container">
             <div id="incidents-grid" class="incidents-grid">
                 
@@ -41,7 +30,10 @@
             </div>
         </div>
     </div>
-
+    <script> window.ADMIN_HEADER_CONFIG = { title: "Verify Incidents" }; </script>
+    <script src="/js/header.js"></script>
+    <script src="/js/sideMenu_loader.js" defer></script>
+    <script src="/js/incidents.js" defer></script>
     
 </body>
 </html>

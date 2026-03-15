@@ -5,23 +5,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accident Detection System</title>
-    <link rel="stylesheet" href="/css/detection.css">
+    <link rel="stylesheet" href="/css/detection.css?v=1">
+    <link rel="stylesheet" href="/css/admin_header.css?v=1">
     <script src="/js/detection.js" defer></script>
     <script src="/js/sideMenu_loader.js" defer></script>
+    <script> window.ADMIN_HEADER_CONFIG = { title: "Accident Detection System" }; </script>
 
 </head>
 
 <body>
     <div id="sidebar-container"></div>
     <div class="page-wrapper">
-        <header>
-            <h3 style="font-weight: 400">Accident Detection System</h3>
-            <div class="admin">
-                <div class="admin-icon"></div>
-                <span>Admin</span>
-            </div>
-        </header>
-
+        <div id="header-container"></div>
         <main class="container">
             <div class="left-section">
                 <section class="live-feed">
@@ -48,19 +43,33 @@
                         <button id="startDetection">Start Detection</button>
                     </div>
                 </section>
+                
                 <section class="detection-frames-section">
                     <h2>Detected Frames</h2>
-                    <div id="detectionFramesContainer" class="frames-container">
 
-                        <div id="streamActiveSection" style="display: none;">
-                            <h3>Live Accident Detection Stream</h3>
-                            <img id="detectionStreamImg" alt="Live accident detection stream">
+                    <p class="no-frames" id="noFramesMessage">No accident detected yet</p>
+
+                    
+                    <div class="frames-layout" id="framesLayout" style="display:none;">
+
+                        <div class="frame-center" id="centerFrame" onclick="openFrameModal()">
+                            <img id="detectionStreamImg" alt="Center view">
+                            <span class="expand-hint">Click for full view</span>
                         </div>
-                        <p class="no-frames" id="noFramesMessage">
-                            No accident detected yet
-                        </p>
-                    </div>
 
+                        <div class="frame-sidebar">
+                            <div class="frame-thumb" id="topFrame">
+                                <span class="frame-view-label">Top view</span>
+                            </div>
+                            <div class="frame-thumb" id="cornerFrame">
+                                <span class="frame-view-label">Corner view</span>
+                            </div>
+                            <div class="frame-thumb" id="bottomFrame">
+                                <span class="frame-view-label">Bottom view</span>
+                            </div>
+                        </div>
+
+                    </div>
                 </section>
 
 
@@ -125,6 +134,19 @@
             </div>
         </main>
     </div>
+
+    <div class="frame-modal-overlay" id="frameModalOverlay" onclick="handleOverlayClick(event)">
+        <div class="frame-modal">
+            <div class="frame-modal-header">
+                <span>Detected Frame — Full View</span>
+                <button class="modal-close-btn" onclick="closeFrameModal()">✕</button>
+            </div>
+            <div class="frame-modal-body">
+                <img id="modalFullImg" src="" alt="Full detection frame">
+            </div>
+        </div>
+    </div>
+    <script src="/js/header.js" defer></script>
 </body>
 
 </html>
