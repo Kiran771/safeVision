@@ -274,49 +274,65 @@ tbody tr:nth-child(odd) {
 }
 
 
-.alert-box {
+
+.threshold-box {
     background-color: #d4d4d4;
-    padding: 25px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-.alert-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 15px;
-}
-
-.alert-icon {
-    font-size: 24px;
-    color: #dc3545;
-}
-
-.alert-title {
-    font-size: 20px;
-    font-weight: 600;
-}
-
-.alert-message {
-    background-color: #dc3545;
-    color: white;
     padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     text-align: center;
-    font-size: 16px;
-    font-weight: 500;
-    border:none;
-    width:22rem;
-    cursor:pointer;
 }
 
+
+.threshold-title {
+    display: block;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    color: #000;
+}
+
+
+.threshold-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+}
+
+
+.threshold-btn {
+    padding: 12px 20px;
+    font-size: 14px;
+    font-weight: 500;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background-color: #7bc0e39e;
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.threshold-btn:hover {
+    background-color: #5685b0;
+}
+
+.threshold-btn.active {
+    background-color: #2563eb;
+}
 
 .stat-box {
-    background-color: #6ba3d4;
+    background-color: #7bc0e39e;
     color: #000;
     padding: 20px;
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     height: 140px;
+    cursor:pointer;
+    transition: all 0.2s ease;
+}
+
+.stat-box:hover {
+    background-color: #5685b0;
 }
 
 .stat-box h3 {
@@ -329,7 +345,6 @@ tbody tr:nth-child(odd) {
     font-size: 48px;
     font-weight: 700;
 }
-
 
 .location-section {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);

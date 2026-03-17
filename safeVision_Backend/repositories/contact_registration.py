@@ -37,3 +37,4 @@ def delete_contact(db: Session, contact_id: int):
         db.commit()
         return True
     return False
+

@@ -21,7 +21,6 @@ function initializeWelcome() {
     let storedUser = {};
     let userName = 'User';
     let greeting = '';
-    
     try {
         storedUser = JSON.parse(sessionStorage.getItem('user')) || {};
         userName = storedUser.username || storedUser.name || 'User';
@@ -63,7 +62,7 @@ async function renderDashboard() {
         
         console.log('Fetching dashboard data...');
         
-        if (userRole.toLowerCase().includes('Super Admin')) {
+        if (userRole.toLowerCase().includes('super admin')) {
             console.log('Loading SuperAdmin stats...');
             dashboardData = await dashboardAPI.getSuperadminStats();
         } else {
@@ -80,37 +79,27 @@ async function renderDashboard() {
         
         // Build dashboard HTML
         let html = '<div class="dashboard-grid">';
-        
         // Metrics Row
         html += '<div class="metrics-row">';
-        
         html += `
             <div class="metric-card total-alerts">
                 <div class="metric-label">Total Alerts</div>
                 <div class="metric-value">${dashboardData.metrics.total_alerts || 0}</div>
             </div>
         `;
-
         html += `
             <div class="metric-card unverified">
                 <div class="metric-label">Unverified incidents</div>
                 <div class="metric-value">${dashboardData.metrics.unverified_incidents || 0}</div>
             </div>
         `;
-        
-        html += '</div>';
-
         html += `
-            <div class="resolved-card-row">
-                <div class="resolved-card">
-                    <div class="resolved-content">
-                        <div class="metric-label">Confirmed</div>
-                        <div class="metric-value">${dashboardData.metrics.confirmed || 0} <img src="/resources/confirmed.png" alt="Confirmed" class="resolved-icon-image"></div>
-                        
-                    </div>
-                </div>
+            <div class="metric-card confirmed">
+                <div class="metric-label">Confirmed</div>
+                <div class="metric-value">${dashboardData.metrics.confirmed || 0}</div>
             </div>
         `;
+        html += '</div>';
         
         // Charts Row
         html += '<div class="charts-row">';
@@ -199,21 +188,23 @@ async function renderDashboard() {
         console.error('Error rendering dashboard:', error);
         console.error('Error stack:', error.stack);
         
-        contentEl.innerHTML = `
-            <div style="padding: 2rem; text-align: center; color: #d32f2f;">
-                <h3>Error loading dashboard</h3>
-                <p>${error.message}</p>
-                <button onclick="location.reload()" style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
-                    Retry
-                </button>
-            </div>
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'padding: 2rem; text-align: center; color: #d32f2f;';
+        errorDiv.innerHTML = `
+            <h3>Error loading dashboard</h3>
+            <button onclick="location.reload()" style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+                Retry
+            </button>
         `;
+        const errorMsg = document.createElement('p');
+        errorMsg.textContent = error.message;
+        errorDiv.insertBefore(errorMsg, errorDiv.querySelector('button'));
+        contentEl.innerHTML = '';
+        contentEl.appendChild(errorDiv);
     }
 }
 
-
 let chartInstances = {};
-
 function initializeChartsWithData(dashboardData) {
     try {
         Object.values(chartInstances).forEach(chart => {
@@ -227,7 +218,6 @@ function initializeChartsWithData(dashboardData) {
             return;
         }
 
-
         // Status Distribution Chart
         const statusCtx = document.getElementById('statusChart');
         if (statusCtx) {
@@ -237,7 +227,7 @@ function initializeChartsWithData(dashboardData) {
                     labels: chartData.alert_distribution.labels || ['Confirmed', 'Pending', 'False Alarm'],
                     datasets: [{
                         data: chartData.alert_distribution.data || [0, 0, 0],
-                        backgroundColor: ['#ef4444', '#1e40af', '#10b981'],
+                        backgroundColor: ['#e32020', '#3564a1', '#197d35'],
                         borderColor: '#ffffff',
                         borderWidth: 2,
                     }]
@@ -249,11 +239,12 @@ function initializeChartsWithData(dashboardData) {
                         legend: {
                             position: 'bottom',
                             labels: {
-                                font: { size: 12, family: "'Segoe UI', sans-serif" },
+                                font: { size: 14, family: "'Segoe UI', sans-serif" },
                                 padding: 15,
                                 usePointStyle: true,
-                                color: '#ffffff'
-                            }
+                                color: '#000000'
+                            },
+                            textAlign: 'center'
                         }
                     }
                 }
@@ -293,16 +284,12 @@ function setupTimeFilters() {
         console.error('Error setting up time filters:', error);
     }
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('DOM Content Loaded - Rendering Dashboard');
-    initializeWelcome();
-    renderDashboard();
-    
-});
-
-if (document.readyState !== 'loading') {
-    console.log('DOM already loaded - Rendering Dashboard immediately');
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        initializeWelcome();
+        renderDashboard();
+    });
+} else {
     initializeWelcome();
     renderDashboard();
 }

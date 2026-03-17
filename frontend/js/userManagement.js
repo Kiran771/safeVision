@@ -1,3 +1,31 @@
+function getAuthHeaders() {
+    const token = sessionStorage.getItem("access_token");
+    return token ? { "Authorization": `Bearer ${token}` } : {};
+}
+
+let =isRedirecting=false
+async function handleResponse(response) {
+    if (response.status === 401) {
+        console.warn('Token expired. Redirecting to login...');
+        isRedirecting=true
+        sessionStorage.clear();
+        alert("Session expired. Please login again.");
+        window.location.href = '/html/login.html';
+        return null;
+    }
+    let data = null;
+    try {
+        data = await response.json();
+    } catch {
+        data = null; 
+    }
+    if (!response.ok) {
+        console.error("API Error:", data);
+        return data; 
+    }
+    return data;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('userForm');
     const addButton = document.querySelector('.add-button');
@@ -73,29 +101,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Load admins
     async function loadAdmins() {
-        const token = sessionStorage.getItem("access_token");
-        if (!token) {
-            alert("Please login first");
-            window.location.href = "/html/login.html";
-            return;
-        }
         try {
-            const res = await fetch("http://127.0.0.1:8000/admins/", {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+            const res = await fetch("/admins/", {
+                headers: getAuthHeaders()
+                
             });
-            if (!res.ok) {
-                if (res.status === 401 || res.status === 403) {
-                    alert("Session expired or unauthorized. Please login again.");
-                    sessionStorage.removeItem("access_token");
-                    window.location.href = "/html/login.html";
-                    return;
-                }
-                throw new Error("Failed to load admins");
-            }
-
-            const admins = await res.json();
+            const admins = await handleResponse(res);
+            if (!admins) return;
             console.log("First admin object:", admins[0] || "No admins");
             tableBody.innerHTML = "";
 
@@ -132,14 +144,6 @@ document.addEventListener('DOMContentLoaded', () => {
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        const token = sessionStorage.getItem("access_token");
-
-        if (!token) {
-            alert("Please login first");
-            window.location.href = "/html/login.html";
-            return;
-        }
-
         const data = {
             username: userName.value.trim(),
             email: userEmail.value.trim(),
@@ -154,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!validateForm(data, isEdit)) return;
 
         try {
-            let url = "http://127.0.0.1:8000/admins/";
+            let url = "/admins/";
             let method = "POST";
 
             if (isEdit) {
@@ -168,13 +172,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 method,
                 headers: {
                     "Content-Type": "application/json",
-                    "Authorization": `Bearer ${token}`
+                    ...getAuthHeaders()
                 },
                 body: JSON.stringify(data)
             });
 
-
-            const result = await res.json();
+            const result = await handleResponse(res);
+            if (!result) return;
 
             if (!res.ok) {
                 if (result.detail) {
@@ -200,31 +204,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // Edit Admin
     async function editAdmin(e) {
         const id = e.currentTarget.dataset.id;
-        const token = sessionStorage.getItem("access_token");
-
-        if (!token) {
-            alert("Please login first");
-            window.location.href = "/html/login.html";
-            return;
-        }
         try {
-            const res = await fetch(`http://127.0.0.1:8000/admins/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+            const res = await fetch(`/admins/${id}`, {
+                headers: getAuthHeaders()
+                
             });
-            if (!res.ok) {
-                if (res.status === 401 || res.status === 403) {
-                    alert("Session expired or unauthorized. Please login again.");
-                    sessionStorage.removeItem("access_token");
-                    window.location.href = "/html/login.html";
-                    return;
-                }
-                throw new Error("Failed to load admin");
-            }
-
-
-            const admin = await res.json();
+            const admin = await handleResponse(res);
+            if (!admin) return;
 
             userName.value = admin.username;
             userEmail.value = admin.email;
@@ -253,31 +239,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const id = e.currentTarget.dataset.id;
         if (!confirm("Delete this admin?")) return;
 
-        const token = sessionStorage.getItem("access_token");
-
-        if (!token) {
-            alert("Please login first");
-            window.location.href = "/html/login.html";
-            return;
-        }
-
         try {
-            const res = await fetch(`http://127.0.0.1:8000/admins/${id}`, {
+            const res = await fetch(`/admins/${id}`, {
                 method: "DELETE",
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
+                headers: getAuthHeaders()
             });
 
-            if (!res.ok) {
-                if (res.status === 401 || res.status === 403) {
-                    alert("Session expired or unauthorized. Please login again.");
-                    sessionStorage.removeItem("access_token");
-                    window.location.href = "/html/login.html";
-                    return;
-                }
-                throw new Error("Delete failed");
-            }
+            const result = await handleResponse(res);
+            if (!result) return;
 
             await loadAdmins();
             alert("Admin deleted successfully");
@@ -299,8 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         CRUD.textContent = "Add New Admin";
         selectedAdminId = null;
-
-        // Always show role dropdown if adding after first Super Admin
         userRole.style.display = 'block';
     });
 

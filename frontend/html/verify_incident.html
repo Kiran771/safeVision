@@ -16,18 +16,17 @@
         <div class="content-wrapper">
             <!-- Main Content Section -->
             <div class="left-section">
-                <!-- Top Row: Anomaly Score and Incident Details -->
                 <div class="top-row">
                     <!-- Anomaly Score -->
                     <div class="anomaly-section">
-                        <h2>Anomaly Score</h2>
+                        <h2>Confidence Score</h2>
                         <div class="anomaly-bar-container">
                             <div class="anomaly-bar" id="anomaly-bar">
                                 <div class="anomaly-fill" id="anomaly-fill"></div>
                             </div>
                         </div>
                         <div class="anomaly-score-text" id="anomaly-score-text">
-                            Anomaly Score: 0.92 mse
+                            Confidence Score: 0.92
                         </div>
                     </div>
 
@@ -40,10 +39,6 @@
                                 <span id="location-address">Main St & 5th Ave</span>
                             </div>
                         
-                            <div class="location-item">
-                                <strong>Coordinates:</strong>
-                                <span id="location-coords">40.7128° N, 74.0060° W</span>
-                            </div>
                         </div>
                     </div>
 
@@ -63,22 +58,12 @@
                     </div>
                 </div>
 
-                <!-- Original and Reconstructed Frames -->
                 <div class="frames-section">
                     <div class="frame-container">
-                        
+                        <h3>Original Frame</h3>
                         <div class="frame-box" id="original-frame">
                             <img src="" alt="Original Frame" id="original-img">
                         </div>
-                        <h3>Original Frame</h3>
-                    </div>
-
-                    <div class="frame-container">
-                        
-                        <div class="frame-box" id="reconstructed-frame">
-                            <img src="" alt="Reconstructed Frame" id="reconstructed-img">
-                        </div>
-                        <h3>Reconstructed Frame</h3>
                     </div>
                 </div>
 

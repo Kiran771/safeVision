@@ -77,3 +77,9 @@ def update_detection_status(db:Session,accident_id:int, status:str):
     detection.status=status
     db.commit()
     return True
+
+def get_pending_count(db: Session):
+    return db.query(Accident).filter(Accident.status == 'pending').count()
+
+def get_confirmed_count(db: Session):
+    return db.query(Accident).filter(Accident.status == 'confirmed').count()

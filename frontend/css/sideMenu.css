@@ -85,17 +85,16 @@ nav {
     margin-bottom: 20px;
     transition: background-color 0.2s ease;
     position: relative;
-    padding: 0;
     flex-shrink: 0;
     flex-grow: 0;
     height: 54px;
     box-sizing: border-box;
-    border: 0 solid transparent;
+    padding-left:2px;
 }
 
 .nav-item img {
     width: 28px;
-    height: 28px;
+    height: 30px;
     flex-shrink: 0;
     flex-grow: 0;
     object-fit: contain;
@@ -116,7 +115,6 @@ nav {
 .nav-item a {
     flex: 1;
     text-decoration: none;
-    padding: 12px;
     gap: 12px;
     color: black;
     display: flex;
@@ -128,6 +126,7 @@ nav {
     height: 100%;
     min-height: 54px;
     box-sizing: border-box;
+    text-overflow: ellipsis; 
 }
 
 .nav-item a:focus {
@@ -175,7 +174,7 @@ nav {
 
 .logout-section img {
     width: 28px;
-    height: 28px;
+    height: 30px;
     flex-shrink: 0;
     flex-grow: 0;
     object-fit: contain;
@@ -187,7 +186,7 @@ nav {
     text-decoration: none;
     color: black;
     white-space: nowrap;
-    padding: 12px;
+    padding: 1px;
     display: flex;
     align-items: center;
     gap: 12px;

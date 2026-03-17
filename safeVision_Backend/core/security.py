@@ -15,16 +15,14 @@ from safeVision_Backend.models.table_creation import User
 pwd_context = PasswordHash.recommended()
 
 # OAuth2 scheme
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token",auto_error=False)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
 
 def hash_password(password: str) -> str:
-    """Hash a password using pwdlib (argon2 by default)"""
     return pwd_context.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
-    """Verify a plain password against the stored hash"""
     return pwd_context.verify(plain_password, hashed_password)
 
 
@@ -32,10 +30,6 @@ def create_access_token(
     data: dict,
     expires_delta: timedelta | None = None
 ) -> str:
-    """
-    Create a JWT access token.
-    Uses ACCESS_TOKEN_EXPIRE_MINUTES from settings (default 30 min)
-    """
     to_encode = data.copy()
 
     # Use settings value if available, fallback to 30 minutes
@@ -59,16 +53,7 @@ def get_current_user(
     token: Annotated[str, Depends(oauth2_scheme)],
     db: Session = Depends(get_db)
 ) -> User:
-    """
-    Dependency: Validate JWT and return the current authenticated user.
-    
-    Raises 401 if:
-    - Token is missing, invalid, expired, or user not found
-    """
 
-    if not token:
-        return None
-    
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -109,3 +94,5 @@ def get_current_user(
         )
 
     return user
+
+

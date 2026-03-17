@@ -2,12 +2,13 @@ import cv2
 import tempfile
 import os
 import time
-from fastapi import APIRouter, Response, UploadFile, File, HTTPException,Query
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi import APIRouter, Depends, Response, UploadFile, File, HTTPException,Query
+from fastapi.responses import JSONResponse
+from safeVision_Backend.core.security import get_current_user
 from safeVision_Backend.services.detection_service import generate_detection_frames
 
 
-router = APIRouter(prefix="/detection", tags=["Accident Detection"])
+router = APIRouter(prefix="/detection", tags=["Accident Detection"],dependencies=[Depends(get_current_user)])
 
 # Global storage for the last uploaded video
 last_uploaded = {
@@ -23,7 +24,7 @@ frame_generator = None
 @router.post("/upload-video")
 async def upload_video(
     file: UploadFile = File(...),
-    camera_id:int = Query(default=1) 
+    camera_id:int = Query(default=3) 
 ):
     global last_uploaded
 

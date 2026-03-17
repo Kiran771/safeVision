@@ -1,0 +1,22 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: sans-serif;
+    background: linear-gradient(135deg, #d4dce5 0%, #dde6f1 100%);
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+.main-content {
+    margin-left: 230px;
+    padding: 0;
+    min-height: 100vh;
+    width: calc(100% - 230px);
+    transition: margin-left 0.3s ease, width 0.3s ease;
+}

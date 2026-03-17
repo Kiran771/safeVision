@@ -19,7 +19,6 @@ class User(Base):
 
 class Camera(Base):
     __tablename__ = 'cameras'
-
     cameraid = Column(Integer, primary_key=True, autoincrement=True, index=True)
     location = Column(String(200), nullable=False)
     location_id=Column(Integer, ForeignKey('locations.location_id'))
@@ -29,7 +28,6 @@ class Camera(Base):
 
 class UserCamera(Base):
     __tablename__ = 'user_cameras'
-
     usercameraid = Column(Integer, primary_key=True, autoincrement=True)
     userid = Column(Integer, ForeignKey('users.userid'), nullable=False, index=True)
     cameraid = Column(Integer, ForeignKey('cameras.cameraid'), nullable=False, index=True)

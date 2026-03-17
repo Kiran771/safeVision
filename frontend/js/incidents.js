@@ -1,3 +1,31 @@
+function getAuthHeaders() {
+    const token = sessionStorage.getItem("access_token");
+    return token ? { "Authorization": `Bearer ${token}` } : {};
+}
+
+let = isRedirecting=false
+async function handleResponse(response) {
+    if (response.status === 401) {
+        console.warn('Token expired. Redirecting to login...');
+        isRedirecting=true
+        sessionStorage.clear();
+        alert("Session expired. Please login again.");
+        window.location.href = '/html/login.html';
+        return null;
+    }
+    let data = null;
+    try {
+        data = await response.json();
+    } catch {
+        data = null; 
+    }
+    if (!response.ok) {
+        console.error("API Error:", data);
+        return data;
+    }
+    return data;
+}
+
 // Configuration
 const ITEMS_PER_PAGE = 8;
 let currentPage = 1;
@@ -14,10 +42,12 @@ async function fetchIncidents() {
     showLoading();
 
     try {
-        const response = await fetch('http://127.0.0.1:8000/accidents/pending');
-        if (!response.ok) throw new Error('Failed to fetch accidents');
-
-        allIncidents = await response.json();
+        const response = await fetch('/accidents/pending',{
+            headers: getAuthHeaders()
+        });
+        const data = await handleResponse(response);
+        if (!data) return;
+        allIncidents = data;
 
         // Show no data if empty
         if (!allIncidents || allIncidents.length === 0) {
@@ -133,9 +163,24 @@ function showNoData() {
 
 function startAutoRefresh(intervalMs = 30000) {
     setInterval(async () => {
-        const scrollPos = window.scrollY;
-        await fetchIncidents();
-        window.scrollTo(0, scrollPos);
+        try {
+            const response = await fetch('/accidents/pending', {
+                headers: getAuthHeaders()
+            });
+            const fresh = await handleResponse(response);
+            if (!fresh) return; 
+            if (fresh.length === 0) return;
+            if (JSON.stringify(fresh) !== JSON.stringify(allIncidents)) {
+                const scrollPos = window.scrollY;
+                allIncidents = fresh;
+                totalPages = Math.ceil(allIncidents.length / ITEMS_PER_PAGE);
+                renderIncidents();
+                renderPagination();
+                window.scrollTo(0, scrollPos);
+            }
+        } catch (err) {
+            console.error('Auto-refresh failed:', err);
+        }
     }, intervalMs);
 }
 

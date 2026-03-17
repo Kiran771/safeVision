@@ -1,3 +1,32 @@
+function getAuthHeaders() {
+  const token = sessionStorage.getItem("access_token");
+  return token ? { "Authorization": `Bearer ${token}` } : {};
+}
+
+let isRedirecting=false
+async function handleResponse(response) {
+    if (response.status === 401) {
+      if (isRedirecting) return null;
+        console.warn('Token expired. Redirecting to login...');
+        isRedirecting=true
+        sessionStorage.clear();
+        alert("Session expired. Please login again.");
+        window.location.href = '/html/login.html';
+        return null;
+    }
+  let data = null;
+  try {
+      data = await response.json();
+  } catch {
+      data = null; 
+  }
+  if (!response.ok) {
+    console.error("API Error:", data);
+    return data;
+  }
+  return data;
+}
+
 window.addEventListener("DOMContentLoaded", () => {
 
   console.log("Script running - DOMContentLoaded fired");
@@ -22,7 +51,7 @@ window.addEventListener("DOMContentLoaded", () => {
     modalTitle.textContent = 'Register New Camera'
     submitBtn.textContent = 'Register';
     resetForm();
-    
+
     await loadLocation();
     await loadAdmin();
 
@@ -43,8 +72,11 @@ window.addEventListener("DOMContentLoaded", () => {
   async function loadLocation(selectedValue = null) {
 
     try {
-      const res = await fetch('/cameras/locations')
-      const data = await res.json();
+      const res = await fetch('/cameras/locations',{
+        headers:getAuthHeaders()
+      })
+      const data = await handleResponse(res);
+      if (!data) return;
       console.log("Locations fetched", data);
 
       locationSelect.innerHTML =
@@ -65,9 +97,12 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   async function loadAdmin(selectedValue = null, allAdmins = false) {
     try {
-      const url = allAdmins ? '/cameras/admins/all': '/cameras/admins/unassigned-admins';
-      const res = await fetch(url)
-      const data = await res.json();
+      const url = allAdmins ? '/cameras/admins/all' : '/cameras/admins/unassigned-admins';
+      const res = await fetch(url, {
+        headers: getAuthHeaders()
+      })
+      const data = await handleResponse(res);
+      if (!data) return;
       console.log('admins', data)
       adminSelect.innerHTML =
         '<option value="" disabled selected>-- Select Admin --</option>';
@@ -88,31 +123,37 @@ window.addEventListener("DOMContentLoaded", () => {
 
   }
   async function loadAvailableAdmins(selectedValue = null, cameraId = null) {
-  try {
-    const url = cameraId 
-      ? `/cameras/admins/available/${cameraId}` 
-      : '/cameras/admins/unassigned-admins';
-    
-    const res  = await fetch(url);
-    const data = await res.json();
-    
-    adminSelect.innerHTML = '<option value="" disabled selected>-- Select Admin --</option>';
-    data.forEach(admin => {
-      const option       = document.createElement('option');
-      option.value       = admin.userid;
-      option.textContent = admin.username;
-      if (selectedValue && admin.userid == selectedValue) option.selected = true;
-      adminSelect.appendChild(option);
-    });
-  } catch (err) {
-    console.error('Error loading admins', err);
+    try {
+      const url = cameraId
+        ? `/cameras/admins/available/${cameraId}`
+        : '/cameras/admins/unassigned-admins';
+
+      const res = await fetch(url, {
+        headers: getAuthHeaders()
+      });
+      const data = await handleResponse(res);
+      if (!data) return;
+
+      adminSelect.innerHTML = '<option value="" disabled selected>-- Select Admin --</option>';
+      data.forEach(admin => {
+        const option = document.createElement('option');
+        option.value = admin.userid;
+        option.textContent = admin.username;
+        if (selectedValue && admin.userid == selectedValue) option.selected = true;
+        adminSelect.appendChild(option);
+      });
+    } catch (err) {
+      console.error('Error loading admins', err);
+    }
   }
-}
 
   async function loadCameras() {
     try {
-      const res = await fetch('/cameras/');
-      const data = await res.json();
+      const res = await fetch('/cameras/', {
+        headers: getAuthHeaders()
+      });
+      const data = await handleResponse(res);
+      if (!data) return;
 
       const tableBody = document.getElementById('camera-table-body');
       tableBody.innerHTML = '';
@@ -151,8 +192,8 @@ window.addEventListener("DOMContentLoaded", () => {
     // EDIT 
     if (editBtn) {
       editCameraId = editBtn.dataset.id;
-      console.log('dataset:', editBtn.dataset);        
-      console.log('admin id:', editBtn.dataset.admin); 
+      console.log('dataset:', editBtn.dataset);
+      console.log('admin id:', editBtn.dataset.admin);
       modalTitle.textContent = `Edit Camera #${editCameraId}`;
       submitBtn.textContent = 'Update';
 
@@ -170,9 +211,10 @@ window.addEventListener("DOMContentLoaded", () => {
       if (!confirmed) return;
 
       try {
-        const res = await fetch(`/cameras/delete/${cameraId}`, { method: 'DELETE' });
-        const result = await res.json();
-        alert(result.message);
+        const res = await fetch(`/cameras/delete/${cameraId}`, { method: 'DELETE', headers: getAuthHeaders() });
+        const data = await handleResponse(res);
+        if (!data) return;
+        alert(data.message);
         loadCameras();
       } catch (err) {
         console.error("Delete error", err);
@@ -184,22 +226,23 @@ window.addEventListener("DOMContentLoaded", () => {
   formElement.addEventListener('submit', async (e) => {
     e.preventDefault();
 
-    const data = {
+    const dataLoad = {
       location_id: parseInt(locationSelect.value),
       admin_id: parseInt(adminSelect.value),
       status: statusSelect.value
-    };
-    const url  = editCameraId ? `/cameras/update/${editCameraId}` : '/cameras/register'; 
-    const method = editCameraId ? 'PUT': 'POST';
+  };
+    const url = editCameraId ? `/cameras/update/${editCameraId}` : '/cameras/register';
+    const method = editCameraId ? 'PUT' : 'POST';
 
     try {
       const res = await fetch(url, {
         method,
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
+        headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
+        body: JSON.stringify(dataLoad)
       });
 
-      const result = await res.json();
+      const result = await handleResponse(res);
+      if (!result) return;
       alert(result.message);
       loadCameras();
       overlay.classList.remove('open');

@@ -30,7 +30,7 @@ body {
   }
 }
 
-/* Registration Container */
+
 .registration-container {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -48,7 +48,7 @@ body {
   }
 }
 
-/* Form Section Styles */
+
 .form-section {
   background: rgba(72, 108, 141, 0.726);
   border-radius: 24px;
@@ -110,7 +110,6 @@ body {
   box-shadow: 0 0 0 4px rgba(85, 168, 245, 0.08);
 }
 
-/* Map Section Styles */
 .map-section {
   background: rgba(72, 108, 141, 0.726);
   border-radius: 24px;
@@ -160,7 +159,7 @@ body {
   font-size: 1.25rem;
 }
 
-/* Map Container */
+
 #map {
   height: 450px;
   width: 100%;
@@ -197,7 +196,7 @@ body {
   font-weight: 500;
 }
 
-/* Button Styles */
+
 .btn-submit {
   width: 100%;
   padding: 1.125rem 2rem;
@@ -219,7 +218,7 @@ body {
   transform: translateY(0);
 }
 
-/* Error Styles */
+
 .error-message {
   display: none;
   color: black;
@@ -252,7 +251,6 @@ body {
   animation: rotate 2s linear infinite;
 }
 
-/* Table Section */
 .table-section {
   margin-top: 4rem;
   border-radius: 24px;

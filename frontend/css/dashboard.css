@@ -69,10 +69,10 @@ body {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 4rem 2rem;
+    padding: 2rem 2rem;
 }
 
-/* Remove scrollbar styling for cleaner look, or customize */
+
 .dashboard-content::-webkit-scrollbar {
     width: 8px;
 }
@@ -100,7 +100,7 @@ body {
 
 .metrics-row {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    grid-template-columns: repeat(3, 1fr); 
     gap: 2rem;
     grid-column: 1 / -1;
 }
@@ -123,28 +123,27 @@ body {
 }
 
 .metric-card.total-alerts {
-    background: linear-gradient(135deg, #0d6f6f 0%, #0a5555 100%);
+    background: white;
 }
 
 .metric-card.unverified {
-    background: linear-gradient(135deg, #08224b 0%, #0b2151 100%);
+    background: white;
 }
 
-.metric-card.resolved {
-    background: linear-gradient(135deg, #8b7ba8 0%, #6b5b95 100%);
-}
 
 .metric-label {
-    font-size: 1rem;
+    font-size: 20px;
     font-weight: 500;
     opacity: 0.95;
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.7rem;
+    color:black;
 }
 
 .metric-value {
     font-size: 3rem;
     font-weight: 700;
     line-height: 1;
+    color:black;
 }
 
 .metric-description {
@@ -153,34 +152,9 @@ body {
     margin-top: 0.5rem;
 }
 
-
-.resolved-card-row {
-    grid-column: 1 / -1;
+.metric-card.confirmed {
+    background: rgba(255, 255, 255, 0.85);
 }
-
-.resolved-icon-image{ 
-    width: 40px;
-    height: 40px; 
-    object-fit: contain;  
-    flex-shrink: 0;
-    margin-left:60rem;
-    align-items: flex-start;
-    margin-right: 1rem
-
-}
-
-.resolved-card {
-    background: rgba(3, 3, 47, 0.6);
-    border-radius: 1.5rem;
-    padding: 3rem;
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
 .resolved-card:hover {
     box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     transform: translateY(1px);
@@ -201,18 +175,18 @@ body {
     flex-shrink: 0;
 }
 
-/* Charts Row */
+
 .charts-row {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-    gap: 3rem;
+    gap: 2.3rem;
     grid-column: 1 / -1;
 }
 
 .chart-card {
     background-color: white;
     border-radius: 1.5rem;
-    padding: 3rem;
+    padding: 2rem;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition: all 0.3s ease;
 }
@@ -222,20 +196,20 @@ body {
 }
 
 .chart-card.dark {
-    background-color: #6b6969;
+    background-color: #dbdddecf;
     color: white;
 }
 
 .chart-card h3 {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 1rem;
-    color: inherit;
+    color: black;
 }
 
 .chart-container {
     position: relative;
-    height: 300px;
+    height: 290px;
     margin-bottom: 1rem;
 }
 
@@ -263,9 +237,9 @@ body {
     background-color: #2563eb;
 }
 
-/* Incident Stats */
+
 .incident-stats {
-    background-color: #4a5568;
+    background-color: #c3c8d2e4;
     border-radius: 1.5rem;
     padding: 3rem;
     color: white;
@@ -274,8 +248,9 @@ body {
 }
 
 .incident-stats h3 {
-    font-size: 1.1rem;
+    font-size: 1.5rem;
     font-weight: 600;
+    color:black;
     margin-bottom: 1.5rem;
 }
 
@@ -292,8 +267,8 @@ body {
 }
 
 .incident-label {
-    color: #b0b0b0;
-    font-size: 0.85rem;
+    color: white;
+    font-size: 0.95rem;
     margin-bottom: 0.5rem;
 }
 
@@ -303,7 +278,7 @@ body {
     color: white;
 }
 
-/* Status Breakdown */
+
 .status-breakdown {
     background-color: white;
     border-radius: 1.5rem;
@@ -426,10 +401,7 @@ body.sidebar-collapsed .main-wrapper {
         height: 250px;
     }
 
-    .resolved-card {
-        flex-direction: column;
-        text-align: center;
-    }
+
 
     .incident-grid {
         grid-template-columns: repeat(2, 1fr);

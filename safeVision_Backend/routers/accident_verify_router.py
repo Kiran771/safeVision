@@ -2,19 +2,22 @@ import os
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from safeVision_Backend.models.table_creation import Camera
+from safeVision_Backend.models.table_creation import Camera,Accident
 from safeVision_Backend.core.psql_db import get_db
+from safeVision_Backend.core.security import get_current_user
 from safeVision_Backend.repositories.accident_repo import (
     get_detection_by_id,
     get_pending_reviews,
     update_detection_status,
     get_camera_location,
-    get_all_detections
+    get_all_detections,
+    get_confirmed_count,
+    get_pending_count
 
     
 )
 
-router = APIRouter(prefix="/accidents", tags=["Accidents"])
+router = APIRouter(prefix="/accidents", tags=["Accidents"],dependencies=[Depends(get_current_user)])
 
 
 
@@ -95,6 +98,13 @@ def get_recent(limit: int = 10, db: Session = Depends(get_db)):
         }
         for d in detections
     ]
+
+@router.get("/stats") 
+def get_stats(db: Session = Depends(get_db)): 
+    return { 
+        "pending": get_pending_count(db=db),
+        "confirmed": get_confirmed_count(db=db) 
+    }
 
 # Get details of incident by id 
 @router.get("/{accident_id}")

@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 from typing import List
 
 from safeVision_Backend.core.psql_db import get_db
+from safeVision_Backend.core.security import get_current_user
 from safeVision_Backend.models.table_creation import EmergencyContact
 from safeVision_Backend.schemas.safeVisionSchema import EmergencyContactCreate, EmergencyContactUpdate, EmergencyContactOut
 from safeVision_Backend.repositories import contact_registration as crud
@@ -12,7 +13,8 @@ from safeVision_Backend.utils.verification_token import generate_verification_to
 
 router = APIRouter(
     prefix="/contacts",
-    tags=["Emergency Contacts"]
+    tags=["Emergency Contacts"],
+    dependencies=[Depends(get_current_user)]
 )
 
 # Create a new contact

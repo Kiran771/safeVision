@@ -11,7 +11,7 @@ from safeVision_Backend.repositories.accident_repo import save_detection,save_bo
 
 # Load model 
 BASE_DIR = Path(__file__).resolve().parent
-accident_detection_model_path = BASE_DIR.parent / "accident_fire_detection_model" / "best_accident_detection2.pt"
+accident_detection_model_path = BASE_DIR.parent / "accident_fire_detection_model" / "best_v4.pt"
 fire_detection_model_path = BASE_DIR.parent / "accident_fire_detection_model" / "best_fire_detection.pt"
 
 accident_model=YOLO(str(accident_detection_model_path))
@@ -28,13 +28,15 @@ fire_confidence_threshold =0.50
 border_line_threshold = 0.20
 
 # consecutive frames required to confirm accident
-consecutive_frames_needed = 8
+consecutive_frames_needed = 5
 
 # accident confirmation cooldown to prevent multiple detections of same event
-accident_cooldown_seconds =8
+accident_cooldown_seconds = 8
 
 # frame skip interval to balance perfromance and detection speed
 frame_skip_interval = 4
+
+MISS_TOLERANCE = 2  
 
 ACCIDENT_FOLDER = "accident_frames"
 FIRE_FOLDER     = "fire_frames"
@@ -125,7 +127,6 @@ def draw_status_overlay(frame,frame_count,acc_conf,fire_conf,
     cv2.putText(frame, f"Frame: {frame_count}", (w - 160, 30),
                     cv2.FONT_HERSHEY_SIMPLEX, 0.7, (200, 200, 200), 2
                 )
-    
     return frame
 
 def save_frame_img(frame,folder,prefix, video_name, frame_count, conf):
@@ -142,13 +143,15 @@ def generate_detection_frames(
     video_bytes: bytes | None = None,
     video_name: str = "video",
     video_path: str | None = None,
-    camera_id: int = 1,
+    camera_id: int = 3,
     playback_time: float = 0.0
 ):
     temp_file = None
     last_saved_time = 0
     consecutive_accident = 0
     consecutive_fire = 0
+    accident_miss_streak = 0  
+    fire_miss_streak  = 0
 
     try:
         if video_path:
@@ -216,8 +219,23 @@ def generate_detection_frames(
                         is_borderline_fire = True
                         break
             is_borderline = is_borderline_accident or is_borderline_fire
-            consecutive_accident = consecutive_accident + 1 if is_accident else 0 
-            consecutive_fire  = consecutive_fire  + 1 if is_fire else 0 
+            if is_accident:
+                consecutive_accident += 1
+                accident_miss_streak  = 0
+            else:
+                accident_miss_streak += 1
+                if accident_miss_streak > MISS_TOLERANCE:
+                    consecutive_accident = 0
+                    accident_miss_streak = 0
+
+            if is_fire:
+                consecutive_fire += 1
+                fire_miss_streak  = 0
+            else:
+                fire_miss_streak += 1
+                if fire_miss_streak > MISS_TOLERANCE:
+                    consecutive_fire = 0
+                    fire_miss_streak = 0
 
             accident_box_count = sum(
                 1 for box in acc_boxes 
@@ -227,7 +245,7 @@ def generate_detection_frames(
 
             confirmed_accident = (
                 consecutive_accident >= consecutive_frames_needed 
-                and acc_conf >= 0.70 
+                and acc_conf >= 0.65 
                 and accident_box_count >= 2
                 )
             confirmed_fire  =consecutive_fire  >= consecutive_frames_needed
@@ -265,7 +283,7 @@ def generate_detection_frames(
                             detection_type = "accident",
                             confidence = acc_conf,
                             frame_path = frame_path,
-                            status ='confirmed'
+                            status ='pending'
                         )
                     finally:
                         db.close()
@@ -288,7 +306,7 @@ def generate_detection_frames(
                             detection_type = "fire",
                             confidence     = fire_conf,
                             frame_path     = frame_path,
-                            status='confirmed'
+                            status='pending'
                         )
                     finally:
                         db.close()

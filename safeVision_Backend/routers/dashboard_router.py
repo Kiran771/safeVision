@@ -2,9 +2,10 @@ from typing import Any, Dict
 from fastapi import APIRouter, Depends,HTTPException
 from sqlalchemy.orm import Session
 from safeVision_Backend.core.psql_db import get_db
+from safeVision_Backend.core.security import get_current_user
 from safeVision_Backend.repositories import dashboard_repo
 
-router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
+router = APIRouter(prefix="/dashboard", tags=["Dashboard"],dependencies=[Depends(get_current_user)])
 
 
 @router.get("/admin/stats",response_model=Dict[str, Any])
@@ -36,7 +37,7 @@ def get_admin_dashboard_stats(db: Session = Depends(get_db)):
                     'data': [status['confirmed'], status['false_alarm']]
                 },
                 'alert_distribution': {
-                    'labels': ['confirmed', 'Pending', 'False Alarm'],
+                    'labels': ['Confirmed', 'Pending', 'False Alarm'],
                     'data': [status['confirmed'], status['pending'], status['false_alarm']]
                 }
             }

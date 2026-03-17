@@ -1,3 +1,31 @@
+function getAuthHeaders() {
+    const token = sessionStorage.getItem("access_token");
+    return token ? { "Authorization": `Bearer ${token}` } : {};
+}
+
+let isRedirecting=false
+async function handleResponse(response) {
+    if (response.status === 401) {
+        console.warn('Token expired. Redirecting to login...');
+        isRedirecting=true
+        sessionStorage.clear();
+        alert("Session expired. Please login again.");
+        window.location.href = '/html/login.html';
+        return null;
+    }
+    let data = null;
+    try {
+        data = await response.json();
+    } catch {
+        data = null; 
+    }
+    if (!response.ok) {
+        console.error("API Error:", data);
+        return data;
+    }
+    return data;
+}
+
 window.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("authorityForm");
     const tableBody = document.getElementById("authorityTableBody");
@@ -12,7 +40,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const email=document.getElementById("email");
 
 
-    const API_BASE = "http://127.0.0.1:8000/contacts/"; 
+    const API_BASE = "/contacts/"; 
 
     function showError(id, msg) {
         const el = document.getElementById(id);
@@ -129,9 +157,7 @@ window.addEventListener("DOMContentLoaded", () => {
     } else {
         selectedLocation.style.color = "black";                        
         selectedLocation.style.fontWeight = "500";
-
     }
-
         return isValid;
     }
 
@@ -139,17 +165,12 @@ window.addEventListener("DOMContentLoaded", () => {
     // Fetch and populate table 
     async function loadContacts() {
 
-        const token = sessionStorage.getItem("access_token");
-        if (!token) {
-            alert("Please login first");
-            window.location.href = "/html/login.html";
-            return;
-        }
         
         tableBody.innerHTML = ""; 
         try {
-            const res = await fetch(API_BASE);
-            const contacts = await res.json();
+            const res = await fetch(API_BASE,{headers:getAuthHeaders()});
+            const contacts = await handleResponse(res);
+            if (!contacts) return;
             console.log("Contacts received:", contacts); 
 
             if (!Array.isArray(contacts) || contacts.length === 0) {
@@ -225,8 +246,9 @@ window.addEventListener("DOMContentLoaded", () => {
         let alertTitle = "";
         if (selectedContactId) {
             // Fetch the existing contact to compare changes
-            const existingRes = await fetch(`${API_BASE}${selectedContactId}`);
-            const existingContact = await existingRes.json();
+            const existingRes = await fetch(`${API_BASE}${selectedContactId}`,{headers:getAuthHeaders()});
+            const existingContact = await handleResponse(existingRes);
+            if (!existingContact) return;
 
             // Check if any field changed
             const isChanged = Object.keys(contactData).some(
@@ -234,13 +256,7 @@ window.addEventListener("DOMContentLoaded", () => {
             );
 
             if (!isChanged) {
-            Swal.fire({
-            icon: 'info',
-            title: 'No changes detected',
-            text: 'You did not modify any fields.',
-            confirmButtonText: 'OK',
-            width: '400px'
-            });
+            alert('No changes detected. You did not modify any fields.');
             resetForm();
             submitButton.textContent = "Register Authority";
             selectedContactId=null;
@@ -250,7 +266,7 @@ window.addEventListener("DOMContentLoaded", () => {
             // Update existing contact
             res = await fetch(`${API_BASE}${selectedContactId}`, {
                 method: "PUT",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json",...getAuthHeaders() },
                 body: JSON.stringify(contactData)
             });
             alertTitle = "Contact Updated!";
@@ -259,13 +275,19 @@ window.addEventListener("DOMContentLoaded", () => {
         } else {
             res = await fetch(API_BASE, {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: { "Content-Type": "application/json" ,...getAuthHeaders()},
                 body: JSON.stringify(contactData)
             });
             alertTitle = "Contact Registered!";
             alertMessage = `A verification email has been sent to <b>${contactData.email}</b>.<br>The contact will become active after they confirm.`;
         
 
+        }
+
+        if (res.status === 401) {
+            sessionStorage.clear();
+            window.location.href = '/html/login.html';
+            return;
         }
 
         if (!res.ok) {
@@ -285,13 +307,7 @@ window.addEventListener("DOMContentLoaded", () => {
             return;  
         }
         
-        Swal.fire({
-        icon: 'success',
-        title: alertTitle,
-        html: alertMessage,
-        confirmButtonText: 'OK',
-        width: '500px'
-        });
+        alert(`${alertTitle}\n${alertMessage.replace(/<b>|<\/b>|<br>/g, '')}`);
 
         resetForm();
         submitButton.textContent = "Register Authority";
@@ -309,9 +325,9 @@ window.addEventListener("DOMContentLoaded", () => {
         const id = e.currentTarget.dataset.id;
         try {
             clearErrors();
-            const res = await fetch(`${API_BASE}${id}`);
-            if (!res.ok) throw new Error("Failed to fetch contact");
-            const contact = await res.json();
+            const res = await fetch(`${API_BASE}${id}`,{headers:getAuthHeaders()});
+            const contact = await handleResponse(res);
+            if (!contact) return;
 
             document.getElementById("authorityName").value = contact.authority_name;
             document.getElementById("contactNumber").value = contact.contact_number;
@@ -327,14 +343,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
         } catch (err) {
             console.error("Error fetching contact:", err);
-            Swal.fire({
-                icon: 'error',
-                title: 'Failed to load contact',
-                text: 'An error occurred while trying to load the contact details.',
-                confirmButtonText: 'OK',
-                width: '400px',
-                height: '20px'
-            });
+            alert('Failed to load contact. An error occurred while trying to load the contact details.');
         }
     }
 
@@ -344,15 +353,10 @@ window.addEventListener("DOMContentLoaded", () => {
         if (!confirm("Are you sure you want to delete this contact?")) return;
 
         try {
-            const res = await fetch(`${API_BASE}${id}`, { method: "DELETE" });
-            if (!res.ok) throw new Error("Delete failed");
-            Swal.fire({
-                icon: 'success',
-                title: 'Deleted!',
-                text: 'The contact has been deleted successfully.',
-                confirmButtonText: 'OK',
-                width: '400px'
-            });
+            const res = await fetch(`${API_BASE}${id}`,{ method: "DELETE" ,headers:getAuthHeaders()});
+            const result = await handleResponse(res);
+            if (!result) return;
+            alert('Deleted! The contact has been deleted successfully.');
             await loadContacts();
         } catch (err) {
             console.error(err);

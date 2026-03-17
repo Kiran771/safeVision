@@ -11,6 +11,7 @@ from safeVision_Backend.core.security import get_current_user
 router = APIRouter(
     prefix="/admins",
     tags=["Admin Registration"],
+    dependencies=[Depends(get_current_user)]
 )
 
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
@@ -19,10 +20,7 @@ def register_admin(
     db: Session = Depends(get_db),
     current_user: User | None = Depends(get_current_user)
 ):
-    """
-    Register a new admin user. Only Super Admin can create new admins,
-    except for the first admin (Super Admin) which can be created without authentication
-    """
+
     # Check if this is the first admin
     existing_admins = db.query(User).count()
     if existing_admins == 0:

@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
-  <link rel="stylesheet" href="/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/dashboard.css?v=1" />
   <script>
     function loadHeaderCSS() {
       let userRole = 'Admin';
@@ -20,7 +20,7 @@
       if (!userRole || userRole === 'Admin') {
         userRole = (sessionStorage.getItem('role') || 'Admin').toLowerCase();
       }
-      if (userRole.includes('Super Admin') || userRole.includes('superadmin')) {
+      if (userRole.includes('super admin')) {
         const link = document.createElement('link');
         link.rel = 'stylesheet';
         link.href = '/css/header.css';
@@ -46,16 +46,13 @@
                 <h2 id="welcome-greeting" class="welcome-greeting"></h2>
                 <p id="welcome-name" class="welcome-name"></p>
             </div>
-            <div class="welcome-calendar">
-                <div id="calendar-widget" class="calendar-widget"></div>
-            </div>
         </div>
     <main id="dashboard-content" class="dashboard-content"></main>
   </div>
   <script src="/js/sideMenu_loader.js"></script>
   <script src="/js/header.js"></script>
   <script src="/js/dashboard_api.js"></script>
-  <script src="/js/role_based_dashboard.js"></script>
+  <script src="/js/role_based_dashboard.js?v=2"></script>
 </body>
 
 </html>

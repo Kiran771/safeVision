@@ -3,8 +3,6 @@ from sqlalchemy import not_
 from safeVision_Backend.models.table_creation import Camera,User,UserCamera,Location
 
 
-
-
 def get_locations(db: Session):
   locations = db.query(Location.location_id, Location.location_name, Location.city).all()
   return [

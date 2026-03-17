@@ -3,14 +3,39 @@ class DashboardAPI {
         this.baseURL = baseURL;
         console.log('DashboardAPI initialized with baseURL:', this.baseURL || '(root)');
     }
+
+    getAuthHeaders() {
+        const token = sessionStorage.getItem("access_token");
+
+        if (!token) {
+            window.location.href = "/html/login.html";
+            throw new Error(' No token found.')
+        }
+
+        return {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        };
+    }
+    async handleResponse(response) {
+        if (response.status === 401) {
+            console.warn('Token expired or unauthorized. Redirecting to login...');
+            sessionStorage.clear();
+            window.location.href = '/html/login.html';
+            return;
+        }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return await response.json();
+    }
     async getAdminStats() {
         try {
-            const response = await fetch(`${this.baseURL}/dashboard/admin/stats`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
+            const response = await fetch(`${this.baseURL}/dashboard/admin/stats`,
+                {
+                    headers: this.getAuthHeaders()
+                });
+                return await this.handleResponse(response);
         } catch (error) {
             console.error('Error fetching admin stats:', error);
             throw error;
@@ -19,12 +44,10 @@ class DashboardAPI {
 
     async getSuperadminStats() {
         try {
-            const response = await fetch(`${this.baseURL}/dashboard/superadmin/stats`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
+            const response = await fetch(`${this.baseURL}/dashboard/superadmin/stats`, {
+                headers: this.getAuthHeaders()
+            });
+            return await this.handleResponse(response);
         } catch (error) {
             console.error('Error fetching superadmin stats:', error);
             throw error;
@@ -33,12 +56,11 @@ class DashboardAPI {
 
     async getPendingIncidents() {
         try {
-            const response = await fetch(`${this.baseURL}/dashboard/pending-incidents`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
+            const response = await fetch(`${this.baseURL}/dashboard/pending-incidents`, {
+                headers: this.getAuthHeaders()
+
+            });
+            return await this.handleResponse(response);
         } catch (error) {
             console.error('Error fetching pending incidents:', error);
             throw error;
@@ -47,12 +69,10 @@ class DashboardAPI {
 
     async getTimePeriodStats(period = '7days') {
         try {
-            const response = await fetch(`${this.baseURL}/dashboard/time-period-stats?period=${period}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
+            const response = await fetch(`${this.baseURL}/dashboard/time-period-stats?period=${period}`, {
+                headers: this.getAuthHeaders()
+            });
+            return await this.handleResponse(response);
         } catch (error) {
             console.error(`Error fetching stats for ${period}:`, error);
             throw error;
@@ -62,12 +82,11 @@ class DashboardAPI {
 
     async getCameraStats(cameraId) {
         try {
-            const response = await fetch(`${this.baseURL}/dashboard/camera-stats/${cameraId}`);
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
+            const response = await fetch(`${this.baseURL}/dashboard/camera-stats/${cameraId}`, {
+                headers: this.getAuthHeaders()
+            });
+            return await this.handleResponse(response);
+            
         } catch (error) {
             console.error(`Error fetching camera ${cameraId} stats:`, error);
             throw error;
@@ -79,39 +98,35 @@ class DashboardAPI {
             const response = await fetch(`${this.baseURL}/accidents/${incidentId}/verify`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    ...this.getAuthHeaders()
                 }
+
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
+            return await this.handleResponse(response);
+
         } catch (error) {
             console.error(`Error verifying incident ${incidentId}:`, error);
             throw error;
         }
     }
 
-
     async rejectIncident(incidentId) {
         try {
             const response = await fetch(`${this.baseURL}/accidents/${incidentId}/reject`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    ...this.getAuthHeaders()
                 }
             });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
-            return data;
+            return await this.handleResponse(response);
         } catch (error) {
             console.error(`Error rejecting incident ${incidentId}:`, error);
             throw error;
         }
     }
+
 }
 
 

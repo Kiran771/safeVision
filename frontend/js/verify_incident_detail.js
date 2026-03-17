@@ -1,4 +1,31 @@
-// Get incident ID from URL parameter
+let = isRedirecting=false
+function getAuthHeaders() {
+    const token = sessionStorage.getItem("access_token");
+    return token ? { "Authorization": `Bearer ${token}` } : {};
+}
+
+async function handleResponse(response) {
+    if (response.status === 401) {
+        console.warn('Token expired. Redirecting to login...');
+        isRedirecting=true
+        sessionStorage.clear();
+        alert("Session expired. Please login again.");
+        window.location.href = '/html/login.html';
+        return null;
+    }
+    let data = null;
+    try {
+        data = await response.json();
+    } catch {
+        data = null; 
+    }
+    if (!response.ok) {
+        console.error("API Error:", data);
+        return data; 
+    }
+    return data;
+}
+
 const urlParams = new URLSearchParams(window.location.search);
 const incidentId = urlParams.get('id');
 
@@ -11,13 +38,11 @@ document.addEventListener('DOMContentLoaded', () => {
 // Load incident data
 async function loadIncidentData() {
     try {
-        const response = await fetch(`http://127.0.0.1:8000/accidents/${incidentId}`);
-        if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.detail || 'Failed to load incident data');
-        }
-
-        const incident = await response.json();
+        const response = await fetch(`/accidents/${incidentId}`,{
+            headers: getAuthHeaders()
+        });
+        const incident = await handleResponse(response);
+        if (!incident) return;
 
         // Populate fields
         document.getElementById('incident-time').textContent = incident.timestamp
@@ -30,13 +55,11 @@ async function loadIncidentData() {
         // Populate location information
         if (incident.location) {
             document.getElementById('location-address').textContent = incident.location.address || incident.location;
-            document.getElementById('location-coords').textContent = incident.location.coordinates || '';
         }
 
-        // Set anomaly score bar using reconstruction error
+        // Set confidence bar 
         setConfidenceBar(incident.confidence || 0)
 
-        // Load original and reconstructed frames
         loadFrameImage(incident.frame_path)
 
     } catch (error) {
@@ -48,8 +71,8 @@ async function loadIncidentData() {
 
 
 function setConfidenceBar(confidence) {
-    const fill     = document.getElementById('anomaly-fill')
-    const textEl   = document.getElementById('anomaly-score-text')
+    const fill = document.getElementById('anomaly-fill')
+    const textEl = document.getElementById('anomaly-score-text')
     const percentage = Math.round(confidence * 100)
 
     setTimeout(() => { fill.style.width = `${percentage}%` }, 100)
@@ -61,27 +84,35 @@ function setConfidenceBar(confidence) {
     } else {
         fill.style.background = 'linear-gradient(90deg, #10b981 0%, #059669 100%)'
     }
-
     if (textEl) {
         textEl.textContent = `Confidence: ${percentage}%`
     }
 }
 
 
-function loadFrameImage(frameUrl) {
-    const originalImg = document.getElementById('original-img')
-
-    // Hide reconstructed image container entirely (no longer exists)
-    const reconstructedContainer = document.getElementById('reconstructed-img')
-    if (reconstructedContainer) {
-        reconstructedContainer.style.display = 'none'
+async function loadFrameImage(frameUrl) {
+    const originalImg = document.getElementById('original-img');
+    if (!frameUrl) {
+        originalImg.style.display = 'none';
+        return;
     }
-
-    if (frameUrl) {
-        originalImg.src = `http://127.0.0.1:8000/accidents/frame-image?path=${encodeURIComponent(frameUrl)}`
-        originalImg.style.display = 'block'
-    } else {
-        originalImg.style.display = 'none'
+    try {
+        const response = await fetch(
+            `/accidents/frame-image?path=${encodeURIComponent(frameUrl)}`,
+            { headers: getAuthHeaders() }
+        );
+        if (response.status === 401) {
+            sessionStorage.clear();
+            window.location.href = '/html/login.html';
+            return;
+        }
+        if (!response.ok) throw new Error('Image load failed');
+        const blob = await response.blob();
+        originalImg.src = URL.createObjectURL(blob);
+        originalImg.style.display = 'block';
+    } catch (err) {
+        console.error('Failed to load frame image:', err);
+        originalImg.style.display = 'none';
     }
 }
 
@@ -98,14 +129,16 @@ async function confirmIncident() {
     if (!confirmed) return;
 
     try {
-        const response = await fetch(`http://127.0.0.1:8000/accidents/${incidentId}/verify`, {
+        const response = await fetch(`/accidents/${incidentId}/verify`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }
         });
 
+        const result = await handleResponse(response);
+        if (!result) return;
+
         if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.detail || 'Failed to confirm incident');
+            throw new Error(result?.detail || 'Failed to confirm incident');
         }
 
         alert('Incident confirmed successfully!');
@@ -125,14 +158,16 @@ async function rejectIncident() {
     if (!confirmed) return;
 
     try {
-        const response = await fetch(`http://127.0.0.1:8000/accidents/${incidentId}/reject`, {
+        const response = await fetch(`/accidents/${incidentId}/reject`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' }
+            headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }
         });
 
+        const result = await handleResponse(response);
+        if (!result) return;
+
         if (!response.ok) {
-            const data = await response.json();
-            throw new Error(data.detail || 'Failed to reject incident');
+            throw new Error(result?.detail || 'Failed to reject incident');
         }
 
         alert('Incident rejected successfully!');
@@ -154,11 +189,6 @@ function cancel() {
 
 // Handle image load errors
 document.getElementById('original-img').addEventListener('error', function () {
-    this.style.display = 'none';
-    this.parentElement.classList.add('loading');
-});
-
-document.getElementById('reconstructed-img').addEventListener('error', function () {
     this.style.display = 'none';
     this.parentElement.classList.add('loading');
 });
