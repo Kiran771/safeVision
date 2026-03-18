@@ -1,7 +1,8 @@
+from sqlalchemy import not_
 from sqlalchemy.orm import Session
 from typing import Optional, List
-
-from safeVision_Backend.models.table_creation import User
+from datetime import datetime, timedelta, timezone
+from safeVision_Backend.models.table_creation import User,UserCamera
 from safeVision_Backend.schemas.safeVisionSchema import AdminCreate, AdminUpdate
 from safeVision_Backend.core.security import hash_password
 
@@ -25,15 +26,39 @@ def create_admin(db: Session, admin_in: AdminCreate) -> User:
 
 # Get all admins with pagination
 def get_all_admins(db: Session, skip: int = 0, limit: int = 20) -> List[User]:
-    """
-    Retrieve all admin users with pagination.
-    """
     return (
         db.query(User)
         .filter(User.role == "Admin")
         .offset(skip)
         .limit(limit)
         .all()
+    )
+
+# Get count of admin created in last 7 days
+def get_recently_added_admins_count(db: Session) -> int:
+    seven_days_ago = datetime.now(timezone.utc) - timedelta(days=7)
+    return (
+        db.query(User)
+        .filter(User.role == "Admin")
+        .filter(User.is_active == True)
+        .filter(User.created_at >= seven_days_ago)
+        .count()
+    )
+
+# get count of admins with no active camera assigned
+def get_unassigned_admins_count(db: Session) -> int:
+
+    assigned_ids = (
+        db.query(UserCamera.userid)
+        .filter(UserCamera.is_active == True)
+        .subquery()
+    )
+    return (
+        db.query(User)
+        .filter(User.role == "Admin")
+        .filter(User.is_active == True)
+        .filter(not_(User.userid.in_(assigned_ids)))
+        .count()
     )
 
 # Get admin by ID
@@ -52,11 +77,9 @@ def update_admin(db: Session, admin_id: int, admin_update: AdminUpdate) -> Optio
 
     update_data = admin_update.model_dump(exclude_unset=True)
     
-    # Handle password separately
     if "password" in update_data and update_data["password"]:
         db_admin.password_hash = hash_password(update_data.pop("password"))
 
-    # Update remaining fields
     for key, value in update_data.items():
         setattr(db_admin, key, value)
 

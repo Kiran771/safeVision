@@ -5,7 +5,6 @@ if (!token) {
 }
 document.addEventListener("DOMContentLoaded", async () => {
     try {
-        //Get user role from sessionStorage 
         const userRole = getUserRole();
         console.log("User role detected:", userRole);
 
@@ -20,9 +19,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         await loadSidebar(sidebarPath);
 
         initializeSidebarToggle();
-
         highlightActiveMenuItem();
-
         filterMenuItemsByRole(userRole);
 
     } catch (error) {
@@ -39,7 +36,6 @@ function getUserRole() {
         console.warn("Make sure user is logged in");
         return null;
     }
-
     console.log("Found role in sessionStorage:", role);
     return role.toLowerCase();
 }
@@ -47,12 +43,10 @@ function getUserRole() {
 
 function getSidebarPath(role) {
     const roleNormalized = role.toLowerCase();
-
     const sidebarPaths = {
         "super admin": "/html/sideMenu.html",
         "admin": "/html/admin_side_menu.html"
     };
-
     const path = sidebarPaths[roleNormalized];
     console.log("Sidebar path for role '" + role + "':", path);
     return path || "/html/admin_side_menu.html";
@@ -62,20 +56,16 @@ function getSidebarPath(role) {
 async function loadSidebar(sidebarPath) {
     try {
         console.log("Fetching sidebar from:", sidebarPath);
-
         const response = await fetch(sidebarPath);
         if (!response.ok) {
             throw new Error(`Failed to load: ${response.status}`);
         }
-
         const html = await response.text();
         const container = document.getElementById("sidebar-container");
-
         if (!container) {
             console.error(" sidebar-container not found in DOM!");
             return;
         }
-
         console.log("Sidebar HTML loaded, inserting into DOM");
         container.innerHTML = html;
         console.log("Sidebar inserted successfully");
@@ -98,7 +88,6 @@ async function loadSidebar(sidebarPath) {
 
 
 //Initialize sidebar toggle
-
 function initializeSidebarToggle() {
     console.log("Initializing sidebar toggle...");
 
@@ -113,7 +102,6 @@ function initializeSidebarToggle() {
     sidebar.classList.remove("collapsed");
     document.body.classList.remove("sidebar-collapsed");
 
-    // Sidebar toggle button setup
     let toggleBtn = sidebar.querySelector(".sidebar-toggle");
     if (!toggleBtn) {
         console.log("Creating toggle button...");
@@ -123,7 +111,6 @@ function initializeSidebarToggle() {
         sidebar.prepend(toggleBtn);
     }
 
-    // Toggle button logic
     toggleBtn.addEventListener("click", () => {
         console.log("Toggle clicked");
         sidebar.classList.toggle("collapsed");
@@ -133,7 +120,6 @@ function initializeSidebarToggle() {
         );
     });
 
-    // Active link highlighting
     const currentPath = window.location.pathname;
     console.log("Current page path:", currentPath);
 
@@ -158,9 +144,6 @@ function initializeSidebarToggle() {
 
     console.log("Toggle function initialized");
 }
-
-
-// Highlight the active menu item based on current page
 
 function highlightActiveMenuItem() {
     console.log("Highlighting active menu item...");

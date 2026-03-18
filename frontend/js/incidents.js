@@ -135,12 +135,10 @@ function changePage(page) {
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Open single incident page
 function openModal(incidentId) {
     window.location.href = `/html/verify_incident.html?id=${incidentId}`;
 }
 
-// Utility functions
 function showLoading() {
     document.getElementById('loading').style.display = 'block';
     document.getElementById('incidents-grid').style.display = 'none';

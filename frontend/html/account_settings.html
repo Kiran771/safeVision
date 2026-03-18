@@ -1,22 +1,174 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Profile page</title>
-    <script src="/js/sideMenu_loader.js" defer></script>
-    <link rel="stylesheet" href="/css/admin_header.css?v=1">
-    <link rel="stylesheet" href="/css/accountSettings.css?v=1">
-    <script> window.ADMIN_HEADER_CONFIG = { title: "Account Settings" }; </script>
-
-
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Account Settings</title>
+    <link rel="stylesheet" href="/css/admin_header.css?v=1" />
+    <link rel="stylesheet" href="/css/accountSettings.css?v=2" />
+    <script>
+        window.ADMIN_HEADER_CONFIG = { title: "Account Settings" };
+    </script>
 </head>
 
 <body>
     <div id="sidebar-container"></div>
     <div class="main-content">
-    <div id="header-container"></div>
+        <div id="header-container"></div>
+        <div class="page-body">
+            <div class="profile-card" id="profileCard">
+                <div id="cardContent" class="card-content hidden">
+                    <div class="profile-banner">
+                        <div class="profile-banner-overlay"></div>
+                    </div>
+                    <div class="profile-info">
+                        <div class="profile-wrap">
+                            <div class="profile-circle" id="avatarCircle">?</div>
+                            <div class="profile-edit" title="Change photo">
+                            </div>
+                        </div>
+                        <div class="profile-info">
+                            <div class="profile-name" id="displayName">—</div>
+                            <div class="profile-email" id="displayEmail">—</div>
+                        </div>
+                        <div class="profile-badge">
+                            <span class="badge badge-role" id="badgeRole">
+                                <span class="dot"></span>
+                                <span id="roleLabel">—</span>
+                            </span>
+                            <span class="badge badge-active" id="badgeStatus">
+                                <span class="dot"></span>
+                                <span id="statusLabel">—</span>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="tabs">
+                        <button class="tab active" data-tab="profile" onclick="switchTab('profile', this)">
+                            Profile
+                        </button>
+                        <button class="tab" data-tab="security" onclick="switchTab('security', this)">
+                            Security
+                        </button>
+                    </div>
+
+                    <div id="tab-profile" class="tab-panel">
+                        <div class="form-section">
+                            <div class="section-label">Personal Information</div>
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label class="form-label" for="inputUsername">Username</label>
+                                    <div class="input-wrap">
+                                        <input class="form-input" id="inputUsername" type="text" placeholder="username"
+                                            autocomplete="username" />
+                                    </div>
+                                    <span class="field-error" id="err-username"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="inputEmail">Email Address</label>
+                                    <div class="input-wrap">
+                                        <input class="form-input" id="inputEmail" type="email"
+                                            placeholder="email@example.com" autocomplete="email" />
+                                    </div>
+                                    <span class="field-error" id="err-email"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="inputContact">Contact Number</label>
+                                    <div class="input-wrap">
+                                        <input class="form-input" id="inputContact" type="tel"
+                                            placeholder="+977 98XXXXXXXX" />
+                                    </div>
+                                    <span class="field-error" id="err-contact"></span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label">Role</label>
+                                    <input class="form-input" id="inputRole" type="text" disabled />
+                                    <span class="input-note">Role is managed by superadmin only.</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-ghost" id="btnDiscard" onclick="discardProfile()">
+                                Cancle
+                            </button>
+                            <button class="btn btn-primary" id="btnSaveProfile" onclick="saveProfile()">
+                                Save Changes
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="tab-security" class="tab-panel hidden">
+                        <div class="form-section">
+                            <div class="section-label">Change Password</div>
+                            <div class="form-grid">
+                                <div class="form-group full">
+                                    <label class="form-label" for="inputCurrentPass">Current Password</label>
+                                    <div class="input-wrap">
+                                        <input class="form-input" id="inputCurrentPass" type="password"
+                                            placeholder="Enter current password" autocomplete="current-password" />
+                                        <button class="toggle-eye" type="button"
+                                            onclick="togglePass('inputCurrentPass', this)" aria-label="Show password">
+                                            <img src="/resources/password.png" data-eye-open="/resources/password.png"
+                                                data-eye-closed="/resources/visible-password.png" alt="show" width="16"
+                                                height="16" />
+                                        </button>
+                                    </div>
+                                    <span class="field-error" id="err-currentPass"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inputNewPass">New Password</label>
+                                    <div class="input-wrap">
+                                        <input class="form-input" id="inputNewPass" type="password"
+                                            placeholder="New password" autocomplete="new-password"
+                                            oninput="checkStrength(this.value)" />
+                                        <button class="toggle-eye" type="button"
+                                            onclick="togglePass('inputNewPass', this)" aria-label="Show password">
+                                            <img src="/resources/password.png" data-eye-open="/resources/password.png"
+                                                data-eye-closed="/resources/visible-password.png" alt="show" width="16"
+                                                height="16" />
+                                        </button>
+                                    </div>
+                                    <div class="strength-bar">
+                                        <div class="strength-fill" id="strengthFill"></div>
+                                    </div>
+                                    <span class="strength-label" id="strengthLabel">At least 8 characters
+                                        recommended</span>
+                                    <span class="field-error" id="err-newPass"></span>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label" for="inputConfirmPass">Confirm New Password</label>
+                                    <div class="input-wrap">
+                                        <input class="form-input" id="inputConfirmPass" type="password"
+                                            placeholder="Confirm new password" autocomplete="new-password" />
+                                        <button class="toggle-eye" type="button"
+                                            onclick="togglePass('inputConfirmPass', this)" aria-label="Show password">
+                                            <img src="/resources/password.png" data-eye-open="/resources/password.png"
+                                                data-eye-closed="/resources/visible-password.png" alt="show" width="16"
+                                                height="16" />
+                                        </button>
+                                    </div>
+                                    <span class="field-error" id="err-confirmPass"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button class="btn btn-ghost" onclick="clearPassFields()">
+                                Clear
+                            </button>
+                            <button class="btn btn-primary" id="btnSavePass" onclick="savePassword()">
+                                Update Password
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <script src="/js/header.js"></script>
+    <script src="/js/sideMenu_loader.js" defer></script>
+    <script src="/js/header.js" defer></script>
+    <script src="/js/account_settings.js"></script>
 </body>
+</html>

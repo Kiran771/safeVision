@@ -77,7 +77,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
 
-
     const validateContact = (contact) => {
         const trimmed = contact.trim();
         if (!trimmed) return { valid: false, msg: "Contact number is required" };
@@ -89,12 +88,10 @@ window.addEventListener("DOMContentLoaded", () => {
         return { valid: true };
     };
 
-    // Utility to show error messages
     function validateForm(data) {
     let isValid = true;
     clearErrors();                    
 
-    // Authority Name
     const name = data.authority_name.trim();
     if (!name) {
         showError("authorityName-error", "Authority Name is required");
@@ -112,7 +109,6 @@ window.addEventListener("DOMContentLoaded", () => {
         markFieldAsError("authorityName", false);
     }
 
-    // Contact
     const contactResult = validateContact(data.contact_number);
     if (!contactResult.valid) {
         showError("contactNumber-error", contactResult.msg);
@@ -122,7 +118,6 @@ window.addEventListener("DOMContentLoaded", () => {
         markFieldAsError("contactNumber", false);
     }
 
-    // Category
     if (!data.category) {
         showError("category-error", "Please select a category");
         markFieldAsError("category", true);
@@ -131,7 +126,6 @@ window.addEventListener("DOMContentLoaded", () => {
         markFieldAsError("category", false);
     }
 
-    // Email
     const emailVal = data.email.trim();
     if (!emailVal) {
         showError("email-error", "Email is required");
@@ -145,7 +139,6 @@ window.addEventListener("DOMContentLoaded", () => {
         markFieldAsError("email", false);
     }
 
-        // Location validation
         if (typeof window.selectedLat !== "number" || typeof window.selectedLng !== "number" || 
         window.selectedLat === 0 || window.selectedLng === 0) {
         
@@ -162,7 +155,6 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
 
-    // Fetch and populate table 
     async function loadContacts() {
 
         
@@ -203,7 +195,6 @@ window.addEventListener("DOMContentLoaded", () => {
                 tableBody.appendChild(row);
             });
 
-            // Attach edit/delete listeners after table rows are added
             document.querySelectorAll(".btn-edit").forEach(btn => {
                 btn.addEventListener("click", editContact);
             });
@@ -219,7 +210,6 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Form submit (create/update)
     form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -245,12 +235,10 @@ window.addEventListener("DOMContentLoaded", () => {
         let alertMessage = "";
         let alertTitle = "";
         if (selectedContactId) {
-            // Fetch the existing contact to compare changes
             const existingRes = await fetch(`${API_BASE}${selectedContactId}`,{headers:getAuthHeaders()});
             const existingContact = await handleResponse(existingRes);
             if (!existingContact) return;
 
-            // Check if any field changed
             const isChanged = Object.keys(contactData).some(
             key => contactData[key] !== existingContact[key]
             );
@@ -263,7 +251,6 @@ window.addEventListener("DOMContentLoaded", () => {
             selectedLocation.textContent = "Click on the map to select a location"; 
             return;
             }
-            // Update existing contact
             res = await fetch(`${API_BASE}${selectedContactId}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json",...getAuthHeaders() },
@@ -364,6 +351,5 @@ window.addEventListener("DOMContentLoaded", () => {
         }
     }
 
-    // Initialize
     loadContacts();
 });

@@ -33,12 +33,11 @@ def update_profile(db: Session, user_id: int, data: AdminUpdate) -> User | None:
     user = get_user_by_id(db, user_id)
     if not user:
         return None
-
     update_data = data.model_dump(exclude_unset=True)
 
     if "password" in update_data:
         update_data["password_hash"] = hash_password(update_data.pop("password"))
-
+        
     for field, value in update_data.items():
         setattr(user, field, value)
 

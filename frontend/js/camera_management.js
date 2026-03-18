@@ -97,7 +97,7 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   async function loadAdmin(selectedValue = null, allAdmins = false) {
     try {
-      const url = allAdmins ? '/cameras/admins/all' : '/cameras/admins/unassigned-admins';
+      const url = allAdmins ? '/cameras/admins/all' : '/cameras/admins/all-admins';
       const res = await fetch(url, {
         headers: getAuthHeaders()
       })
@@ -126,7 +126,7 @@ window.addEventListener("DOMContentLoaded", () => {
     try {
       const url = cameraId
         ? `/cameras/admins/available/${cameraId}`
-        : '/cameras/admins/unassigned-admins';
+        : '/cameras/admins/all-admins';
 
       const res = await fetch(url, {
         headers: getAuthHeaders()
@@ -226,6 +226,17 @@ window.addEventListener("DOMContentLoaded", () => {
   formElement.addEventListener('submit', async (e) => {
     e.preventDefault();
 
+    const locationVal = parseInt(locationSelect.value);
+    const adminVal = parseInt(adminSelect.value);
+
+    if (isNaN(locationVal)) {
+        alert("Please select a location.");
+        return;
+    }
+    if (isNaN(adminVal)) {
+        alert("No admin available to assign. Please create a new admin first.");
+        return;
+    }
     const dataLoad = {
       location_id: parseInt(locationSelect.value),
       admin_id: parseInt(adminSelect.value),

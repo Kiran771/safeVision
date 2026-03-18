@@ -6,8 +6,8 @@
     <title>User Management</title>
     <link rel="stylesheet" href="/css/userManagment.css" />
     <link rel="stylesheet" href="/css/header.css"/>
-    <script src="/js/userManagement.js"></script>
-    <script src="/js/sideMenu_loader.js"></script>
+    <script src="/js/userManagement.js?v=2"></script>
+    <script src="/js/sideMenu_loader.js?v=1"></script>
     <script> window.HEADER_CONFIG = { title  : "User Management", subtitle:"" };</script>
   </head>
   <body>
@@ -15,20 +15,20 @@
     
     <main class="main-content">
       <div id="header-container"></div>
-      <div class="stats-area">
-        <div class="stat-card">
-          <h3>Total Admin</h3>
-          <p id="totalAdmin">0</p>
+        <div class="stats-area">
+            <div class="stat-card">
+              <h3>Total Admin</h3>
+              <p id="totalAdmin">0</p>
+            </div>
+            <div class="stat-card">
+              <h3>Recently Added Admins</h3>
+              <p id="newAdmin">3</p>
+            </div>
+          <div class="stat-card">
+            <h3>Unassigned Admins</h3>
+            <p id="unassignedAdmin">0</p>  
+          </div>
         </div>
-        <div class="stat-card">
-          <h3>New Admin Added</h3>
-          <p id="newAdmin">3</p>
-        </div>
-        <div class="stat-card">
-          <h3>Number of Camera</h3>
-          <p>12</p>
-        </div>
-      </div>
 
       <div class="add-button-container">
         <button class="add-button">

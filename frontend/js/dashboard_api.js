@@ -101,7 +101,6 @@ class DashboardAPI {
                     'Content-Type': 'application/json',
                     ...this.getAuthHeaders()
                 }
-
             });
             return await this.handleResponse(response);
 
@@ -128,7 +127,6 @@ class DashboardAPI {
     }
 
 }
-
 
 const dashboardAPI = new DashboardAPI('');
 

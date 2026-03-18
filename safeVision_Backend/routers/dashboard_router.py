@@ -3,7 +3,10 @@ from fastapi import APIRouter, Depends,HTTPException
 from sqlalchemy.orm import Session
 from safeVision_Backend.core.psql_db import get_db
 from safeVision_Backend.core.security import get_current_user
-from safeVision_Backend.repositories import dashboard_repo
+from safeVision_Backend.repositories.dashboard_repo import (
+    get_detection_stats, get_incident_breakdown, get_status_breakdown,
+    get_daily_accident_counts, get_accidents_per_camera, get_high_confidence_count
+)
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"],dependencies=[Depends(get_current_user)])
 
@@ -11,9 +14,9 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"],dependencies=[Depends
 @router.get("/admin/stats",response_model=Dict[str, Any])
 def get_admin_dashboard_stats(db: Session = Depends(get_db)):
     try:
-        stats = dashboard_repo.get_detection_stats(db)
-        incidents = dashboard_repo.get_incident_breakdown(db)
-        status = dashboard_repo.get_status_breakdown(db)
+        stats = get_detection_stats(db)
+        incidents = get_incident_breakdown(db)
+        status = get_status_breakdown(db)
         
         return {
             'metrics': {
@@ -33,11 +36,11 @@ def get_admin_dashboard_stats(db: Session = Depends(get_db)):
             },
             'charts': {
                 'pending_reviews': {
-                    'labels': ['Resolved', 'False Alarm'],
+                    'labels': ['Resolved', 'Rejected Alarm'],
                     'data': [status['confirmed'], status['false_alarm']]
                 },
                 'alert_distribution': {
-                    'labels': ['Confirmed', 'Pending', 'False Alarm'],
+                    'labels': ['Confirmed', 'Pending', 'Rejected Alarm'],
                     'data': [status['confirmed'], status['pending'], status['false_alarm']]
                 }
             }
@@ -55,9 +58,9 @@ def get_time_period_stats(period: str = "7days", db: Session = Depends(get_db)):
             '30days': 30
         }
         days = days_map.get(period, 7)
-        stats = dashboard_repo.get_detection_stats(db, days=days)
-        status = dashboard_repo.get_status_breakdown(db, days=days)
-        incidents = dashboard_repo.get_incident_breakdown(db, days=days)
+        stats = get_detection_stats(db, days=days)
+        status = get_status_breakdown(db, days=days)
+        incidents = get_incident_breakdown(db, days=days)
         response_data = {
             'period': period,
             'days': days,
@@ -67,7 +70,7 @@ def get_time_period_stats(period: str = "7days", db: Session = Depends(get_db)):
             'false_alarm': status['false_alarm'],
             'total': status['total'],
             'chart_data': {
-                'labels': ['Confirmed', 'Pending', 'False Alarm'],
+                'labels': ['Confirmed', 'Pending', 'Rejected Alarm'],
                 'data': [status['confirmed'], status['pending'], status['false_alarm']]
             },
 
@@ -84,5 +87,41 @@ def get_time_period_stats(period: str = "7days", db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-
+@router.get("/superadmin/stats", response_model=Dict[str, Any])
+def get_superadmin_dashboard_stats(db: Session = Depends(get_db)):
+    try:
+        stats    = get_detection_stats(db)
+        incidents= get_incident_breakdown(db)
+        status   = get_status_breakdown(db)
+        daily    = get_daily_accident_counts(db, days=7)
+        cam_stats= get_accidents_per_camera(db)
+        hi_conf  = get_high_confidence_count(db)
+        return {
+            'metrics': {
+                'total_alerts':      stats['total_alerts'],
+                'unverified_incidents': stats['unverified'],
+                'confirmed':         stats['confirmed'],
+                'high_confidence':   hi_conf
+            },
+            'incidents': {
+                'fire_incident': incidents['fire_incident'],
+                'car_incidents': incidents['car_incidents']
+            },
+            'status_breakdown': {
+                'confirmed':   status['confirmed'],
+                'pending':     status['pending'],
+                'false_alarm': status['false_alarm'],
+                'total':       status['total']
+            },
+            'charts': {
+                'alert_distribution': {
+                    'labels': ['Confirmed', 'Pending', 'Rejected'],
+                    'data':   [status['confirmed'], status['pending'], status['false_alarm']]
+                },
+                'daily_counts': daily,     
+                'camera_stats': cam_stats     
+            }
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 

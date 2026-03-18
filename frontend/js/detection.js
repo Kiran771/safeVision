@@ -195,7 +195,6 @@ function renderFrameStrip() {
             detectionImg.src   = frame.url;
             activeView         = 'center';
             updateCenterLabel('center');
-            // highlight selected
             strip.querySelectorAll('div').forEach(d => d.style.outline = 'none');
             wrapper.style.outline = '2px solid #60a5fa';
         };
@@ -460,10 +459,8 @@ function renderFrameStrip() {
 
     }
 
-
     function closeFrameModal() {
         document.getElementById("frameModalOverlay").classList.remove("open");
-
     }
 
     function handleOverlayClick(e) {

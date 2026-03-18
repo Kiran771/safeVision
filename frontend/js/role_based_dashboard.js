@@ -4,37 +4,38 @@ function getUserRole() {
     let storedUser = {};
 
     try {
-        storedUser = JSON.parse(sessionStorage.getItem('user')) || {};
+        storedUser = JSON.parse(sessionStorage.getItem("user")) || {};
     } catch (e) { }
-    
+
     const role = (
         adminConfig.role ||
         userConfig.role ||
         storedUser.role ||
-        sessionStorage.getItem('role') || 'Admin'
+        sessionStorage.getItem("role") ||
+        "Admin"
     ).toLowerCase();
-    
+
     return role;
 }
 
 function initializeWelcome() {
     let storedUser = {};
-    let userName = 'User';
-    let greeting = '';
+    let userName = "User";
+    let greeting = "";
     try {
-        storedUser = JSON.parse(sessionStorage.getItem('user')) || {};
-        userName = storedUser.username || storedUser.name || 'User';
-    } catch (e) {}
+        storedUser = JSON.parse(sessionStorage.getItem("user")) || {};
+        userName = storedUser.username || storedUser.name || "User";
+    } catch (e) { }
     const hour = new Date().getHours();
     if (hour < 12) {
-        greeting = 'Good Morning,';
+        greeting = "Good Morning,";
     } else if (hour < 18) {
-        greeting = 'Good Afternoon,';
+        greeting = "Good Afternoon,";
     } else {
-        greeting = 'Good Evening,';
+        greeting = "Good Evening,";
     }
-    const greetingEl = document.getElementById('welcome-greeting');
-    const nameEl = document.getElementById('welcome-name');
+    const greetingEl = document.getElementById("welcome-greeting");
+    const nameEl = document.getElementById("welcome-name");
     if (greetingEl) {
         greetingEl.textContent = greeting;
     }
@@ -44,235 +45,564 @@ function initializeWelcome() {
     console.log(`Welcome message set: ${greeting}, ${userName}`);
 }
 
-async function renderDashboard() {
-    const userRole = getUserRole();
-    console.log('User Role:', userRole);
-    const contentEl = document.getElementById('dashboard-content');
-    if (!contentEl) {
-        console.error('dashboard-content element not found');
-        return;
-    }
-    
-    // Show loading state
-    contentEl.innerHTML = '<div style="padding: 2rem; text-align: center; color: #666;">Loading dashboard...</div>';
-    
+async function renderSuperAdminDashboard(contentEl) {
     try {
-        // Fetch data based on role
-        let dashboardData;
+        contentEl.innerHTML = '<div class="sa-loading">Loading dashboard…</div>';
+
+        const [statsRes, periodRes, adminsRes] = await Promise.all([
+            fetch("/dashboard/superadmin/stats", {
+                headers: dashboardAPI.getAuthHeaders(),
+            }),
+            fetch("/dashboard/time-period-stats?period=7days", {
+                headers: dashboardAPI.getAuthHeaders(),
+            }),
+            fetch("/admins/stats", { headers: dashboardAPI.getAuthHeaders() }),
+        ]);
+
+        const stats = await statsRes.json();
+        const period = await periodRes.json();
+        const admins = await adminsRes.json();
+
+        contentEl.innerHTML = buildSuperAdminHTML(stats, admins);
+
+        setTimeout(() => initSuperAdminCharts(stats, period), 120);
+        setupSATimeFilters();
+    } catch (err) {
+        console.error("SuperAdmin dashboard error:", err);
+        contentEl.innerHTML = `<div class="sa-error"><p>${err.message}</p>
+      <button onclick="location.reload()">Retry</button></div>`;
+    }
+}
+
+function buildSuperAdminHTML(stats, admins) {
+    const m = stats.metrics || {};
+    const sb = stats.status_breakdown || {};
+    const inc = stats.incidents || {};
+    const total = sb.total || 1;
+
+    const pct = (n) => (total > 0 ? ((n / total) * 100).toFixed(1) : 0);
+
+    return `
+    <div class="sa-dashboard">
+    <div class="sa-row sa-stats-row">
+        <div class="sa-card sa-stat blue-light">
+        <div class="sa-stat-label">Total Admins</div>
+        <div class="sa-stat-value">${admins.total ?? 0}</div>
+        </div>
+        <div class="sa-card sa-stat blue-light">
+        <div class="sa-stat-label">Total Cameras</div>
+        <div class="sa-stat-value" id="sa-total-cameras">—</div>
+        </div>
+        <div class="sa-card sa-stat blue-light">
+        <div class="sa-stat-label">Active Cameras</div>
+        <div class="sa-stat-value" id="sa-active-cameras">—</div>
+        </div>
+        <div class="sa-card sa-stat blue-light">
+        <div class="sa-stat-label">Unassigned Admins</div>
+        <div class="sa-stat-value">${admins.unassigned ?? 0}</div>
+        </div>
+    </div>
+
+    <div class="sa-row sa-alert-row">
+        <div class="sa-card sa-alert-card dark-slate">
+        <div class="sa-stat-label">Total Alerts Sent</div>
+        <div class="sa-stat-value">${m.total_alerts ?? 0}</div>
+        </div>
+        <div class="sa-card sa-alert-card dark-slate">
+        <div class="sa-stat-label">Active Emergency Contacts</div>
+        <div class="sa-stat-value" id="sa-contacts">—</div>
+        </div>
+        <div class="sa-card sa-alert-card dark-teal">
+        <div class="sa-stat-label">High-Confidence Detections</div>
+        <div class="sa-stat-value" id="sa-high-conf">—</div>
+        <div class="sa-stat-sub">confidence ≥ 70 %</div>
+        </div>
+    </div>
+
+    <div class="sa-row sa-charts-row">
+        <div class="sa-card sa-chart-card">
+        <div class="sa-chart-header">
+            <h3>Alert Status Distribution</h3>
+            <div class="sa-time-filters">
+            <button class="sa-filter active" data-period="24hrs">24hrs</button>
+            <button class="sa-filter" data-period="7days">7days</button>
+            <button class="sa-filter" data-period="30days">30days</button>
+            </div>
+        </div>
+        <div class="sa-chart-wrap"><canvas id="saStatusChart"></canvas></div>
+        </div>
+
+        <div class="sa-card sa-chart-card">
+        <div class="sa-chart-header">
+            <h3>Accidents Over Time</h3>
+        </div>
+        <div class="sa-chart-wrap"><canvas id="saTimelineChart"></canvas></div>
+        </div>
+
+    </div>
+
+
+    <div class="sa-row sa-charts-row">
+
+        <div class="sa-card sa-chart-card">
+        <div class="sa-chart-header">
+            <h3>Detections by Camera</h3>
+        </div>
+        <div class="sa-chart-wrap"><canvas id="saCameraChart"></canvas></div>
+        </div>
+
+        <div class="sa-card sa-incident-card">
+        <h3>Incident Type Stats</h3>
+        <div class="sa-incident-grid">
+            <div class="sa-inc-item">
+            <div class="sa-inc-label">Fire Incidents</div>
+            <div class="sa-inc-value">${inc.fire_incident ?? 0}</div>
+            </div>
+            <div class="sa-inc-item">
+            <div class="sa-inc-label">Car Incidents</div>
+            <div class="sa-inc-value">${inc.car_incidents ?? 0}</div>
+            </div>
+            <div class="sa-inc-item">
+            <div class="sa-inc-label">Pending Reviews</div>
+            <div class="sa-inc-value">${sb.pending ?? 0}</div>
+            </div>
+            <div class="sa-inc-item">
+            <div class="sa-inc-label">Confirmed</div>
+            <div class="sa-inc-value">${sb.confirmed ?? 0}</div>
+            </div>
+        </div>
+        </div>
+
+    </div>
+
+    <div class="sa-card sa-breakdown-card">
+        <h3>Status Breakdown</h3>
+        <div class="sa-breakdown-list">
+        ${saProgressBar("Confirmed Incidents", sb.confirmed ?? 0, pct(sb.confirmed ?? 0), "bar-confirmed")}
+        ${saProgressBar("Pending Reviews", sb.pending ?? 0, pct(sb.pending ?? 0), "bar-pending")}
+        ${saProgressBar("False Alarms", sb.false_alarm ?? 0, pct(sb.false_alarm ?? 0), "bar-false")}
+        </div>
+    </div>
+
+    </div>`;
+}
+
+function saProgressBar(label, count, pct, cls) {
+    return `
+    <div class="sa-bar-item">
+        <div class="sa-bar-header">
+        <span class="sa-bar-label">${label}</span>
+        <span class="sa-bar-count">${count} incidents</span>
+        </div>
+        <div class="sa-bar-track">
+        <div class="sa-bar-fill ${cls}" style="width:${pct}%"></div>
         
-        console.log('Fetching dashboard data...');
-        
-        if (userRole.toLowerCase().includes('super admin')) {
-            console.log('Loading SuperAdmin stats...');
-            dashboardData = await dashboardAPI.getSuperadminStats();
-        } else {
-            console.log('Loading Admin stats...');
-            dashboardData = await dashboardAPI.getAdminStats();
+        </div>
+    </div>`;
+}
+
+let saCharts = {};
+
+async function initSuperAdminCharts(stats, period) {
+    Object.values(saCharts).forEach((c) => c && c.destroy());
+    saCharts = {};
+
+    const sb = stats.status_breakdown || {};
+    const chartDefaults = {
+        font: { family: "'Segoe UI', sans-serif", size: 13 },
+        color: "#374151",
+    };
+    Chart.defaults.font = chartDefaults.font;
+    Chart.defaults.color = chartDefaults.color;
+
+    const statusCtx = document.getElementById("saStatusChart");
+    if (statusCtx) {
+        saCharts.status = new Chart(statusCtx, {
+            type: "doughnut",
+            data: {
+                labels: ["Confirmed", "Pending", "Rejected"],
+                datasets: [
+                    {
+                        data: [sb.confirmed ?? 0, sb.pending ?? 0, sb.false_alarm ?? 0],
+                        backgroundColor: ["#e32020", "#2563eb", "#f59e0b"],
+                        borderWidth: 3,
+                        borderColor: "#fff",
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: "65%",
+                plugins: {
+                    legend: {
+                        position: "bottom",
+                        labels: { padding: 16, usePointStyle: true },
+                    },
+                },
+            },
+        });
+    }
+
+    const timelineCtx = document.getElementById("saTimelineChart");
+    if (timelineCtx) {
+        const labels = [];
+        const today = new Date();
+        for (let i = 6; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(d.getDate() - i);
+            labels.push(
+                d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+            );
         }
-        
-        console.log('Dashboard Data Received:', dashboardData);
-        
-        // Validate data exists
+
+        let dailyData = [0, 0, 0, 0, 0, 0, 0];
+        try {
+            const r = await fetch("/dashboard/superadmin/stats", {
+                headers: dashboardAPI.getAuthHeaders(),
+            });
+            const d = await r.json();
+            if (d.charts && d.charts.daily_counts) dailyData = d.charts.daily_counts;
+        } catch (_) { }
+
+        saCharts.timeline = new Chart(timelineCtx, {
+            type: "bar",
+            data: {
+                labels,
+                datasets: [
+                    {
+                        label: "Accidents",
+                        data: dailyData,
+                        backgroundColor: (ctx) => {
+                            const val = ctx.raw;
+                            if (val === Math.max(...dailyData)) return "#dc2626";
+                            return "#93c5fd";
+                        },
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                        grid: { color: "#f1f5f9" },
+                    },
+                    x: { grid: { display: false } },
+                },
+            },
+        });
+    }
+
+    const cameraCtx = document.getElementById("saCameraChart");
+    if (cameraCtx) {
+        let camLabels = [],
+            camData = [];
+        try {
+            const r = await fetch("/cameras/", {
+                headers: dashboardAPI.getAuthHeaders(),
+            });
+            const cameras = await r.json();
+
+            const countRes = await fetch("/dashboard/superadmin/stats", {
+                headers: dashboardAPI.getAuthHeaders(),
+            });
+            const countData = await countRes.json();
+            const camStats = countData.charts?.camera_stats || {};
+
+            cameras.forEach((cam) => {
+                camLabels.push(`Cam #${cam.cameraid}`);
+                camData.push(camStats[cam.cameraid] ?? 0);
+            });
+
+            document.getElementById("sa-total-cameras").textContent = cameras.length;
+            document.getElementById("sa-active-cameras").textContent = cameras.filter(
+                (c) => c.status?.toLowerCase() === "active",
+            ).length;
+        } catch (_) { }
+
+        saCharts.camera = new Chart(cameraCtx, {
+            type: "bar",
+            data: {
+                labels: camLabels,
+                datasets: [
+                    {
+                        label: "Detections",
+                        data: camData,
+                        backgroundColor: "#305083",
+                        borderRadius: 6,
+                        borderSkipped: false,
+                    },
+                ],
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: camLabels.length > 6 ? "y" : "x",
+                plugins: { legend: { display: false } },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { precision: 0 },
+                        grid: { color: "#f1f5f9" },
+                    },
+                    x: { grid: { display: false } },
+                },
+            },
+        });
+    }
+
+    try {
+        const r = await fetch("/contacts/", {
+            headers: dashboardAPI.getAuthHeaders(),
+        });
+        const contacts = await r.json();
+        const active = contacts.filter((c) => c.is_active).length;
+        document.getElementById("sa-contacts").textContent = active;
+    } catch (_) { }
+
+    try {
+        const r = await fetch("/dashboard/superadmin/stats", {
+            headers: dashboardAPI.getAuthHeaders(),
+        });
+        const d = await r.json();
+        document.getElementById("sa-high-conf").textContent =
+            d.metrics?.high_confidence ?? "—";
+    } catch (_) { }
+}
+
+function setupSATimeFilters() {
+    document.querySelectorAll(".sa-filter").forEach((btn) => {
+        btn.addEventListener("click", async () => {
+            document
+                .querySelectorAll(".sa-filter")
+                .forEach((b) => b.classList.remove("active"));
+            btn.classList.add("active");
+            const p = btn.dataset.period;
+            try {
+                const r = await fetch(`/dashboard/time-period-stats?period=${p}`, {
+                    headers: dashboardAPI.getAuthHeaders(),
+                });
+                const d = await r.json();
+                if (saCharts.status && d.chart_data) {
+                    saCharts.status.data.datasets[0].data = d.chart_data.data;
+                    saCharts.status.data.labels = d.chart_data.labels;
+                    saCharts.status.update();
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        });
+    });
+}
+
+async function renderAdminDashboard(contentEl) {
+    contentEl.innerHTML =
+        '<div style="padding:2rem;text-align:center;color:#666;">Loading dashboard...</div>';
+    try {
+        const dashboardData = await dashboardAPI.getAdminStats();
+
         if (!dashboardData || !dashboardData.metrics) {
-            throw new Error('Invalid dashboard data received');
+            throw new Error("Invalid dashboard data received");
         }
-        
-        // Build dashboard HTML
+
         let html = '<div class="dashboard-grid">';
-        // Metrics Row
         html += '<div class="metrics-row">';
-        html += `
-            <div class="metric-card total-alerts">
-                <div class="metric-label">Total Alerts</div>
-                <div class="metric-value">${dashboardData.metrics.total_alerts || 0}</div>
-            </div>
-        `;
-        html += `
-            <div class="metric-card unverified">
-                <div class="metric-label">Unverified incidents</div>
-                <div class="metric-value">${dashboardData.metrics.unverified_incidents || 0}</div>
-            </div>
-        `;
-        html += `
-            <div class="metric-card confirmed">
-                <div class="metric-label">Confirmed</div>
-                <div class="metric-value">${dashboardData.metrics.confirmed || 0}</div>
-            </div>
-        `;
-        html += '</div>';
-        
-        // Charts Row
+        html += `<div class="metric-card total-alerts">
+                    <div class="metric-label">Total Alerts</div>
+                    <div class="metric-value">${dashboardData.metrics.total_alerts || 0}</div>
+                </div>`;
+        html += `<div class="metric-card unverified">
+                    <div class="metric-label">Unverified incidents</div>
+                    <div class="metric-value">${dashboardData.metrics.unverified_incidents || 0}</div>
+                </div>`;
+        html += `<div class="metric-card confirmed">
+                    <div class="metric-label">Confirmed</div>
+                    <div class="metric-value">${dashboardData.metrics.confirmed || 0}</div>
+                </div>`;
+        html += "</div>";
+
         html += '<div class="charts-row">';
-
-        // Alert Status Distribution Chart
-        html += `
-            <div class="chart-card dark">
-                <h3>Alert status distribution</h3>
-                <div class="time-filters">
-                    <button class="filter-btn active" data-filter="24hrs">24hrs</button>
-                    <button class="filter-btn" data-filter="7days">7days</button>
-                    <button class="filter-btn" data-filter="30days">30days</button>
-                </div>
-                <div class="chart-container">
-                    <canvas id="statusChart"></canvas>
-                </div>
-            </div>
-        `;
-        html += '</div>';
-
-        // Incident Stats
-        html += '<div class="incident-stats">';
-        html += '<h3>Incident type stat\'s</h3>';
-        html += '<div class="incident-grid">';
+        html += `<div class="chart-card dark">
+                    <h3>Alert status distribution</h3>
+                    <div class="time-filters">
+                        <button class="filter-btn active" data-filter="24hrs">24hrs</button>
+                        <button class="filter-btn" data-filter="7days">7days</button>
+                        <button class="filter-btn" data-filter="30days">30days</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>`;
+        html += "</div>";
 
         const incidents = dashboardData.incidents || {};
+        html += '<div class="incident-stats">';
+        html += "<h3>Incident type stat's</h3>";
+        html += '<div class="incident-grid">';
+        html += `<div class="incident-item">
+                    <div class="incident-label">Fire Incident</div>
+                    <div class="incident-value">${incidents.fire_incident || 0}</div>
+                </div>`;
+        html += `<div class="incident-item">
+                    <div class="incident-label">Car incidents</div>
+                    <div class="incident-value">${incidents.car_incidents || 0}</div>
+                </div>`;
+        html += "</div></div>";
 
-        html += `
-            <div class="incident-item">
-                <div class="incident-label">Fire Incident</div>
-                <div class="incident-value">${incidents.fire_incident || 0}</div>
-            </div>
-        `;
-
-        html += `
-            <div class="incident-item">
-                <div class="incident-label">Car incidents</div>
-                <div class="incident-value">${incidents.car_incidents || 0}</div>
-            </div>
-        `;
-        
-        html += '</div></div>';
-
-        // Status Breakdown
-        html += '<div class="status-breakdown">';
-        html += '<h3>Status Break down</h3>';
-        html += '<div class="status-items">';
-
-        const breakdown = dashboardData.status_breakdown || { confirmed: 0, pending: 0, false_alarm: 0, total: 0 };
+        const breakdown = dashboardData.status_breakdown || {
+            confirmed: 0,
+            pending: 0,
+            false_alarm: 0,
+            total: 0,
+        };
         const total = breakdown.total || 1;
-
         const statuses = [
-            { name: 'Confirmed Incidents', count: breakdown.confirmed || 0, color: 'progress-resolved' },
-            { name: 'Pending Reviews', count: breakdown.pending || 0, color: 'progress-pending' },
-            { name: 'False Alarm', count: breakdown.false_alarm || 0, color: 'progress-false' }
+            {
+                name: "Confirmed Incidents",
+                count: breakdown.confirmed || 0,
+                color: "progress-resolved",
+            },
+            {
+                name: "Pending Reviews",
+                count: breakdown.pending || 0,
+                color: "progress-pending",
+            },
+            {
+                name: "Rejected Alarm",
+                count: breakdown.false_alarm || 0,
+                color: "progress-false",
+            },
         ];
 
-        statuses.forEach(status => {
+        html +=
+            '<div class="status-breakdown"><h3>Status Break down</h3><div class="status-items">';
+        statuses.forEach((status) => {
             const percentage = total > 0 ? (status.count / total) * 100 : 0;
-            html += `
-                <div class="status-item">
-                    <div class="status-header">
-                        <span class="status-name">${status.name}</span>
-                        <span class="status-count">${status.count} incident${status.count !== 1 ? 's' : ''}</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill ${status.color}" style="width: ${percentage}%"></div>
-                    </div>
-                </div>
-            `;
-        }); 
+            html += `<div class="status-item">
+                        <div class="status-header">
+                            <span class="status-name">${status.name}</span>
+                            <span class="status-count">${status.count} incident${status.count !== 1 ? "s" : ""}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${status.color}" style="width:${percentage}%"></div>
+                        </div>
+                    </div>`;
+        });
+        html += "</div></div>";
+        html += "</div>";
 
-        html += '</div></div>';
-        html += '</div>';
-        
         contentEl.innerHTML = html;
-        console.log('Dashboard HTML rendered successfully');
-
-        // Initialize charts with real data
         setTimeout(() => initializeChartsWithData(dashboardData), 100);
-        
-        // Setup time filters
         setupTimeFilters();
-        
     } catch (error) {
-        console.error('Error rendering dashboard:', error);
-        console.error('Error stack:', error.stack);
-        
-        const errorDiv = document.createElement('div');
-        errorDiv.style.cssText = 'padding: 2rem; text-align: center; color: #d32f2f;';
-        errorDiv.innerHTML = `
+        console.error("Error rendering admin dashboard:", error);
+        contentEl.innerHTML = `<div style="padding:2rem;text-align:center;color:#d32f2f;">
             <h3>Error loading dashboard</h3>
-            <button onclick="location.reload()" style="padding: 0.5rem 1rem; background: #2563eb; color: white; border: none; border-radius: 0.5rem; cursor: pointer;">
+            <p>${error.message}</p>
+            <button onclick="location.reload()" 
+                style="padding:0.5rem 1rem;background:#2563eb;color:white;border:none;border-radius:0.5rem;cursor:pointer;">
                 Retry
             </button>
-        `;
-        const errorMsg = document.createElement('p');
-        errorMsg.textContent = error.message;
-        errorDiv.insertBefore(errorMsg, errorDiv.querySelector('button'));
-        contentEl.innerHTML = '';
-        contentEl.appendChild(errorDiv);
+        </div>`;
+    }
+}
+
+async function renderDashboard() {
+    const userRole = getUserRole();
+    const contentEl = document.getElementById("dashboard-content");
+    if (!contentEl) return;
+
+    if (userRole.includes("super")) {
+        await renderSuperAdminDashboard(contentEl);
+    } else {
+        await renderAdminDashboard(contentEl);
     }
 }
 
 let chartInstances = {};
 function initializeChartsWithData(dashboardData) {
     try {
-        Object.values(chartInstances).forEach(chart => {
+        Object.values(chartInstances).forEach((chart) => {
             if (chart) chart.destroy();
         });
         chartInstances = {};
         const chartData = dashboardData.charts || {};
-        
-        if (!chartData.pending_reviews || !chartData.alert_distribution) {
-            console.error('Chart data missing', chartData);
+
+        if (!chartData.alert_distribution) {
+            console.error("Chart data missing", chartData);
             return;
         }
 
-        // Status Distribution Chart
-        const statusCtx = document.getElementById('statusChart');
+        const statusCtx = document.getElementById("statusChart");
         if (statusCtx) {
             chartInstances.status = new Chart(statusCtx, {
-                type: 'doughnut',
+                type: "doughnut",
                 data: {
-                    labels: chartData.alert_distribution.labels || ['Confirmed', 'Pending', 'False Alarm'],
-                    datasets: [{
-                        data: chartData.alert_distribution.data || [0, 0, 0],
-                        backgroundColor: ['#e32020', '#3564a1', '#197d35'],
-                        borderColor: '#ffffff',
-                        borderWidth: 2,
-                    }]
+                    labels: chartData.alert_distribution.labels || [
+                        "Confirmed",
+                        "Pending",
+                        "Rejected Alarm",
+                    ],
+                    datasets: [
+                        {
+                            data: chartData.alert_distribution.data || [0, 0, 0],
+                            backgroundColor: ["#e32020", "#3564a1", "#f59e0b"],
+                            borderColor: "#ffffff",
+                            borderWidth: 2,
+                        },
+                    ],
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     plugins: {
                         legend: {
-                            position: 'bottom',
+                            position: "bottom",
                             labels: {
                                 font: { size: 14, family: "'Segoe UI', sans-serif" },
                                 padding: 15,
                                 usePointStyle: true,
-                                color: '#000000'
+                                color: "#000000",
                             },
-                            textAlign: 'center'
-                        }
-                    }
-                }
+                            textAlign: "center",
+                        },
+                    },
+                },
             });
-            console.log('Status chart initialized');
+            console.log("Status chart initialized");
         }
     } catch (error) {
-        console.error('Error initializing charts:', error);
+        console.error("Error initializing charts:", error);
     }
 }
 
 function setupTimeFilters() {
     try {
-        document.querySelectorAll('.filter-btn').forEach(btn => {
-            btn.addEventListener('click', async () => {
-                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
+        document.querySelectorAll(".filter-btn").forEach((btn) => {
+            btn.addEventListener("click", async () => {
+                document
+                    .querySelectorAll(".filter-btn")
+                    .forEach((b) => b.classList.remove("active"));
+                btn.classList.add("active");
+
                 const period = btn.dataset.filter;
-                console.log('Fetching stats for period:', period);
-                
+                console.log("Fetching stats for period:", period);
+
                 try {
                     const periodData = await dashboardAPI.getTimePeriodStats(period);
-                    console.log('Period data:', periodData);
-                    
+                    console.log("Period data:", periodData);
+
                     if (chartInstances.status && periodData.chart_data) {
-                        chartInstances.status.data.datasets[0].data = periodData.chart_data.data || [0, 0, 0];
-                        chartInstances.status.data.labels = periodData.chart_data.labels || ['Confirmed', 'Pending', 'False Alarm'];
+                        chartInstances.status.data.datasets[0].data = periodData.chart_data
+                            .data || [0, 0, 0];
+                        chartInstances.status.data.labels = periodData.chart_data
+                            .labels || ["Confirmed", "Pending", "Rejected Alarm"];
                         chartInstances.status.update();
                     }
                 } catch (error) {
@@ -281,11 +611,11 @@ function setupTimeFilters() {
             });
         });
     } catch (error) {
-        console.error('Error setting up time filters:', error);
+        console.error("Error setting up time filters:", error);
     }
 }
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
         initializeWelcome();
         renderDashboard();
     });

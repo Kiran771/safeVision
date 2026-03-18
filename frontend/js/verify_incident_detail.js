@@ -1,4 +1,4 @@
-let = isRedirecting=false
+let = isRedirecting = false
 function getAuthHeaders() {
     const token = sessionStorage.getItem("access_token");
     return token ? { "Authorization": `Bearer ${token}` } : {};
@@ -7,7 +7,7 @@ function getAuthHeaders() {
 async function handleResponse(response) {
     if (response.status === 401) {
         console.warn('Token expired. Redirecting to login...');
-        isRedirecting=true
+        isRedirecting = true
         sessionStorage.clear();
         alert("Session expired. Please login again.");
         window.location.href = '/html/login.html';
@@ -17,11 +17,11 @@ async function handleResponse(response) {
     try {
         data = await response.json();
     } catch {
-        data = null; 
+        data = null;
     }
     if (!response.ok) {
         console.error("API Error:", data);
-        return data; 
+        return data;
     }
     return data;
 }
@@ -29,22 +29,19 @@ async function handleResponse(response) {
 const urlParams = new URLSearchParams(window.location.search);
 const incidentId = urlParams.get('id');
 
-// Load incident data when page loads
 document.addEventListener('DOMContentLoaded', () => {
     loadIncidentData();
     setupEventListeners();
 });
 
-// Load incident data
 async function loadIncidentData() {
     try {
-        const response = await fetch(`/accidents/${incidentId}`,{
+        const response = await fetch(`/accidents/${incidentId}`, {
             headers: getAuthHeaders()
         });
         const incident = await handleResponse(response);
         if (!incident) return;
 
-        // Populate fields
         document.getElementById('incident-time').textContent = incident.timestamp
             ? new Date(incident.timestamp).toLocaleTimeString()
             : 'Unknown';
@@ -52,14 +49,11 @@ async function loadIncidentData() {
             ? `${Math.round(incident.confidence * 100)}%`
             : 'N/A';
 
-        // Populate location information
         if (incident.location) {
             document.getElementById('location-address').textContent = incident.location.address || incident.location;
         }
 
-        // Set confidence bar 
         setConfidenceBar(incident.confidence || 0)
-
         loadFrameImage(incident.frame_path)
 
     } catch (error) {
@@ -71,8 +65,8 @@ async function loadIncidentData() {
 
 
 function setConfidenceBar(confidence) {
-    const fill = document.getElementById('anomaly-fill')
-    const textEl = document.getElementById('anomaly-score-text')
+    const fill = document.getElementById('confidence-fill')
+    const textEl = document.getElementById('confidence-score-text')
     const percentage = Math.round(confidence * 100)
 
     setTimeout(() => { fill.style.width = `${percentage}%` }, 100)
@@ -116,14 +110,12 @@ async function loadFrameImage(frameUrl) {
     }
 }
 
-// Setup event listeners
 function setupEventListeners() {
     document.getElementById('confirm-btn').addEventListener('click', confirmIncident);
     document.getElementById('reject-btn').addEventListener('click', rejectIncident);
     document.getElementById('cancel-btn').addEventListener('click', cancel);
 }
 
-// Confirm incident
 async function confirmIncident() {
     const confirmed = confirm('Are you sure you want to CONFIRM this incident?');
     if (!confirmed) return;
@@ -140,10 +132,8 @@ async function confirmIncident() {
         if (!response.ok) {
             throw new Error(result?.detail || 'Failed to confirm incident');
         }
-
         alert('Incident confirmed successfully!');
 
-        // Redirect back to verify incidents page
         window.location.href = '/html/verify.html';
     } catch (error) {
         console.error('Error confirming incident:', error);
@@ -152,7 +142,6 @@ async function confirmIncident() {
 }
 
 
-// Reject incident
 async function rejectIncident() {
     const confirmed = confirm('Are you sure you want to REJECT this incident?');
     if (!confirmed) return;
@@ -171,8 +160,6 @@ async function rejectIncident() {
         }
 
         alert('Incident rejected successfully!');
-
-        // Redirect back to verify incidents page
         window.location.href = '/html/verify.html';
     } catch (error) {
         console.error('Error rejecting incident:', error);
@@ -180,14 +167,10 @@ async function rejectIncident() {
     }
 }
 
-
-// Cancel and go back
 function cancel() {
-    // Go back to verify incidents page
     window.location.href = '/html/verify.html';
 }
 
-// Handle image load errors
 document.getElementById('original-img').addEventListener('error', function () {
     this.style.display = 'none';
     this.parentElement.classList.add('loading');

@@ -1,3 +1,4 @@
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from safeVision_Backend.models.table_creation import Accident, Camera, User,Location,Alert,UserCamera
@@ -47,11 +48,9 @@ def get_detection_stats(db: Session, days: int = 30):
     pending = len([d for d in detections if d.status == 'pending'])
     rejected = len([d for d in detections if d.status == 'rejected'])
 
-    # Count by detection type
     accidents = len([d for d in detections if d.detection_type in ['accident', 'confirmed']])
     fires = len([d for d in detections if d.detection_type == 'fire'])
 
-    # Count by confidence ranges
     low_confidence = len([d for d in detections if d.confidence and d.confidence < 0.5])
     high_confidence = len([d for d in detections if d.confidence and d.confidence >= 0.7])
 
@@ -95,7 +94,6 @@ def get_status_breakdown(db: Session, days: int = 30):
             'total': 0
         }
 
-    # Status breakdown
     confirmed= len([d for d in detections if d.status == 'confirmed'])    
     pending = len([d for d in detections if d.status == 'pending'])    
     rejected = len([d for d in detections if d.status == 'rejected'])   
@@ -108,10 +106,9 @@ def get_status_breakdown(db: Session, days: int = 30):
     }
 
 def get_detection_count_by_status(db: Session, days: int = 30):
-    
     breakdown = get_status_breakdown(db, days)
     return {
-        'labels': ['Confirmed', 'Pending', 'False Alarm'],
+        'labels': ['Confirmed', 'Pending', 'Rejected Alarm'],
         'data': [
             breakdown['confirmed'],
             breakdown['pending'],
@@ -129,6 +126,37 @@ def get_total_active_cameras(db: Session):
 
 def get_total_admins(db: Session):
     return db.query(User).filter(User.role=='Admin').count()
+
+def get_daily_accident_counts(db, days: int = 7):
+    today = datetime.utcnow().date()
+    counts = []
+    for i in range(days - 1, -1, -1):
+        day = today - timedelta(days=i)
+        start = datetime(day.year, day.month, day.day)
+        end   = start + timedelta(days=1)
+        count = (
+            db.query(Accident)
+            .filter(Accident.timestamp >= start, Accident.timestamp < end)
+            .count()
+        )
+        counts.append(count)
+    return counts
+
+def get_accidents_per_camera(db):
+    rows = (
+        db.query(Accident.cameraid, func.count(Accident.accidentid).label('cnt'))
+        .group_by(Accident.cameraid)
+        .all()
+    )
+    return {row.cameraid: row.cnt for row in rows}
+
+def get_high_confidence_count(db, min_confidence: float = 0.7, days: int = 30):
+    start = datetime.utcnow() - timedelta(days=days)
+    return (
+        db.query(Accident)
+        .filter(Accident.confidence >= min_confidence, Accident.timestamp >= start)
+        .count()
+    )
 
 
 

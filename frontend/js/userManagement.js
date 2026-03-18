@@ -3,11 +3,11 @@ function getAuthHeaders() {
     return token ? { "Authorization": `Bearer ${token}` } : {};
 }
 
-let =isRedirecting=false
+let isRedirecting = false
 async function handleResponse(response) {
     if (response.status === 401) {
         console.warn('Token expired. Redirecting to login...');
-        isRedirecting=true
+        isRedirecting = true
         sessionStorage.clear();
         alert("Session expired. Please login again.");
         window.location.href = '/html/login.html';
@@ -17,11 +17,11 @@ async function handleResponse(response) {
     try {
         data = await response.json();
     } catch {
-        data = null; 
+        data = null;
     }
     if (!response.ok) {
         console.error("API Error:", data);
-        return data; 
+        return data;
     }
     return data;
 }
@@ -44,7 +44,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let selectedAdminId = null;
 
-    // Utility Functions
     function showError(id, msg) { document.getElementById(id).innerText = msg; }
     function clearErrors() { document.querySelectorAll(".error").forEach(e => e.innerText = ""); }
     function resetForm() {
@@ -87,7 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const contactResult = validateContact(data.contact);
         if (!contactResult.valid) { showError("userContactError", contactResult.msg); valid = false; }
 
-        // Password (only for add)
+        // password 
         if (!isEdit) {
             if (!data.password) { showError("passwordError", "Password required"); valid = false; }
             else if (data.password.length < 8) { showError("passwordError", "Min 8 characters"); valid = false; }
@@ -99,48 +98,51 @@ document.addEventListener('DOMContentLoaded', () => {
         return valid;
     }
 
-    // Load admins
     async function loadAdmins() {
         try {
-            const res = await fetch("/admins/", {
-                headers: getAuthHeaders()
-                
-            });
-            const admins = await handleResponse(res);
+            const [statsRes, adminsRes] = await Promise.all([
+                fetch("/admins/stats", { headers: getAuthHeaders() }),
+                fetch("/admins/", { headers: getAuthHeaders() })
+            ]);
+
+            const stats = await handleResponse(statsRes);
+            const admins = await handleResponse(adminsRes);
+
+            if (stats) {
+                document.getElementById("totalAdmin").textContent = stats.total;
+                document.getElementById("newAdmin").textContent = stats.recently_added;
+                document.getElementById("unassignedAdmin").textContent = stats.unassigned;
+            }
             if (!admins) return;
-            console.log("First admin object:", admins[0] || "No admins");
             tableBody.innerHTML = "";
 
             const adminUsers = admins.filter(admin => admin.role === "Admin");
-            const totalAdmins = adminUsers.length;
-
-            if (totalAdmins === 0) {
-                tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; font-size: 15px; color: #666;">No admin found</td></tr>`;
+            if (adminUsers.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center;color:#666;">No admin found</td></tr>`;
+                return;
             }
-            else {
-                adminUsers.forEach(admin => {
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td>${admin.id}</td>
-                        <td>${admin.username}</td>
-                        <td>${admin.email}</td>
-                        <td>${admin.role}</td>
-                        <td>
-                            <button class="btn-edit" data-id="${admin.id}"><img src="/resources/edit.png" alt="Edit"></button>
-                            <button class="btn-delete" data-id="${admin.id}"><img src="/resources/delete.png" alt="Delete"></button>
-                        </td>`;
-                    tableBody.appendChild(tr);
-                });
+            adminUsers.forEach(admin => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                <td>${admin.id}</td>
+                <td>${admin.username}</td>
+                <td>${admin.email}</td>
+                <td>${admin.role}</td>
+                <td>
+                    <button class="btn-edit" data-id="${admin.id}"><img src="/resources/edit.png" alt="Edit"></button>
+                    <button class="btn-delete" data-id="${admin.id}"><img src="/resources/delete.png" alt="Delete"></button>
+                </td>`;
+                tableBody.appendChild(tr);
+            });
 
-                document.querySelectorAll(".btn-edit").forEach(btn => btn.addEventListener("click", editAdmin));
-                document.querySelectorAll(".btn-delete").forEach(btn => btn.addEventListener("click", deleteAdmin));
-            }
-
-            totalAdminEl.textContent = totalAdmins;
-        } catch (err) { console.error(err); alert("Failed to load admins"); }
+            document.querySelectorAll(".btn-edit").forEach(btn => btn.addEventListener("click", editAdmin));
+            document.querySelectorAll(".btn-delete").forEach(btn => btn.addEventListener("click", deleteAdmin));
+        } catch (err) {
+            console.error(err);
+            alert("Failed to load admins");
+        }
     }
 
-    // Form Submit
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
@@ -192,7 +194,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             closeForm();
             await loadAdmins();
-            alert(isEdit ? "Admin updated!" : "Admin created!");
+            alert(result.message);
             selectedAdminId = null;
 
         } catch (err) {
@@ -207,7 +209,7 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const res = await fetch(`/admins/${id}`, {
                 headers: getAuthHeaders()
-                
+
             });
             const admin = await handleResponse(res);
             if (!admin) return;
@@ -224,8 +226,6 @@ document.addEventListener('DOMContentLoaded', () => {
             CRUD.textContent = "Update Admin";
             selectedAdminId = id;
             form.classList.add('show');
-
-            // Always show role dropdown for edit
             userRole.style.display = 'block';
 
         } catch (err) {
@@ -234,7 +234,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Delete Admin
     async function deleteAdmin(e) {
         const id = e.currentTarget.dataset.id;
         if (!confirm("Delete this admin?")) return;
@@ -257,7 +256,6 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Open Add Admin Form
     addButton.addEventListener('click', async () => {
         form.classList.add('show');
         resetForm();
@@ -273,7 +271,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     closeButton.addEventListener('click', closeForm);
 
-    // Initial load
     console.log("loadAdmins started");
 
     console.log("tableBody element:", tableBody);

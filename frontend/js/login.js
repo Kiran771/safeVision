@@ -57,9 +57,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const data = await res.json();
 
-      
-
-
 if (!res.ok) {
     passwordError.innerText = data.detail || "Login failed. Please check your credentials.";
     usernameInput.classList.add("error");

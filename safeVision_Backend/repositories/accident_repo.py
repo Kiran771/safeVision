@@ -3,8 +3,8 @@ from safeVision_Backend.models.table_creation import Accident,Camera
 
 
 def get_camera_location(db:Session,camera_id:int):
-  camera=db.query(Camera).filter(Camera.cameraid==camera_id).first()
-  return camera.location if camera else "Unknown Location"
+    camera=db.query(Camera).filter(Camera.cameraid==camera_id).first()
+    return camera.location if camera else "Unknown Location"
 
 def save_detection(
     db: Session,

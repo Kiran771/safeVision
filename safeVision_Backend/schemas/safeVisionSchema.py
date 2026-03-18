@@ -25,6 +25,10 @@ class AdminUpdate(BaseModel):
     role : Optional[str] = Field(None, min_length=2,  max_length=30)
     password: Optional[str] = Field(None, min_length=8)
 
+class AdminStatsOut(BaseModel):
+    total: int
+    recently_added: int
+    unassigned: int
 
 class UserOut(BaseModel):
     userid : int
@@ -85,23 +89,13 @@ class CameraCreate(BaseModel):
     @field_validator("status")
     @classmethod
     def status_must_be_valid(cls, v: str) -> str:
-        allowed = {"active", "inactive", "maintenance"}
+        allowed = {"active", "inactive", "maintenance"}  # ← all lowercase
         if v.lower() not in allowed:
             raise ValueError(f"status must be one of: {allowed}")
-        return v.lower()
+        return v 
 
-class CameraUpdate(BaseModel):
-    location_id: int
-    admin_id : int
-    status : str = Field(default="active", max_length=20)
-
-    @field_validator("status")
-    @classmethod
-    def status_must_be_valid(cls, v: str) -> str:
-        allowed = {"active", "inactive", "maintenance"}
-        if v.lower() not in allowed:
-            raise ValueError(f"status must be one of: {allowed}")
-        return v.lower()
+class CameraUpdate(CameraCreate):
+    pass
 
 class CameraOut(BaseModel):
     cameraid   : int

@@ -5,7 +5,7 @@
 }
 
 body {
-  font-family: "Segoe UI", system-ui, sans-serif;
+  font-family: Arial, sans-serif;
   background: #f4f6f8;
   display: flex;
   min-height: 100vh;
@@ -48,7 +48,7 @@ body {
 }
 
 .stat-card {
-  background: #c8ddf5;
+  background: rgba(13, 63, 87,0.73);;
   border-radius: 18px;
   padding: 24px 40px;
   text-align: center;
@@ -57,15 +57,15 @@ body {
 
 .stat-card .label {
   font-size: 16px;
-  font-weight: 700;
-  color: #111;
+  font-weight: 600;
+  color: white;
   margin-bottom: 6px;
 }
 
 .stat-card .value {
   font-size: 28px;
-  font-weight: 700;
-  color: #111;
+  font-weight: 600;
+  color: white;
 }
 
 .btn-register {
