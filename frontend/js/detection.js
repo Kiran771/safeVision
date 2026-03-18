@@ -124,7 +124,60 @@ async function startSyncedDetection(videoElement, detectionImg, videoFps) {
             syncRunning = false;
             videoElement.pause()
         }
+    
+}
+
+
+
+async function loadCurrentSensitivity() {
+    try {
+        const resp = await fetch('/settings/sensitivity', {
+            headers: getAuthHeaders()
+        });
+        const data = await handleResponse(resp);
+        if (!data) return;
+
+        highlightActiveThreshold(data.sensitivity);
+    } catch (err) {
+        console.error('[THRESHOLD] Failed to load sensitivity:', err);
     }
+}
+
+function highlightActiveThreshold(activeLevel) {
+    document.querySelectorAll('.threshold-btn').forEach(btn => {
+        if (btn.dataset.value === activeLevel) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+}
+
+async function setSensitivity(level) {
+    try {
+        const resp = await fetch(`/settings/sensitivity/${level}`, {
+            method: 'POST',
+            headers: getAuthHeaders()
+        });
+        const data = await handleResponse(resp);
+        if (!data) return;
+
+        highlightActiveThreshold(level);
+        console.log(`[THRESHOLD] Set to: ${level}`);
+
+    } catch (err) {
+        console.error('[THRESHOLD] Failed to update:', err);
+    }
+}
+
+document.querySelectorAll('.threshold-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const level = btn.dataset.value;
+        setSensitivity(level);
+    });
+});
+
+loadCurrentSensitivity();
 
 
 function renderFrameStrip() {

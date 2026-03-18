@@ -79,3 +79,13 @@ class Alert(Base):
     contactid = Column(Integer, ForeignKey('emergency_contacts.contactid'), nullable=False, index=True)
     accidentid = Column(Integer, ForeignKey('accidents.accidentid'), nullable=False, index=True)
     userid = Column(Integer, ForeignKey('users.userid'), nullable=True, index=True)
+
+
+class DetectionConfig(Base):
+    __tablename__ = 'detection_config'
+    config_id = Column(Integer, primary_key=True, autoincrement=True)
+    sensitivity = Column(String(20), nullable=False, default='medium')
+    updated_by  = Column(Integer, ForeignKey('users.userid'), nullable=True)
+    updated_at  = Column(DateTime(timezone=True), 
+                        server_default=func.now(), 
+                        onupdate=func.now())
