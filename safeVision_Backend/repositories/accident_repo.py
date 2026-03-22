@@ -1,6 +1,10 @@
+from datetime import datetime
+
 from sqlalchemy.orm import Session
 from safeVision_Backend.models.table_creation import Accident,Camera
 
+
+notifications = []
 
 def get_camera_location(db:Session,camera_id:int):
     camera=db.query(Camera).filter(Camera.cameraid==camera_id).first()
@@ -83,3 +87,29 @@ def get_pending_count(db: Session):
 
 def get_confirmed_count(db: Session):
     return db.query(Accident).filter(Accident.status == 'confirmed').count()
+
+
+def add_notification(message: str, type: str = "info"):
+    notifications.append({
+        "message":   message,
+        "type":      type,   
+        "timestamp": datetime.now().isoformat(),
+        "read":      False
+    })
+    if len(notifications) > 20:
+        notifications.pop(0)
+
+def get_unread_notifications():
+    
+    unread = [n for n in notifications if not n["read"]]
+    for n in notifications:
+        n["read"] = True
+    return unread
+
+
+def get_all_notifications():
+    return list(notifications)
+
+
+def clear_all_notifications():
+    notifications.clear()

@@ -3,7 +3,7 @@ function getAuthHeaders() {
     return token ? { "Authorization": `Bearer ${token}` } : {};
 }
 
-let= isRedirecting= false
+let isRedirecting= false
 async function handleResponse(response) {
     if (response.status === 401) {
         if (isRedirecting) return null;
@@ -115,6 +115,9 @@ async function startSyncedDetection(videoElement, detectionImg, videoFps) {
 
             } catch (err) {
                 console.error('[SYNC] Error:', err)
+                console.error('[SYNC] Backend reachable?')
+                fetch('/health').then(r => console.log('[HEALTH]', r.status))
+                .catch(e => console.error('[HEALTH] Backend down!', e))
                 if (syncRunning) setTimeout(fetchAndSyncFrame, 1000)
             }
         }

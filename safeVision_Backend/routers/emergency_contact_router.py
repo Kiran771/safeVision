@@ -11,6 +11,12 @@ from safeVision_Backend.repositories import contact_registration as crud
 from safeVision_Backend.core.email import send_verification_email
 from safeVision_Backend.utils.verification_token import generate_verification_token, verify_verification_token
 
+
+public_router = APIRouter(
+    prefix="/contacts",
+    tags=["Emergency Contacts"]
+)
+
 router = APIRouter(
     prefix="/contacts",
     tags=["Emergency Contacts"],
@@ -38,8 +44,7 @@ def create_contact(contact: EmergencyContactCreate, background_tasks: Background
 
     return db_contact
 
-@router.get("/verify/{token}")
-
+@public_router.get("/verify/{token}")
 def verify_contact(token:str,db:Session=Depends(get_db)):
     try:
         email=verify_verification_token(token)
@@ -98,3 +103,7 @@ def delete_contact(contact_id: int, db: Session = Depends(get_db)):
     if not success:
         raise HTTPException(status_code=404, detail="Contact not found")
     return {"detail": "Contact deleted successfully"}
+
+
+
+

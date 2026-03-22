@@ -6,6 +6,7 @@ from pathlib import Path
 from ultralytics import YOLO
 from safeVision_Backend.core.psql_db import SessionLocal
 from safeVision_Backend.repositories.accident_repo import save_detection,save_borderline_detection
+from safeVision_Backend.core.detection_config import get_config
 
 
 
@@ -17,15 +18,6 @@ fire_detection_model_path = BASE_DIR.parent / "accident_fire_detection_model" / 
 accident_model=YOLO(str(accident_detection_model_path))
 fire_model=YOLO(str(fire_detection_model_path))
 
-
-# accident detection threshold
-accident_confidence_threshold =0.60
-
-# fire detection threshold
-fire_confidence_threshold =0.50
-
-# Borderline threshold for human review
-border_line_threshold = 0.20
 
 # consecutive frames required to confirm accident
 consecutive_frames_needed = 5
@@ -146,6 +138,17 @@ def generate_detection_frames(
     camera_id: int = 3,
     playback_time: float = 0.0
 ):
+    
+    config = get_config()
+    accident_conf_thresh = config["accident_confidence_threshold"]
+    fire_conf_thresh     = config["fire_confidence_threshold"]
+    border_line_thresh   = accident_conf_thresh * 0.55
+
+    
+    print(f"[CONFIG] Sensitivity: {config['sensitivity']}")
+    print(f"[CONFIG] Accident threshold: {accident_conf_thresh}")
+    print(f"[CONFIG] Fire threshold:     {fire_conf_thresh}")
+
     temp_file = None
     last_saved_time = 0
     consecutive_accident = 0
@@ -193,8 +196,13 @@ def generate_detection_frames(
                 continue
 
             
-            accident_results  = accident_model(frame, conf= accident_confidence_threshold, verbose=False)
-            fire_results = fire_model(frame, conf= fire_confidence_threshold,verbose=False)
+            accident_results  = accident_model(
+                frame, 
+                conf=accident_conf_thresh, verbose=False
+            )
+            fire_results = fire_model(
+                frame, conf=fire_conf_thresh, verbose=False
+            )
     
             acc_boxes = accident_results[0].boxes
             frame, is_accident, acc_conf = annotate_accident_frame(
@@ -208,14 +216,14 @@ def generate_detection_frames(
             if not is_accident  and len(acc_boxes)>0:
                 for box in acc_boxes:
                     raw_conf = float(box.conf[0])
-                    if border_line_threshold <=raw_conf < accident_confidence_threshold:
+                    if border_line_thresh <=raw_conf < accident_conf_thresh:
                         is_borderline_accident = True
                         break
             is_borderline_fire = False
             if not is_fire and len(fire_boxes)>0:
                 for box in fire_boxes:
                     raw_conf= float(box.conf[0])
-                    if border_line_threshold <= raw_conf < fire_confidence_threshold:
+                    if border_line_thresh <= raw_conf < fire_conf_thresh:
                         is_borderline_fire = True
                         break
             is_borderline = is_borderline_accident or is_borderline_fire
@@ -240,15 +248,17 @@ def generate_detection_frames(
             accident_box_count = sum(
                 1 for box in acc_boxes 
                 if accident_model.names[int(box.cls[0])] == 'ACCIDENT' 
-                and  float(box.conf[0]) >= accident_confidence_threshold 
+                and  float(box.conf[0]) >= accident_conf_thresh
             )
 
             confirmed_accident = (
                 consecutive_accident >= consecutive_frames_needed 
-                and acc_conf >= 0.65 
-                and accident_box_count >= 2
+                and acc_conf >= accident_conf_thresh+0.05
                 )
-            confirmed_fire  =consecutive_fire  >= consecutive_frames_needed
+            confirmed_fire  = (
+                consecutive_fire >= consecutive_frames_needed
+                and fire_conf >= fire_conf_thresh + 0.05
+            )
 
             vehicle_count = len(acc_boxes) 
             heavy_traffic =vehicle_count >= 8

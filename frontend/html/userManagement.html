@@ -1,156 +1,135 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>User Management</title>
-    <link rel="stylesheet" href="/css/userManagment.css" />
-    <link rel="stylesheet" href="/css/header.css"/>
-    <script src="/js/userManagement.js?v=2"></script>
-    <script src="/js/sideMenu_loader.js?v=1"></script>
-    <script> window.HEADER_CONFIG = { title  : "User Management", subtitle:"" };</script>
-  </head>
-  <body>
-    <div id="sidebar-container"></div>
-    
-    <main class="main-content">
-      <div id="header-container"></div>
-        <div class="stats-area">
-            <div class="stat-card">
-              <h3>Total Admin</h3>
-              <p id="totalAdmin">0</p>
-            </div>
-            <div class="stat-card">
-              <h3>Recently Added Admins</h3>
-              <p id="newAdmin">3</p>
-            </div>
-          <div class="stat-card">
-            <h3>Unassigned Admins</h3>
-            <p id="unassignedAdmin">0</p>  
-          </div>
-        </div>
 
-      <div class="add-button-container">
-        <button class="add-button">
-          
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>User Management</title>
+  <link rel="stylesheet" href="/css/userManagment.css" />
+  <link rel="stylesheet" href="/css/header.css?v=1" />
+  <script src="/js/userManagement.js?v=2"></script>
+  <script src="/js/sideMenu_loader.js?v=1"></script>
+  <script> window.HEADER_CONFIG = { title: "User Management", subtitle: "" };</script>
+</head>
+
+<body>
+  <div id="sidebar-container"></div>
+
+  <main class="main-content">
+    <div id="header-container"></div>
+    <div class="stats-area">
+      <div class="stat-card">
+        <h3>Total Admin</h3>
+        <p id="totalAdmin">0</p>
+      </div>
+      <div class="stat-card">
+        <h3>Recently Added Admins</h3>
+        <p id="newAdmin">3</p>
+      </div>
+      <div class="stat-card">
+        <h3>Unassigned Admins</h3>
+        <p id="unassignedAdmin">0</p>
+      </div>
+    </div>
+
+    <div class="add-button-container">
+      <button class="add-button">
+
         <b> + </b> Add user
-        </button>
-      </div>
+      </button>
+    </div>
 
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Id</th>
-              <th>Username</th>
-              <th>Email</th>
-              <th>Role</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="userTableBody">
-          </tbody>
-        </table>
-      </div>
-    </main>
+    <div class="table-container">
+      <table>
+        <thead>
+          <tr>
+            <th>Id</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="userTableBody">
+        </tbody>
+      </table>
+    </div>
+  </main>
 
-    <form id="userForm" class="form" novalidate>
-      <div class="form-content">
-        <div class="form-header">
-          <h3 class="CURD">Add New Admin</h3>
-          <button type="button" class="close-btn">&times;</button>
+  <form id="userForm" class="form" novalidate>
+    <div class="form-content">
+      <div class="form-header">
+        <h3 class="CURD">Add New Admin</h3>
+        <button type="button" class="close-btn">&times;</button>
+      </div>
+      <div class="form-body">
+        <div class="form-group">
+          <label for="userName">User Name</label>
+          <input type="text" id="userName" placeholder="Enter user name" required />
+          <small class="error" id="userNameError"></small>
         </div>
-        <div class="form-body">
-          <div class="form-group">
-            <label for="userName">User Name</label>
-            <input
-              type="text"
-              id="userName"
-              placeholder="Enter user name"
-              required
-            />
-            <small class="error" id="userNameError"></small>
+        <div class="form-group">
+          <label for="userEmail">Email Address</label>
+          <input type="email" id="userEmail" placeholder="Enter email address" required />
+          <small class="error" id="userEmailError"></small>
+        </div>
+        <div class="form-group">
+          <label for="userContact">Contact</label>
+          <input type="text" id="userContact" placeholder="Enter contact number" />
+          <small class="error" id="userContactError"></small>
+        </div>
+        <div class="form-group">
+          <label for="userRole">Role</label>
+          <select id="userRole">
+            <option value="Admin">Admin</option>
+            <option value="Super Admin" selected>Super Admin</option>
+          </select>
+        </div>
+        <div class="form-group password-section">
+          <label for="Password">Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="Password" placeholder="Enter password" required />
+            <img class="toggle-password" src="/resources/password.png" alt="toggle-password">
           </div>
-          <div class="form-group">
-            <label for="userEmail">Email Address</label>
-            <input
-              type="email"
-              id="userEmail"
-              placeholder="Enter email address"
-              required
-            />
-            <small class="error" id="userEmailError"></small>
-          </div>
-          <div class="form-group">
-            <label for="userContact">Contact</label>
-            <input
-              type="text"
-              id="userContact"
-              placeholder="Enter contact number"
-            />
-            <small class="error" id="userContactError"></small>
-          </div>
-          <div class="form-group">
-            <label for="userRole">Role</label>
-            <select id="userRole">
-              <option value="Admin">Admin</option>
-              <option value="Super Admin" selected>Super Admin</option>
-            </select>
-          </div>
-          <div class="form-group password-section">
-            <label for="Password">Password</label>
-            <div class="input-wrapper">
-              <input
-                type="password"
-                id="Password"
-                placeholder="Enter password"
-                required
-              />
-              <img class="toggle-password" src="/resources/password.png" alt="toggle-password">
-            </div>
-            <small class="error" id="passwordError"></small>
-          </div>
+          <small class="error" id="passwordError"></small>
+        </div>
 
-          <div class="form-group password-section">
-            <label for="rePassword">Retype Password</label>
-            <div class="input-wrapper">
-              <input
-                type="password"
-                id="rePassword"
-                placeholder="Re-enter password"
-                required
-              />
-              <img class="toggle-password" src="/resources/password.png" alt="toggle-password">
-            </div>
-            <small class="error" id="rePasswordError"></small>
+        <div class="form-group password-section">
+          <label for="rePassword">Retype Password</label>
+          <div class="input-wrapper">
+            <input type="password" id="rePassword" placeholder="Re-enter password" required />
+            <img class="toggle-password" src="/resources/password.png" alt="toggle-password">
           </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-submit">Add Admin</button>
-          </div>
+          <small class="error" id="rePasswordError"></small>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-submit">Add Admin</button>
         </div>
       </div>
-    </form>
+    </div>
+  </form>
 
-    <script>
-  const toggleIcons = document.querySelectorAll('.toggle-password');
+  <script>
+    const toggleIcons = document.querySelectorAll('.toggle-password');
 
-  toggleIcons.forEach(icon => {
-    icon.addEventListener('click', () => {
-      const input = icon.parentElement.querySelector('input');
+    toggleIcons.forEach(icon => {
+      icon.addEventListener('click', () => {
+        const input = icon.parentElement.querySelector('input');
 
-      if (input.type === 'password') {
-        input.type = 'text'; 
-        icon.src = '/resources/visible-password.png'; 
-      } else {
-        input.type = 'password'; 
-        icon.src = '/resources/password.png'; 
-      }
+        if (input.type === 'password') {
+          input.type = 'text';
+          icon.src = '/resources/visible-password.png';
+        } else {
+          input.type = 'password';
+          icon.src = '/resources/password.png';
+        }
+      });
+
+
     });
-    
+  </script>
+  <script src="/js/header.js?v=1"></script>
 
-  });
-</script>
-<script src="/js/header.js"></script>
+</body>
 
-  </body>
 </html>

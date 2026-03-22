@@ -41,3 +41,10 @@
     font-weight: 400;
     color: #888;
 }
+
+.admin img{
+    height:27px;
+    width:27px;
+    cursor:pointer;
+    margin-right:15px;
+}

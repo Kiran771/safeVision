@@ -30,6 +30,7 @@
           <h3>${title}</h3>
           ${subtitle ? `<p class="header-subtitle">${subtitle}</p>` : ""}
           <div class="admin">
+            <img src='/resources/notification.png'>
             <div class="admin-icon"></div>
             <div>
               <span class="admin-name">${name}</span>

@@ -2,20 +2,20 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Register Authority</title>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="/js/sideMenu_loader.js"></script>
-    <script src="/js/camera_management.js?v=1"></script>
-    <link rel="stylesheet" href="/css/header.css"/>
-    <link rel="stylesheet" href="/css/camera_management.css?" />
-    <script> window.HEADER_CONFIG = { title  : "Camera Management",subtitle: "" };</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register Authority</title>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="/js/sideMenu_loader.js"></script>
+  <script src="/js/camera_management.js?v=1"></script>
+  <link rel="stylesheet" href="/css/header.css?v=1" />
+  <link rel="stylesheet" href="/css/camera_management.css?" />
+  <script> window.HEADER_CONFIG = { title: "Camera Management", subtitle: "" };</script>
 </head>
 
 <body>
-    <div id="sidebar-container"></div>
-    <div class="main-column">
+  <div id="sidebar-container"></div>
+  <div class="main-column">
     <main class="page-content">
       <div id="header-container"></div>
       <div class="top-row">
@@ -54,37 +54,38 @@
     <div class="modal">
       <h2>Register New Camera</h2>
       <form id="cameraForm">
-          <div class="form-group">
-          </div>
-          <div class="form-group">
-            <label>Location</label>
-            <select id="cam-location">
+        <div class="form-group">
+        </div>
+        <div class="form-group">
+          <label>Location</label>
+          <select id="cam-location">
 
-              <option value="" disabled selected>-- Select Location --</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label>Assigned To</label>
-            <select id="cam-assigned" >
-              <option value="" disabled selected>-- Select Admin --</option>
-            </select>
+            <option value="" disabled selected>-- Select Location --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Assigned To</label>
+          <select id="cam-assigned">
+            <option value="" disabled selected>-- Select Admin --</option>
+          </select>
 
-            </div>
-          <div class="form-group">
-            <label>Status</label>
-            <select id="cam-status">
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-            </select>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn-cancel" id="close-btn">Cancel</button>
-            <button type="submit" class="btn-submit" id="submit-camera">Register</button>
-          </div>
+        </div>
+        <div class="form-group">
+          <label>Status</label>
+          <select id="cam-status">
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-cancel" id="close-btn">Cancel</button>
+          <button type="submit" class="btn-submit" id="submit-camera">Register</button>
+        </div>
       </form>
     </div>
   </div>
 
-  <script src="/js/header.js"></script>
+  <script src="/js/header.js?v=1"></script>
 </body>
+
 </html>

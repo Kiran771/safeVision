@@ -88,8 +88,6 @@ def send_accident_alert_email(
 ) -> bool:
 
     subject = f" {detection_type.upper()} DETECTED — {camera_location}"
-
-    # Color based on detection type
     alert_color = "#ff4444" if detection_type == "accident" else "#ff8c00"
 
     html_content = f"""

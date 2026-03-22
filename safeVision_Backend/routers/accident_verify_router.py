@@ -2,7 +2,9 @@ import os
 from fastapi import APIRouter, HTTPException, Depends
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
-from safeVision_Backend.models.table_creation import Camera,Accident
+from fastapi import BackgroundTasks
+from safeVision_Backend.services.alert_service import dispatch_alerts
+from safeVision_Backend.models.table_creation import Camera
 from safeVision_Backend.core.psql_db import get_db
 from safeVision_Backend.core.security import get_current_user
 from safeVision_Backend.repositories.accident_repo import (
@@ -12,7 +14,10 @@ from safeVision_Backend.repositories.accident_repo import (
     get_camera_location,
     get_all_detections,
     get_confirmed_count,
-    get_pending_count
+    get_pending_count,
+    get_all_notifications,
+    get_unread_notifications,
+    clear_all_notifications
 
     
 )
@@ -20,9 +25,13 @@ from safeVision_Backend.repositories.accident_repo import (
 router = APIRouter(prefix="/accidents", tags=["Accidents"],dependencies=[Depends(get_current_user)])
 
 
-
 @router.post("/{accident_id}/verify")
-def verify_incident(accident_id: int, db: Session = Depends(get_db)):
+def verify_incident(
+    accident_id: int, 
+    background_tasks:BackgroundTasks,
+    db: Session = Depends(get_db),
+    current_user    = Depends(get_current_user)
+):
     detection = get_detection_by_id(db=db, accident_id=accident_id)
     if not detection:
         raise HTTPException(status_code=404, detail="Incident not found")
@@ -34,6 +43,13 @@ def verify_incident(accident_id: int, db: Session = Depends(get_db)):
     )
     if not updated:
         raise HTTPException(status_code=500, detail="Failed to update status")
+    
+    background_tasks.add_task(
+        dispatch_alerts,
+        accident_id = accident_id,
+        user_id = current_user.userid
+    )
+    
 
     return {"message": "Incident confirmed successfully", "status":"confirmed"}
 
@@ -106,7 +122,30 @@ def get_stats(db: Session = Depends(get_db)):
         "confirmed": get_confirmed_count(db=db) 
     }
 
-# Get details of incident by id 
+@router.get("/notifications")
+def get_notifications():
+    unread = get_unread_notifications()  
+    return {
+        "notifications": unread,
+        "total": len(unread)
+    }
+
+
+@router.get("/notifications/all")
+def get_all_notifs():
+    all_notifs = get_all_notifications()  
+    return {
+        "notifications": all_notifs,
+        "total":len(all_notifs)
+    }
+
+
+@router.delete("/notifications/clear")
+def clear_notifications():
+    clear_all_notifications()            
+    return {"message": "Notifications cleared"}
+
+
 @router.get("/{accident_id}")
 def get_incident(accident_id: int, db: Session = Depends(get_db)):
     detection = get_detection_by_id(db=db, accident_id=accident_id)

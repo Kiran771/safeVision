@@ -32,7 +32,6 @@ def create_access_token(
 ) -> str:
     to_encode = data.copy()
 
-    # Use settings value if available, fallback to 30 minutes
     expire_minutes = getattr(settings, "ACCESS_TOKEN_EXPIRE_MINUTES", 30)
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=expire_minutes))
 
