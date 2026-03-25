@@ -1,11 +1,17 @@
 from typing import List
 
-from fastapi import APIRouter,Depends
+from fastapi import APIRouter,Depends, HTTPException
 from sqlalchemy.orm import Session 
 from safeVision_Backend.core.psql_db import get_db
 from safeVision_Backend.core.security import get_current_user
 from safeVision_Backend.repositories import camera_management_repo
-from safeVision_Backend.schemas.safeVisionSchema import CameraCreate,CameraUpdate,LocationOut,AvailableAdminOut,CameraOut
+from safeVision_Backend.schemas.safeVisionSchema import (
+   CameraCreate,
+   CameraUpdate,
+   LocationOut,
+   AvailableAdminOut,
+   CameraOut
+)
 
 
 router = APIRouter(prefix="/cameras", tags=["Cameras"],dependencies=[Depends(get_current_user)])
@@ -17,6 +23,17 @@ def get_locations(db: Session = Depends(get_db)):
 @router.get('/admins/all-admins',response_model=List[AvailableAdminOut])
 def get_all_admins(db:Session=Depends(get_db)):
   return camera_management_repo.get_all_admins(db)
+
+@router.get("/my-cameras")
+async def get_my_cameras(
+    current_user = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    cameras = camera_management_repo.get_cameras_by_user(db, current_user.userid)
+    if not cameras:
+        raise HTTPException(status_code=404, detail="No cameras assigned to this user")
+    return cameras 
+
 
 @router.get("/",response_model=List[CameraOut])
 def get_cameras(db: Session = Depends(get_db)):
@@ -34,6 +51,8 @@ def register_camera(data: CameraCreate, db: Session = Depends(get_db)):
 @router.get('/admins/available/{camera_id}',response_model=List[AvailableAdminOut])
 def get_available_admins(camera_id: int, db: Session = Depends(get_db)):
     return camera_management_repo.get_available_admins(db, camera_id)
+
+
 
 
 @router.put("/update/{camera_id}")

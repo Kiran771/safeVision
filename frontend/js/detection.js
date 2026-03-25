@@ -130,8 +130,6 @@ async function startSyncedDetection(videoElement, detectionImg, videoFps) {
     
 }
 
-
-
 async function loadCurrentSensitivity() {
     try {
         const resp = await fetch('/settings/sensitivity', {
@@ -263,12 +261,18 @@ function renderFrameStrip() {
     strip.scrollTop = strip.scrollHeight;
 }
 
-
     async function loadRecentAccidents() {
         const tbody = document.getElementById("eventTableBody");
         if (!tbody) return;
+        const camera_id = sessionStorage.getItem("selected_camera_id");
+
+        if (!camera_id) {
+            console.warn("No camera selected");
+            tableBody.innerHTML = `<tr><td colspan="6">Please select a camera</td></tr>`;
+            return;
+        }
         try {
-            const resp = await fetch("/accidents/recent?limit=10",{headers: getAuthHeaders()});
+            const resp = await fetch(`/accidents/recent?camera_id=${camera_id}`,{headers: getAuthHeaders()});
             const data = await handleResponse(resp);
             if (!data) return;
             if (!data.length) {
@@ -308,20 +312,27 @@ function renderFrameStrip() {
     setInterval(loadRecentAccidents, 15000)
 
     async function loadStats() {
-    try {
-        const resp = await fetch('/accidents/stats',{
-            headers: getAuthHeaders()
-        });
-        const data = await handleResponse(resp);
-        if (!data) return;
-        const unverified = document.getElementById('unverifiedCount');
-        const detected   = document.getElementById('detectedCount');
-        if (unverified) unverified.textContent = data.pending;
-        if (detected)   detected.textContent   = data.confirmed;
-    } catch (err) {
-        console.error('[STATS] Failed:', err);
+        const camera_id = sessionStorage.getItem("selected_camera_id");
+
+        if (!camera_id) {
+            console.warn("No camera selected");
+            tableBody.innerHTML = `<tr><td colspan="6">Please select a camera</td></tr>`;
+            return;
+        }
+        try {
+            const resp = await fetch(`/accidents/stats?camera_id=${camera_id}`,{
+                headers: getAuthHeaders()
+            });
+            const data = await handleResponse(resp);
+            if (!data) return;
+            const unverified = document.getElementById('unverifiedCount');
+            const detected   = document.getElementById('detectedCount');
+            if (unverified) unverified.textContent = data.pending;
+            if (detected)   detected.textContent   = data.confirmed;
+        } catch (err) {
+            console.error('[STATS] Failed:', err);
+        }
     }
-}
 
     loadStats();
     setInterval(loadStats, 15000);
@@ -365,7 +376,12 @@ function renderFrameStrip() {
         console.log("[UPLOAD] Starting...");
 
         try {
-            const resp = await fetch("/detection/upload-video?camera_id=3", {
+            const cameraId = sessionStorage.getItem('selected_camera_id');
+            if (!cameraId) {
+                alert("No camera selected. Please go to the dashboard and select a camera first.");
+                return;
+            }
+            const resp = await fetch(`/detection/upload-video?camera_id=${cameraId}`,{
                 method: "POST",
                 body: formData,
                 headers:getAuthHeaders()

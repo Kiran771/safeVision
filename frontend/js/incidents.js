@@ -40,17 +40,17 @@ document.addEventListener('DOMContentLoaded', () => {
 // Fetch incidents from API
 async function fetchIncidents() {
     showLoading();
-
     try {
-        const response = await fetch('/accidents/pending',{
-            headers: getAuthHeaders()
-        });
+        const cameraId = sessionStorage.getItem('selected_camera_id');
+        let url = '/accidents/pending';
+        if (cameraId) url += `?camera_id=${cameraId}`;
+
+        const response = await fetch(url, { headers: getAuthHeaders() });
         const data = await handleResponse(response);
         if (!data) return;
-        allIncidents = data;
 
-        // Show no data if empty
-        if (!allIncidents || allIncidents.length === 0) {
+        allIncidents = data;
+        if (!allIncidents.length) {
             showNoData();
             return;
         }
@@ -162,12 +162,14 @@ function showNoData() {
 function startAutoRefresh(intervalMs = 30000) {
     setInterval(async () => {
         try {
-            const response = await fetch('/accidents/pending', {
-                headers: getAuthHeaders()
-            });
+            const cameraId = sessionStorage.getItem('selected_camera_id');
+            let url = '/accidents/pending';
+            if (cameraId) url += `?camera_id=${cameraId}`;
+
+            const response = await fetch(url, { headers: getAuthHeaders() });
             const fresh = await handleResponse(response);
-            if (!fresh) return; 
-            if (fresh.length === 0) return;
+            if (!fresh || fresh.length === 0) return;
+
             if (JSON.stringify(fresh) !== JSON.stringify(allIncidents)) {
                 const scrollPos = window.scrollY;
                 allIncidents = fresh;

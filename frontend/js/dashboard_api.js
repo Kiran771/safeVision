@@ -29,13 +29,13 @@ class DashboardAPI {
         }
         return await response.json();
     }
-    async getAdminStats() {
+    async getAdminStats(cameraId = null) {
         try {
-            const response = await fetch(`${this.baseURL}/dashboard/admin/stats`,
-                {
-                    headers: this.getAuthHeaders()
-                });
-                return await this.handleResponse(response);
+            const url = cameraId
+                ? `${this.baseURL}/dashboard/admin/stats?camera_id=${cameraId}`
+                : `${this.baseURL}/dashboard/admin/stats`;
+            const response = await fetch(url, { headers: this.getAuthHeaders() });
+            return await this.handleResponse(response);
         } catch (error) {
             console.error('Error fetching admin stats:', error);
             throw error;
@@ -67,11 +67,12 @@ class DashboardAPI {
         }
     }
 
-    async getTimePeriodStats(period = '7days') {
+    async getTimePeriodStats(period = '7days', cameraId = null) {
         try {
-            const response = await fetch(`${this.baseURL}/dashboard/time-period-stats?period=${period}`, {
-                headers: this.getAuthHeaders()
-            });
+            const url = cameraId
+                ? `${this.baseURL}/dashboard/time-period-stats?period=${period}&camera_id=${cameraId}`
+                : `${this.baseURL}/dashboard/time-period-stats?period=${period}`;
+            const response = await fetch(url, { headers: this.getAuthHeaders() });
             return await this.handleResponse(response);
         } catch (error) {
             console.error(`Error fetching stats for ${period}:`, error);

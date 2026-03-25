@@ -30,11 +30,21 @@ body.sidebar-collapsed .page-wrapper {
     margin: 0 auto;
 }
 
-.left-section,
-.right-section {
+.left-section{
     display: flex;
     flex-direction: column;
     gap: 66px;
+}
+
+.right-section {
+    position: sticky;
+    top: 20px;
+    align-self: start;
+    max-height: calc(100vh - 40px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto; 
 }
 
 section {
@@ -277,16 +287,17 @@ tbody tr:nth-child(odd) {
 
 .threshold-box {
     background-color: #d4d4d4;
-    padding: 20px;
+    padding: 35px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     text-align: center;
+    height:150px;
 }
 
 
 .threshold-title {
     display: block;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
     margin-bottom: 15px;
     color: #000;
@@ -326,7 +337,7 @@ tbody tr:nth-child(odd) {
     padding: 20px;
     text-align: center;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    height: 140px;
+    height: 150px;
     cursor:pointer;
     transition: all 0.2s ease;
 }
@@ -336,26 +347,32 @@ tbody tr:nth-child(odd) {
 }
 
 .stat-box h3 {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 600;
     margin-bottom: 20px;
 }
 
 .stat-number {
-    font-size: 48px;
+    font-size: 38px;
     font-weight: 700;
 }
 
+
 .location-section {
+    flex: 1;       
+    display: flex;
+    flex-direction: column;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
+
+
 .map-container {
-    position: relative;
-    height: 450px;
-    width: 100%;
+    flex: 1;         
+    min-height: 400px;
+    height: auto;   
     background-color: #e0e0e0;
-    overflow: hidden;
+    position: relative;   
 }
 
 .map-image {

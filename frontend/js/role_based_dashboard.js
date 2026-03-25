@@ -405,16 +405,49 @@ async function renderAdminDashboard(contentEl) {
     contentEl.innerHTML =
         '<div style="padding:2rem;text-align:center;color:#666;">Loading dashboard...</div>';
     try {
-        const dashboardData = await dashboardAPI.getAdminStats();
+        const cameraId     = sessionStorage.getItem('selected_camera_id');
+        const dashboardData = await dashboardAPI.getAdminStats(cameraId);
 
         if (!dashboardData || !dashboardData.metrics) {
             throw new Error("Invalid dashboard data received");
         }
 
         let html = '<div class="dashboard-grid">';
+        html += `
+        <div class="chart-card" style="grid-column: 1 / -1; display:flex; align-items:center; gap:16px; padding: 1.4rem 2rem;">
+            <span style="font-size:0.95rem; font-weight:600; color:#374151; white-space:nowrap;">
+                Active Camera
+            </span>
+            <select id="cameraSelect" style="
+                flex:1;
+                max-width:280px;
+                background:#f8fafc;
+                border:1.5px solid #cbd5e1;
+                border-radius:0.6rem;
+                color:#0f172a;
+                font-size:0.95rem;
+                font-weight:500;
+                padding:8px 14px;
+                cursor:pointer;
+                outline:none;
+                transition: border-color 0.2s;
+            ">
+                <option disabled>Loading...</option>
+            </select>
+            <span id="cameraStatusBadge" style="
+                padding: 5px 14px;
+                border-radius: 9999px;
+                font-size: 0.8rem;
+                font-weight: 600;
+                background: #dcfce7;
+                color: #15803d;
+                border: 1px solid #bbf7d0;
+                white-space: nowrap;
+            ">● Active</span>
+        </div>`;
         html += '<div class="metrics-row">';
         html += `<div class="metric-card total-alerts">
-                    <div class="metric-label">Total Alerts</div>
+                    <div class="metric-label">Total Detection</div>
                     <div class="metric-value">${dashboardData.metrics.total_alerts || 0}</div>
                 </div>`;
         html += `<div class="metric-card unverified">
@@ -426,6 +459,7 @@ async function renderAdminDashboard(contentEl) {
                     <div class="metric-value">${dashboardData.metrics.confirmed || 0}</div>
                 </div>`;
         html += "</div>";
+
 
         html += '<div class="charts-row">';
         html += `<div class="chart-card dark">
@@ -500,6 +534,7 @@ async function renderAdminDashboard(contentEl) {
         contentEl.innerHTML = html;
         setTimeout(() => initializeChartsWithData(dashboardData), 100);
         setupTimeFilters();
+        await loadAdminCameras();
     } catch (error) {
         console.error("Error rendering admin dashboard:", error);
         contentEl.innerHTML = `<div style="padding:2rem;text-align:center;color:#d32f2f;">
@@ -510,6 +545,73 @@ async function renderAdminDashboard(contentEl) {
                 Retry
             </button>
         </div>`;
+    }
+}
+function updateCameraBadge(status) {
+    const badge = document.getElementById('cameraStatusBadge');
+    if (!badge) return;
+    const styles = {
+        active:      { bg: '#dcfce7', color: '#15803d', border: '#bbf7d0', label: '● Active' },
+        inactive:    { bg: '#fee2e2', color: '#dc2626', border: '#fecaca', label: '● Inactive' },
+        maintenance: { bg: '#fef9c3', color: '#a16207', border: '#fde68a', label: '● Maintenance' },
+    };
+    const s = styles[status?.toLowerCase()] || styles.active;
+    badge.textContent       = s.label;
+    badge.style.background  = s.bg;
+    badge.style.color       = s.color;
+    badge.style.borderColor = s.border;
+}
+async function loadAdminCameras() {
+    const select = document.getElementById('cameraSelect');
+    if (!select) return;
+
+    try {
+        const resp = await fetch('/cameras/my-cameras', {
+            headers: dashboardAPI.getAuthHeaders()
+        });
+
+        if (!resp.ok) {
+            select.innerHTML = '<option disabled>No cameras assigned</option>';
+            
+            const badge = document.getElementById('cameraStatusBadge');
+            if (badge) {
+                badge.textContent = '● Unassigned';
+                badge.style.background = '#fee2e2';
+                badge.style.color = '#dc2626';
+                badge.style.borderColor = '#fecaca';
+            }
+            return;
+        }
+
+        const cameras = await resp.json();
+        select.innerHTML = cameras.map(cam =>
+            `<option value="${cam.camera_id}" data-status="${cam.status}">
+                Camera ${cam.camera_id} — ${cam.status}
+            </option>`
+        ).join('');
+
+        const saved = sessionStorage.getItem('selected_camera_id');
+        const stillValid = saved && cameras.some(cam => cam.camera_id == saved);
+        if (stillValid) {
+            select.value = saved;
+        } else {
+            sessionStorage.setItem('selected_camera_id', cameras[0].camera_id);
+            select.value = cameras[0].camera_id;
+        }
+
+        updateCameraBadge(cameras.find(c => c.camera_id == select.value)?.status);
+
+        select.addEventListener('change', () => {
+            sessionStorage.setItem('selected_camera_id', select.value);
+            const selectedStatus = select.options[select.selectedIndex].dataset.status;
+            updateCameraBadge(selectedStatus);
+
+            const contentEl = document.getElementById('dashboard-content');
+            if (contentEl) renderAdminDashboard(contentEl);
+        });
+
+    } catch (err) {
+        console.error('[CAMERA SELECT] Failed:', err);
     }
 }
 
@@ -595,7 +697,8 @@ function setupTimeFilters() {
                 console.log("Fetching stats for period:", period);
 
                 try {
-                    const periodData = await dashboardAPI.getTimePeriodStats(period);
+                    const cameraId   = sessionStorage.getItem('selected_camera_id');
+                    const periodData = await dashboardAPI.getTimePeriodStats(period, cameraId);
                     console.log("Period data:", periodData);
 
                     if (chartInstances.status && periodData.chart_data) {

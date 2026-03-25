@@ -36,25 +36,22 @@ def get_all_active_contacts(db: Session):
         EmergencyContact.is_active == True
     ).all()
 
-def get_accident_location(db: Session, accident_id: int):
+def get_accident_location(db, accident_id: int):
     result = (
         db.query(
-            Camera.location.label("camera_location"),
             Location.location_name,
-            Location.city,
-            Location.province,
+            Location.city
         )
+        .join(Camera, Camera.location_id == Location.location_id)
         .join(Accident, Accident.cameraid == Camera.cameraid)
-        .outerjoin(Location, Location.location_id == Camera.location_id)
         .filter(Accident.accidentid == accident_id)
         .first()
     )
+
     if not result:
         return "Unknown Location"
 
-    camera_location, location_name, city, province = result
-    parts = [p for p in [location_name, city, province] if p]
-    return ", ".join(parts) if parts else camera_location or "Unknown Location"
+    return f"{result.location_name}, {result.city}"
 
 def get_alerts_by_accident(db: Session, accident_id: int):
     return db.query(Alert).filter(

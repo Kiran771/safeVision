@@ -3,9 +3,12 @@ from sqlalchemy.orm import Session
 from datetime import datetime, timedelta
 from safeVision_Backend.models.table_creation import Accident, Camera, User,Location,Alert,UserCamera
 
-def get_detections_by_date(db:Session,days:int=30):
-    start_date=datetime.now() - timedelta(days=days)
-    return db.query(Accident).filter(Accident.timestamp >=start_date).all()
+def get_detections_by_date(db: Session, days: int = 30, camera_id: int = None):
+    start_date = datetime.now() - timedelta(days=days)
+    query = db.query(Accident).filter(Accident.timestamp >= start_date)
+    if camera_id:
+        query = query.filter(Accident.cameraid == camera_id)
+    return query.all()
 
 
 def get_detection_by_id(db:Session,accident_id:int):
@@ -29,8 +32,8 @@ def get_high_confidence_detections(db: Session, min_confidence: float = 0.7, day
 
     ).all()
 
-def get_detection_stats(db: Session, days: int = 30):
-    detections = get_detections_by_date(db, days)
+def get_detection_stats(db: Session, days: int = 30,camera_id: int = None):
+    detections = get_detections_by_date(db, days, camera_id=camera_id)
     if not detections:
         return {
             'total_alerts': 0,
@@ -66,8 +69,8 @@ def get_detection_stats(db: Session, days: int = 30):
         'high_confidence': high_confidence
     }
 
-def get_incident_breakdown(db: Session, days: int = 30):
-    detections = get_detections_by_date(db, days)
+def get_incident_breakdown(db: Session, days: int = 30,camera_id: int = None):
+    detections = get_detections_by_date(db, days,camera_id=camera_id)
     if not detections:
         return {
             'fire_incident': 0,
@@ -83,8 +86,8 @@ def get_incident_breakdown(db: Session, days: int = 30):
         'total': len(detections)
     }
 
-def get_status_breakdown(db: Session, days: int = 30):
-    detections = get_detections_by_date(db, days)
+def get_status_breakdown(db: Session,days: int = 30,camera_id: int = None):
+    detections = get_detections_by_date(db, days,camera_id=camera_id)
 
     if not detections:
         return {
@@ -127,19 +130,20 @@ def get_total_active_cameras(db: Session):
 def get_total_admins(db: Session):
     return db.query(User).filter(User.role=='Admin').count()
 
-def get_daily_accident_counts(db, days: int = 7):
-    today = datetime.utcnow().date()
+def get_daily_accident_counts(db: Session, days: int = 7, camera_id: int = None):
+    today  = datetime.utcnow().date()
     counts = []
     for i in range(days - 1, -1, -1):
-        day = today - timedelta(days=i)
+        day   = today - timedelta(days=i)
         start = datetime(day.year, day.month, day.day)
         end   = start + timedelta(days=1)
-        count = (
-            db.query(Accident)
-            .filter(Accident.timestamp >= start, Accident.timestamp < end)
-            .count()
+        query = db.query(Accident).filter(
+            Accident.timestamp >= start,
+            Accident.timestamp < end
         )
-        counts.append(count)
+        if camera_id:
+            query = query.filter(Accident.cameraid == camera_id)
+        counts.append(query.count())
     return counts
 
 def get_accidents_per_camera(db):

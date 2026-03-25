@@ -5,12 +5,12 @@ THRESHOLD_PRESETS = {
         "auto_confirm_threshold":        None,
     },
     "medium": {
-        "accident_confidence_threshold": 0.60,
+        "accident_confidence_threshold": 0.55,
         "fire_confidence_threshold":     0.55,
         "auto_confirm_threshold":        None,
     },
     "high": {
-        "accident_confidence_threshold": 0.80,
+        "accident_confidence_threshold": 0.70,
         "fire_confidence_threshold":     0.70,
         "auto_confirm_threshold":        None, 
     },

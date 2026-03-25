@@ -1,14 +1,23 @@
 from datetime import datetime
 
 from sqlalchemy.orm import Session
-from safeVision_Backend.models.table_creation import Accident,Camera
+from safeVision_Backend.models.table_creation import Accident,Camera,Location
 
 
 notifications = []
 
-def get_camera_location(db:Session,camera_id:int):
-    camera=db.query(Camera).filter(Camera.cameraid==camera_id).first()
-    return camera.location if camera else "Unknown Location"
+def get_camera_location(db: Session, camera_id: int):
+    camera = db.query(Camera).filter(Camera.cameraid == camera_id).first()
+    if not camera:
+        return "Unknown Location"
+    location = db.query(Location).filter(
+        Location.location_id == camera.location_id
+    ).first()
+
+    if not location:
+        return "Unknown Location"
+
+    return f"{location.location_name}, {location.city}"
 
 def save_detection(
     db: Session,
@@ -48,24 +57,24 @@ def save_borderline_detection(
         status= 'pending'
     )
 
-def get_all_detections(db:Session,skip:int=0,limit:int=20):
-    return (
-        db.query(Accident)
-        .order_by(Accident.timestamp.desc())
-        .offset(skip)
-        .limit(limit)
-        .all()
-    )
+def get_all_detections(db:Session, camera_id:int=None,skip:int=0,limit:int=20):
+    query = db.query(Accident).order_by(Accident.timestamp.desc())
+    if camera_id is not None:
+        query = query.filter(Accident.cameraid == camera_id)
+    return query.offset(skip).limit(limit).all()
 
 def get_detection_by_id(db:Session,accident_id:int):
     return db.query(Accident).filter(
         Accident.accidentid==accident_id
     ).first()
 
-def get_pending_reviews(db:Session):
-    return(
+def get_pending_reviews(db: Session, camera_ids: list):
+    return (
         db.query(Accident)
-        .filter(Accident.status=='pending')
+        .filter(
+            Accident.status == "pending",
+            Accident.cameraid.in_(camera_ids) 
+        )
         .order_by(Accident.timestamp.desc())
         .all()
     )
@@ -82,11 +91,19 @@ def update_detection_status(db:Session,accident_id:int, status:str):
     db.commit()
     return True
 
-def get_pending_count(db: Session):
-    return db.query(Accident).filter(Accident.status == 'pending').count()
+def get_pending_count(db: Session, camera_id: int):
+    count = db.query(Accident).filter(
+        Accident.cameraid == camera_id,
+        Accident.status == "pending"
+    ).count()
+    return count
 
-def get_confirmed_count(db: Session):
-    return db.query(Accident).filter(Accident.status == 'confirmed').count()
+def get_confirmed_count(db: Session, camera_id: int):
+    count = db.query(Accident).filter(
+        Accident.cameraid == camera_id,
+        Accident.status == "confirmed"
+    ).count()
+    return count
 
 
 def add_notification(message: str, type: str = "info"):

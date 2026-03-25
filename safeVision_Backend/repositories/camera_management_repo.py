@@ -28,7 +28,6 @@ def register_camera(db: Session, location_id: int, admin_id: int, status: str):
     return {"error": "Invalid location"}
 
   new_camera = Camera(
-    location=f"{location.location_name}, {location.city}",
     location_id=location_id,
     status=status
   )
@@ -54,7 +53,8 @@ def register_camera(db: Session, location_id: int, admin_id: int, status: str):
 # Get all the register cameras
 def get_cameras(db: Session):
   results = (
-    db.query(Camera.cameraid, Camera.location, Camera.status, User.username,User.userid,Location.location_id)
+    db.query(Camera.cameraid, Camera.status, User.username,User.userid,Location.location_id, Location.location_name,
+        Location.city)
     .join(UserCamera, UserCamera.cameraid == Camera.cameraid)
     .join(User, User.userid == UserCamera.userid)
     .join(Location, Camera.location_id == Location.location_id)
@@ -66,7 +66,7 @@ def get_cameras(db: Session):
   return [
   {
     "cameraid": r.cameraid,
-    "location": r.location,
+    "location": f"{r.location_name}, {r.city}",
     'location_id':r.location_id,
     "assigned_to": r.username,
     'admin_id':r.userid,
@@ -75,16 +75,26 @@ def get_cameras(db: Session):
     for r in results
   ]
 
+def get_cameras_by_user(db: Session, user_id: int):
+    results = (
+        db.query(UserCamera.cameraid, Camera.status)
+        .join(Camera, Camera.cameraid == UserCamera.cameraid)
+        .filter(
+            UserCamera.userid == user_id,
+            UserCamera.is_active == True
+        )
+        .all()
+    )
+    return [{"camera_id": r.cameraid, "status": r.status} for r in results]
+
 # Update camera
 def update_camera(db: Session, camera_id: int, location_id: int, admin_id: int, status: str):
     camera = db.query(Camera).filter(Camera.cameraid == camera_id).first()
     if not camera:
         return {"error": "Camera not found"}
-
     location = db.query(Location).filter(Location.location_id == location_id).first()
     if not location:
         return {"error": "Invalid location"}
-
     current_admin = (
         db.query(UserCamera)
           .filter(UserCamera.cameraid == camera_id, UserCamera.is_active == True)
@@ -100,9 +110,6 @@ def update_camera(db: Session, camera_id: int, location_id: int, admin_id: int, 
 
     if no_changes:
         return {"message": "No changes were made"}
-
-
-    camera.location = f"{location.location_name},{location.city}"
     camera.location_id = location_id
     camera.status = status
 

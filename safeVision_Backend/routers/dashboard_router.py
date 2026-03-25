@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends,HTTPException
 from sqlalchemy.orm import Session
 from safeVision_Backend.core.psql_db import get_db
 from safeVision_Backend.core.security import get_current_user
+from safeVision_Backend.repositories import camera_management_repo
 from safeVision_Backend.repositories.dashboard_repo import (
     get_detection_stats, get_incident_breakdown, get_status_breakdown,
     get_daily_accident_counts, get_accidents_per_camera, get_high_confidence_count
@@ -12,11 +13,14 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"],dependencies=[Depends
 
 
 @router.get("/admin/stats",response_model=Dict[str, Any])
-def get_admin_dashboard_stats(db: Session = Depends(get_db)):
+def get_admin_dashboard_stats(db: Session = Depends(get_db),current_user = Depends(get_current_user)
+):
     try:
-        stats = get_detection_stats(db)
-        incidents = get_incident_breakdown(db)
-        status = get_status_breakdown(db)
+        cameras    = camera_management_repo.get_cameras_by_user(db, current_user.userid)
+        camera_id  = cameras[0]["camera_id"] if cameras else None
+        stats = get_detection_stats(db,camera_id=camera_id)
+        incidents = get_incident_breakdown(db,camera_id=camera_id)
+        status = get_status_breakdown(db,camera_id=camera_id)
         
         return {
             'metrics': {
@@ -49,8 +53,7 @@ def get_admin_dashboard_stats(db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=str(e))
     
 @router.get("/time-period-stats", response_model=Dict[str, Any])
-
-def get_time_period_stats(period: str = "7days", db: Session = Depends(get_db)):
+def get_time_period_stats(period: str = "7days", camera_id: int = None,db: Session = Depends(get_db)):
     try:
         days_map = {
             '24hrs': 1,
@@ -58,9 +61,9 @@ def get_time_period_stats(period: str = "7days", db: Session = Depends(get_db)):
             '30days': 30
         }
         days = days_map.get(period, 7)
-        stats = get_detection_stats(db, days=days)
-        status = get_status_breakdown(db, days=days)
-        incidents = get_incident_breakdown(db, days=days)
+        stats = get_detection_stats(db, days=days, camera_id=camera_id)
+        status = get_status_breakdown(db, days=days, camera_id=camera_id)
+        incidents = get_incident_breakdown(db, days=days, camera_id=camera_id)
         response_data = {
             'period': period,
             'days': days,

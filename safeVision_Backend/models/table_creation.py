@@ -20,7 +20,6 @@ class User(Base):
 class Camera(Base):
     __tablename__ = 'cameras'
     cameraid = Column(Integer, primary_key=True, autoincrement=True, index=True)
-    location = Column(String(200), nullable=False)
     location_id=Column(Integer, ForeignKey('locations.location_id'))
     status = Column(String(20), nullable=False, default='active')
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
@@ -41,6 +40,8 @@ class Location(Base):
     location_name = Column(String(120), nullable=False)
     city = Column(String(100), nullable=False)
     province = Column(String(50), nullable=False)
+    latitude = Column(Float, nullable=False)
+    longitude = Column(Float, nullable=False)
 
 
 class Accident(Base):

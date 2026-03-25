@@ -1,5 +1,5 @@
 import os
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Query
 from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from fastapi import BackgroundTasks
@@ -7,6 +7,7 @@ from safeVision_Backend.services.alert_service import dispatch_alerts
 from safeVision_Backend.models.table_creation import Camera
 from safeVision_Backend.core.psql_db import get_db
 from safeVision_Backend.core.security import get_current_user
+from safeVision_Backend.repositories import camera_management_repo
 from safeVision_Backend.repositories.accident_repo import (
     get_detection_by_id,
     get_pending_reviews,
@@ -70,21 +71,33 @@ def reject_incident(accident_id: int, db: Session = Depends(get_db)):
     return {"message": "Incident rejected successfully", "status": "rejected"}
 
 @router.get("/pending")
-def get_pending(db: Session = Depends(get_db)):
-    detections = get_pending_reviews(db=db)
+def get_pending(
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user),
+    camera_id:int= Query(None),
+):
+    cameras = camera_management_repo.get_cameras_by_user(db, current_user.userid)
+    if not cameras:
+        return []
+    camera_ids = [c["camera_id"] for c in cameras]
+    if camera_id:
+        if camera_id not in camera_ids:
+            raise HTTPException(status_code=403, detail="Access denied for this camera")
+        camera_ids = [camera_id]
 
+    
+    detections = get_pending_reviews(db=db, camera_ids=camera_ids)
     result = []
     for d in detections:
-        camera   = db.query(Camera).filter(Camera.cameraid == d.cameraid).first()
-        location = camera.location if camera else "Unknown Location"
+        location = get_camera_location(db, d.cameraid)
         result.append({
-            "accidentid":     d.accidentid,
-            "timestamp":      d.timestamp,
-            "confidence":     d.confidence,
+            "accidentid": d.accidentid,
+            "timestamp": d.timestamp,
+            "confidence": d.confidence,
             "detection_type": d.detection_type,
-            "status":         d.status,
-            "location":       location,  
-            "cameraid":       d.cameraid
+            "status": d.status,
+            "location": location,
+            "cameraid": d.cameraid
         })
     return result
 
@@ -102,25 +115,39 @@ def get_frame_image(path: str):
 
 # Get recent incidents 
 @router.get("/recent")
-def get_recent(limit: int = 10, db: Session = Depends(get_db)):
-    detections = get_all_detections(db=db, skip=0, limit=limit)
-    return [
+def get_recent_detections(
+    camera_id: int = Query(None),
+    skip: int = 0,
+    limit: int = 20,
+    db: Session = Depends(get_db),
+    current_user = Depends(get_current_user)
+):
+
+    detections = get_all_detections(db, camera_id=camera_id, skip=skip, limit=limit)
+    return [ 
         {
-            "accidentid":     d.accidentid,
-            "timestamp":      d.timestamp,
-            "confidence":     d.confidence,
-            "detection_type": d.detection_type,
-            "status":         d.status,
-        }
+            "id": d.accidentid,
+            "camera_id": d.cameraid,
+            "type": d.detection_type,
+            "confidence": d.confidence,
+            "status": d.status,
+            "timestamp": d.timestamp.isoformat(),
+            "frame_path": d.frame_path,
+        } 
         for d in detections
     ]
 
-@router.get("/stats") 
-def get_stats(db: Session = Depends(get_db)): 
-    return { 
-        "pending": get_pending_count(db=db),
-        "confirmed": get_confirmed_count(db=db) 
-    }
+@router.get("/stats")
+def get_stats(camera_id: int=Query(...,description='camerid to fetch for stats'), db: Session = Depends(get_db)):
+    if not camera_id:
+        raise HTTPException(status_code=400, detail="camera_id is required")
+    try:
+        pending = get_pending_count(db=db, camera_id=camera_id)
+        confirmed = get_confirmed_count(db=db, camera_id=camera_id)
+        return {"pending": pending, "confirmed": confirmed}
+    except Exception as e:
+        print("Error in get_stats:", e)
+        raise HTTPException(status_code=500, detail="Failed to fetch accident stats")
 
 @router.get("/notifications")
 def get_notifications():

@@ -12,7 +12,7 @@ from safeVision_Backend.core.detection_config import get_config
 
 # Load model 
 BASE_DIR = Path(__file__).resolve().parent
-accident_detection_model_path = BASE_DIR.parent / "accident_fire_detection_model" / "best_v4.pt"
+accident_detection_model_path = BASE_DIR.parent / "accident_fire_detection_model" / "best_v5.pt"
 fire_detection_model_path = BASE_DIR.parent / "accident_fire_detection_model" / "best_fire_detection.pt"
 
 accident_model=YOLO(str(accident_detection_model_path))
@@ -23,7 +23,7 @@ fire_model=YOLO(str(fire_detection_model_path))
 consecutive_frames_needed = 5
 
 # accident confirmation cooldown to prevent multiple detections of same event
-accident_cooldown_seconds = 8
+accident_cooldown_seconds = 20
 
 # frame skip interval to balance perfromance and detection speed
 frame_skip_interval = 4
@@ -150,9 +150,14 @@ def generate_detection_frames(
     print(f"[CONFIG] Fire threshold:     {fire_conf_thresh}")
 
     temp_file = None
-    last_saved_time = 0
+    last_accident_time = 0
+    last_fire_time = 0
+    last_borderline_time = 0
     consecutive_accident = 0
     consecutive_fire = 0
+    accident_active = False
+    fire_active= False
+    borderline_active= False
     accident_miss_streak = 0  
     fire_miss_streak  = 0
 
@@ -276,75 +281,90 @@ def generate_detection_frames(
 
             current_time = time.time()
 
-            if current_time - last_saved_time > accident_cooldown_seconds:
-                if confirmed_accident:
-                    frame_path = save_frame_img(
-                        frame, 
-                        ACCIDENT_FOLDER, 
-                        "accident", 
-                        video_name, 
-                        frame_count, 
-                        acc_conf)
-                    db = SessionLocal()
-                    try: 
-                        save_detection(
-                            db = db,
-                            camera_id = camera_id,
-                            detection_type = "accident",
-                            confidence = acc_conf,
-                            frame_path = frame_path,
-                            status ='pending'
-                        )
-                    finally:
-                        db.close()
-                    last_saved_time = current_time
+            if confirmed_accident and current_time - last_accident_time > accident_cooldown_seconds:
+                    if not accident_active:
+                        frame_path = save_frame_img(
+                                frame, 
+                                ACCIDENT_FOLDER, 
+                                "accident", 
+                                video_name, 
+                                frame_count, 
+                                acc_conf
+                            )
 
-                elif confirmed_fire:
-                    frame_path = save_frame_img(frame, 
-                            FIRE_FOLDER,
-                            "fire",
-                            video_name,
-                            frame_count,
-                            fire_conf
+                        db = SessionLocal()
+                        try: 
+                                save_detection(
+                                    db = db,
+                                    camera_id = camera_id,
+                                    detection_type = "accident",
+                                    confidence = acc_conf,
+                                    frame_path = frame_path,
+                                    status ='pending'
+                                )
+                        finally:
+                                db.close()
+                        accident_active= True
+                        last_accident_time = current_time
+            else:
+                accident_active= False
+                
 
-                        )
-                    db = SessionLocal()
-                    try:
-                        save_detection(
-                            db = db,
-                            camera_id      = camera_id,
-                            detection_type = "fire",
-                            confidence     = fire_conf,
-                            frame_path     = frame_path,
-                            status='pending'
-                        )
-                    finally:
-                        db.close()
-                    last_saved_time = current_time
+            if confirmed_fire and (current_time - last_fire_time > accident_cooldown_seconds):
+                    if not fire_active:
+                        frame_path = save_frame_img(frame, 
+                                FIRE_FOLDER,
+                                "fire",
+                                video_name,
+                                frame_count,
+                                fire_conf
 
-                elif is_borderline:
-                    borderline_type = 'borderline_accident' if is_borderline_accident else 'borderline_fire'
-                    frame_path = save_frame_img( frame, 
-                        REVIEW_FOLDER, 
-                        "review", 
-                        video_name, frame_count, 
-                        acc_conf if is_borderline_accident else fire_conf 
-                    ) 
-                    db = SessionLocal()
+                            )
+                        db = SessionLocal()
+                        try:
+                            save_detection(
+                                db = db,
+                                camera_id      = camera_id,
+                                detection_type = "fire",
+                                confidence     = fire_conf,
+                                frame_path     = frame_path,
+                                status='pending'
+                            )
+                        finally:
+                            db.close()
+                        fire_active = True
+                        last_fire_time = current_time
 
-                    try: 
+            else:
+                fire_active = False
 
-                        save_borderline_detection( 
-                            db = db, 
-                            camera_id  = camera_id, 
-                            confidence  = acc_conf  if is_borderline_accident else fire_conf,
-                            frame_path  = frame_path, 
-                            detection_type = borderline_type 
+            if is_borderline and (current_time - last_borderline_time > accident_cooldown_seconds):
+                    if not borderline_active:
+                        borderline_type = 'borderline_accident' if is_borderline_accident else 'borderline_fire'
+                        frame_path = save_frame_img( frame, 
+                            REVIEW_FOLDER, 
+                            "review", 
+                            video_name, frame_count, 
+                            acc_conf if is_borderline_accident else fire_conf 
                         ) 
-                    finally:
-                        db.close()
+                        db = SessionLocal()
 
-                    last_saved_time =current_time
+                        try: 
+
+                            save_borderline_detection( 
+                                db = db, 
+                                camera_id  = camera_id, 
+                                confidence  = acc_conf  if is_borderline_accident else fire_conf,
+                                frame_path  = frame_path, 
+                                detection_type = borderline_type 
+                            ) 
+                        finally:
+                            db.close()
+                        borderline_active = True
+                        last_borderline_time =current_time
+            else: 
+                borderline_active = False
+        
         
             should_stream = (
                     confirmed_accident or confirmed_fire or
