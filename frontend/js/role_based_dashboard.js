@@ -600,12 +600,15 @@ async function loadAdminCameras() {
         }
 
         updateCameraBadge(cameras.find(c => c.camera_id == select.value)?.status);
-
         select.addEventListener('change', () => {
-            sessionStorage.setItem('selected_camera_id', select.value);
+            const newCameraId = select.value;
+            sessionStorage.setItem('selected_camera_id', newCameraId);
+            window.dispatchEvent(new CustomEvent('cameraChanged', {
+                detail: { cameraId: newCameraId }
+            }));
+            localStorage.setItem('selected_camera_id', newCameraId);
             const selectedStatus = select.options[select.selectedIndex].dataset.status;
             updateCameraBadge(selectedStatus);
-
             const contentEl = document.getElementById('dashboard-content');
             if (contentEl) renderAdminDashboard(contentEl);
         });

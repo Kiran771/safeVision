@@ -7,7 +7,7 @@
     <title>Accident Detection System</title>
     <link rel="stylesheet" href="/css/detection.css?v=2">
     <link rel="stylesheet" href="/css/admin_header.css?v=3">
-    <script src="/js/detection.js" defer></script>
+    <script src="/js/detection.js?v=1" defer></script>
     <script src="/js/sideMenu_loader.js" defer></script>
     <script> window.ADMIN_HEADER_CONFIG = { title: "Accident Detection System" }; </script>
 
@@ -20,7 +20,7 @@
         <main class="container">
             <div class="left-section">
                 <section class="live-feed">
-                    <h2>Live feed: Camera 3</h2>
+                    <h2 id="cameraTitle">Live feed: Camera 3</h2>
                     <div class="video-container">
                         <video id="cameraFeed" autoplay muted playsinline>
                             <source src=" " type="video/mp4">
@@ -29,7 +29,7 @@
                             <img src="/resources/stopbutton.png">
                         </div>
                         <div class="video-info">
-                            <span>Camera id : 3</span>
+                            <span id="cameraIdText">Camera id : 3</span>
                             <span class="status">
                                 <span class="status-dot"></span>
                                 Active

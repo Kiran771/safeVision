@@ -45,6 +45,59 @@ const CROP_REGIONS = {
 let syncRunning = false
 let stopSyncFunc = null
 
+function applyCameraId(cameraId) {
+    const titleEl = document.getElementById('cameraTitle');
+    const idEl    = document.getElementById('cameraIdText');
+    if (titleEl) titleEl.textContent = `Live feed: Camera ${cameraId}`;
+    if (idEl)    idEl.textContent    = `Camera id: ${cameraId}`;
+}
+
+async function loadAssignedCamera() {
+    try {
+        const res = await fetch('/cameras/my-cameras', {
+            headers: getAuthHeaders()
+        });
+        const data = await handleResponse(res);
+        if (!data || data.length === 0) {
+            console.warn('[CAMERA] No cameras assigned to this admin');
+            document.getElementById('cameraTitle').textContent = 'Live feed: No camera assigned';
+            document.getElementById('cameraIdText').textContent = 'Camera id: N/A';
+            return;
+        }
+        const savedId = sessionStorage.getItem('selected_camera_id');
+        const camera  = data.find(c => String(c.camera_id) === String(savedId)) || data.find(c => c.status === 'Active') || data[0];
+
+        const cameraId = camera.camera_id;
+        sessionStorage.setItem('selected_camera_id', cameraId);
+        applyCameraId(cameraId);
+
+        console.log(`[CAMERA] Assigned camera: ${cameraId}`);
+    } catch (err) {
+        console.error('[CAMERA] Failed to load assigned camera:', err);
+    }
+}
+
+window.addEventListener('cameraChanged', (e) => {
+    const cameraId = e.detail?.cameraId || sessionStorage.getItem('selected_camera_id');
+    if (!cameraId) return;
+    console.log('[CAMERA] cameraChanged event →', cameraId);
+    sessionStorage.setItem('selected_camera_id', cameraId);
+    applyCameraId(cameraId);
+    loadRecentAccidents();
+    loadStats();
+});
+
+window.addEventListener('storage', (e) => {
+    if (e.key !== 'selected_camera_id' || !e.newValue) return;
+    console.log('[CAMERA] storage event (cross-tab) →', e.newValue);
+    sessionStorage.setItem('selected_camera_id', e.newValue);
+    applyCameraId(e.newValue);
+    loadRecentAccidents();
+    loadStats();
+});
+
+
+
 async function startSyncedDetection(videoElement, detectionImg, videoFps) {
     const noFramesMsg = document.getElementById('noFramesMessage')
     const framesLayout = document.getElementById('framesLayout')
@@ -268,7 +321,7 @@ function renderFrameStrip() {
 
         if (!camera_id) {
             console.warn("No camera selected");
-            tableBody.innerHTML = `<tr><td colspan="6">Please select a camera</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6">Please select a camera</td></tr>`;
             return;
         }
         try {
@@ -316,7 +369,6 @@ function renderFrameStrip() {
 
         if (!camera_id) {
             console.warn("No camera selected");
-            tableBody.innerHTML = `<tr><td colspan="6">Please select a camera</td></tr>`;
             return;
         }
         try {
@@ -543,4 +595,6 @@ function renderFrameStrip() {
     document.addEventListener("keydown", e => {
         if (e.key === "Escape") closeFrameModal();
     });
+
+    loadAssignedCamera()
 

@@ -74,7 +74,7 @@ async function loadSidebar(sidebarPath) {
             const logoutAnchor = logoutSection.querySelector("a");
             if (logoutAnchor) {
                 logoutAnchor.addEventListener("click", (e) => {
-                    e.preventDefault();  
+                    e.preventDefault();
                     e.stopPropagation();
                     logout();
                 });
@@ -164,7 +164,7 @@ function highlightActiveMenuItem() {
         const link = item.querySelector("a");
         if (!link) return;
         const href = link.getAttribute("href");
-        if (!href) return; 
+        if (!href) return;
         if (currentPath.includes(href)) {
             item.classList.add("active");
         } else {
@@ -225,5 +225,6 @@ function filterMenuItemsByRole(userRole) {
 function logout() {
     console.log("Logging out...");
     sessionStorage.clear();
-    window.location.href = "/html/login.html"; 
+    localStorage.removeItem('selected_camera_id');
+    window.location.href = "/html/login.html";
 }

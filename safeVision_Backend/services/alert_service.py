@@ -56,7 +56,6 @@ def dispatch_alerts(accident_id: int, user_id: int = None):
 
         sent_count   = 0
         failed_count = 0
-
         for category in categories:
             contacts = get_active_contacts_by_category(db, category)
 
@@ -72,7 +71,6 @@ def dispatch_alerts(accident_id: int, user_id: int = None):
 
             if not nearest:
                 continue
-
             if not nearest.email:
                 print(f"[ALERT] No email for: {nearest.authority_name}")
                 add_notification(
@@ -80,7 +78,6 @@ def dispatch_alerts(accident_id: int, user_id: int = None):
                     type="warning"
                 )
                 continue
-
             distance = haversine_distance(
                 acc_lat, acc_lon,
                 nearest.latitude, nearest.longitude
