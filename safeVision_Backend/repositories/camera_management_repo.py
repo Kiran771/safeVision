@@ -22,8 +22,17 @@ def get_all_admins(db: Session):
 
 # Register camera
 def register_camera(db: Session, location_id: int, admin_id: int, status: str):
+  
+  location_count = db.query(Location).count()
+  admin_count = db.query(User).filter(User.role == 'Admin', User.is_active == True).count()
+  if location_count == 0 and admin_count == 0:
+      return {"error": "Cannot register camera. No locations and no admins available."}
+  if location_count == 0:
+      return {"error": "Cannot register camera. No locations found. Please add a location first."}
+  if admin_count == 0:
+      return {"error": "Cannot register camera. No admins available. Please register an admin first."}
+  
   location = db.query(Location).filter(Location.location_id == location_id).first()
-
   if not location:
     return {"error": "Invalid location"}
 
@@ -97,8 +106,8 @@ def update_camera(db: Session, camera_id: int, location_id: int, admin_id: int, 
         return {"error": "Invalid location"}
     current_admin = (
         db.query(UserCamera)
-          .filter(UserCamera.cameraid == camera_id, UserCamera.is_active == True)
-          .first()
+            .filter(UserCamera.cameraid == camera_id, UserCamera.is_active == True)
+            .first()
     )
     current_admin_id = current_admin.userid if current_admin else None
 

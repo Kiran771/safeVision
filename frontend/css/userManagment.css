@@ -91,17 +91,18 @@ thead {
 }
 
 th {
-    padding: 16px 24px;
+    padding: 14px 20px;
     text-align: left;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 600;
-    color: white;
+    color: #e8edf2;
+    letter-spacing: 0.03em;
 }
 
 td {
-    padding: 10px 20px;
-    border-bottom: 1px solid #f3f4f6;
-    color:rgb(108, 108, 108);
+    padding: 14px 20px;
+    font-size: 16px;
+    color: #222;
 }
 
 .action-cell {

@@ -113,7 +113,7 @@ def get_frame_image(path: str):
 
     return FileResponse(path, media_type="image/jpeg")
 
-# Get recent incidents 
+
 @router.get("/recent")
 def get_recent_detections(
     camera_id: int = Query(None),
@@ -151,10 +151,10 @@ def get_stats(camera_id: int=Query(...,description='camerid to fetch for stats')
 
 @router.get("/notifications")
 def get_notifications():
-    unread = get_unread_notifications()  
+    all_notifs = get_all_notifications()  
     return {
-        "notifications": unread,
-        "total": len(unread)
+        "notifications": all_notifs,
+        "total": len(all_notifs)
     }
 
 

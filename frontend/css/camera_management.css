@@ -124,7 +124,7 @@ thead th {
 }
 
 tbody {
-  background: #dcdcdc;
+  background: white;
 }
 
 tbody tr {
@@ -138,7 +138,7 @@ tbody tr:hover {
 
 tbody td {
   padding: 14px 20px;
-  font-size: 14px;
+  font-size: 16px;
   color: #222;
 }
 

@@ -3,22 +3,22 @@ function getAuthHeaders() {
   return token ? { "Authorization": `Bearer ${token}` } : {};
 }
 
-let isRedirecting=false
+let isRedirecting = false
 async function handleResponse(response) {
-    if (response.status === 401) {
-      if (isRedirecting) return null;
-        console.warn('Token expired. Redirecting to login...');
-        isRedirecting=true
-        sessionStorage.clear();
-        alert("Session expired. Please login again.");
-        window.location.href = '/html/login.html';
-        return null;
-    }
+  if (response.status === 401) {
+    if (isRedirecting) return null;
+    console.warn('Token expired. Redirecting to login...');
+    isRedirecting = true
+    sessionStorage.clear();
+    alert("Session expired. Please login again.");
+    window.location.href = '/html/login.html';
+    return null;
+  }
   let data = null;
   try {
-      data = await response.json();
+    data = await response.json();
   } catch {
-      data = null; 
+    data = null;
   }
   if (!response.ok) {
     console.error("API Error:", data);
@@ -45,18 +45,43 @@ window.addEventListener("DOMContentLoaded", () => {
   let editCameraId = null;
 
 
-
   addButton.addEventListener('click', async () => {
-    editCameraId = null;
-    modalTitle.textContent = 'Register New Camera'
-    submitBtn.textContent = 'Register';
-    resetForm();
 
-    await loadLocation();
-    await loadAdmin();
+    try {
+      const [locRes, adminRes] = await Promise.all([
+        fetch('/cameras/locations', { headers: getAuthHeaders() }),
+        fetch('/cameras/admins/all-admins', { headers: getAuthHeaders() })
+      ]);
 
-    overlay.classList.add('open');
-  });
+      const locations = await handleResponse(locRes);
+      const admins = await handleResponse(adminRes);
+      if (!locations || !admins) return;
+      if (locations.length === 0 && admins.length === 0) {
+        alert("Cannot register camera: No locations and no admins available.");
+        return;
+      }
+      if (locations.length === 0) {
+        alert("No locations found. Please add a location first.");
+        return;
+      }
+      if (admins.length === 0) {
+        alert("No admins available. Please register an admin first.");
+        return;
+      }
+      editCameraId = null;
+      modalTitle.textContent = 'Register New Camera'
+      submitBtn.textContent = 'Register';
+      resetForm();
+
+      await loadLocation();
+      await loadAdmin();
+      overlay.classList.add('open');
+    }
+    catch (err) {
+        console.error("Validation error", err);
+    }
+
+    });
 
   closeButton.addEventListener('click', () => {
     overlay.classList.remove('open');
@@ -72,8 +97,8 @@ window.addEventListener("DOMContentLoaded", () => {
   async function loadLocation(selectedValue = null) {
 
     try {
-      const res = await fetch('/cameras/locations',{
-        headers:getAuthHeaders()
+      const res = await fetch('/cameras/locations', {
+        headers: getAuthHeaders()
       })
       const data = await handleResponse(res);
       if (!data) return;
@@ -230,18 +255,18 @@ window.addEventListener("DOMContentLoaded", () => {
     const adminVal = parseInt(adminSelect.value);
 
     if (isNaN(locationVal)) {
-        alert("Please select a location.");
-        return;
+      alert("Please select a location.");
+      return;
     }
     if (isNaN(adminVal)) {
-        alert("No admin available to assign. Please create a new admin first.");
-        return;
+      alert("Please assign a admin to camera.");
+      return;
     }
     const dataLoad = {
       location_id: parseInt(locationSelect.value),
       admin_id: parseInt(adminSelect.value),
       status: statusSelect.value
-  };
+    };
     const url = editCameraId ? `/cameras/update/${editCameraId}` : '/cameras/register';
     const method = editCameraId ? 'PUT' : 'POST';
 
@@ -254,6 +279,10 @@ window.addEventListener("DOMContentLoaded", () => {
 
       const result = await handleResponse(res);
       if (!result) return;
+      if (result.error) {
+        alert(result.error);
+        return;
+      }
       alert(result.message);
       loadCameras();
       overlay.classList.remove('open');

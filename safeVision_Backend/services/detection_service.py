@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 from ultralytics import YOLO
 from safeVision_Backend.core.psql_db import SessionLocal
-from safeVision_Backend.repositories.accident_repo import save_detection,save_borderline_detection
+from safeVision_Backend.repositories.accident_repo import save_detection,save_borderline_detection,add_notification
 from safeVision_Backend.core.detection_config import get_config
 
 
@@ -20,10 +20,10 @@ fire_model=YOLO(str(fire_detection_model_path))
 
 
 # consecutive frames required to confirm accident
-consecutive_frames_needed = 5
+consecutive_frames_needed = 4
 
 # accident confirmation cooldown to prevent multiple detections of same event
-accident_cooldown_seconds = 20
+accident_cooldown_seconds = 50
 
 # frame skip interval to balance perfromance and detection speed
 frame_skip_interval = 4
@@ -302,6 +302,10 @@ def generate_detection_frames(
                                     frame_path = frame_path,
                                     status ='pending'
                                 )
+                                add_notification(
+                                        f"Accident detected at Camera #{camera_id} with {acc_conf:.0%} confidence — pending review",
+                                        type="error"
+                                )
                         finally:
                                 db.close()
                         accident_active= True
@@ -329,6 +333,10 @@ def generate_detection_frames(
                                 confidence     = fire_conf,
                                 frame_path     = frame_path,
                                 status='pending'
+                            )
+                            add_notification(
+                                f"Fire detected at Camera #{camera_id} with {fire_conf:.0%} confidence — pending review",
+                                type="error"
                             )
                         finally:
                             db.close()
@@ -358,6 +366,10 @@ def generate_detection_frames(
                                 frame_path  = frame_path, 
                                 detection_type = borderline_type 
                             ) 
+                            add_notification(
+                                f"Borderline {'accident' if is_borderline_accident else 'fire'} detected at Camera #{camera_id} — flagged for review",
+                                type="warning"
+                            )
                         finally:
                             db.close()
                         borderline_active = True

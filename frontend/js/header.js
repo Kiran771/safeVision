@@ -1,6 +1,14 @@
 (function () {
+  if (!document.getElementById('fa-cdn')) {
+    const link = document.createElement('link');
+    link.id   = 'fa-cdn';
+    link.rel  = 'stylesheet';
+    link.href = 'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css';
+    document.head.appendChild(link);
+  }
 
   function getConfig() {
+
     const adminConfig = window.ADMIN_HEADER_CONFIG || {};
     const userConfig = window.HEADER_CONFIG || {};
 
@@ -25,21 +33,38 @@
     const { role, name, initials, title, subtitle } = getConfig();
 
     if (role === "admin") {
-      el.innerHTML = `
-        <header class="admin-header">
-          <h3>${title}</h3>
-          ${subtitle ? `<p class="header-subtitle">${subtitle}</p>` : ""}
-          <div class="admin">
-            <img src='/resources/notification.png'>
-            <div class="admin-icon"></div>
-            <div>
-              <span class="admin-name">${name}</span>
-              <span class="admin-role">${role}</span>
+  el.innerHTML = `
+    <header class="admin-header">
+      <h3>${title}</h3>
+      ${subtitle ? `<p class="header-subtitle">${subtitle}</p>` : ""}
+      <div class="admin">
+        <div class="notification-wrapper" id="notificationWrapper">
+          <div class="bell-btn" id="bellBtn">
+            <img src='/resources/notification.png' alt="notifications">
+            <span class="notif-badge hidden" id="notifBadge">0</span>
+          </div>
+          <div class="notif-dropdown hidden" id="notifDropdown">
+            <div class="notif-header">
+              <span>Notifications</span>
+              <button class="clear-btn" id="clearNotifBtn">Clear all</button>
+            </div>
+            <div class="notif-list" id="notifList">
+              <p class="notif-empty">No notifications</p>
             </div>
           </div>
-        </header>
-      `;
-    } else {
+        </div>
+
+        <div class="admin-icon"></div>
+        <div>
+          <span class="admin-name">${name}</span>
+          <span class="admin-role">${role}</span>
+        </div>
+      </div>
+    </header>
+  `;
+
+  initNotifications();
+}else {
       el.innerHTML = `
         <header class="header">
           <div class="header-left">
@@ -57,6 +82,98 @@
           </div>
         </header>
       `;
+    }
+  }
+
+  function initNotifications() {
+    const bellBtn       = document.getElementById('bellBtn');
+    const notifDropdown = document.getElementById('notifDropdown');
+    const clearBtn      = document.getElementById('clearNotifBtn');
+    if (!bellBtn) return;
+
+    bellBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      notifDropdown.classList.toggle('hidden');
+      if (!notifDropdown.classList.contains('hidden')) {
+        fetchNotifications();
+      }
+    });
+
+    document.addEventListener('click', (e) => {
+      if (!document.getElementById('notificationWrapper')?.contains(e.target)) {
+        notifDropdown?.classList.add('hidden');
+      }
+    });
+
+    clearBtn?.addEventListener('click', async () => {
+      try {
+        const token = sessionStorage.getItem("access_token");
+        await fetch('/accidents/notifications/clear', {
+          method: 'DELETE',
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        document.getElementById('notifList').innerHTML = '<p class="notif-empty">No notifications</p>';
+        updateBadge(0);
+      } catch (err) {
+        console.error('Failed to clear notifications:', err);
+      }
+    });
+
+    fetchNotifications();
+    setInterval(fetchNotifications, 10000);
+  }
+
+  async function fetchNotifications() {
+    try {
+      const token = sessionStorage.getItem("access_token");
+      if (!token) return;
+      const res = await fetch('/accidents/notifications', {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      const notifications = data.notifications || [];
+      updateBadge(notifications.length);
+      renderNotifications(notifications);
+    } catch (err) {
+      console.error('Notification fetch error:', err);
+    }
+  }
+
+  function renderNotifications(notifications) {
+    const list = document.getElementById('notifList');
+    if (!list) return;
+
+    if (!notifications.length) {
+      list.innerHTML = '<p class="notif-empty">No notifications</p>';
+      return;
+    }
+
+    const iconMap = {
+      success : '<i class="fa-solid fa-circle-check"></i>',
+      error   : '<i class="fa-solid fa-circle-xmark"></i>',
+      warning : '<i class="fa-solid fa-triangle-exclamation"></i>',
+      info    : '<i class="fa-solid fa-circle-info"></i>',
+    };
+
+    list.innerHTML = notifications.map(n => `
+      <div class="notif-item notif-${n.type || 'info'}">
+        <span class="notif-icon">${iconMap[n.type] || iconMap.info}</span>
+        <span class="notif-msg">${n.message}</span>
+      </div>
+    `).join('');
+
+    list.scrollTop = 0;
+  }
+
+  function updateBadge(count) {
+    const badge = document.getElementById('notifBadge');
+    if (!badge) return;
+    if (count > 0) {
+      badge.textContent = count > 99 ? '99+' : count;
+      badge.classList.remove('hidden');
+    } else {
+      badge.classList.add('hidden');
     }
   }
 

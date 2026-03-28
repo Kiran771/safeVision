@@ -1,9 +1,10 @@
+let originalAdminData = null; 
+let isRedirecting = false
 function getAuthHeaders() {
     const token = sessionStorage.getItem("access_token");
     return token ? { "Authorization": `Bearer ${token}` } : {};
 }
 
-let isRedirecting = false
 async function handleResponse(response) {
     if (response.status === 401) {
         console.warn('Token expired. Redirecting to login...');
@@ -168,6 +169,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 method = "PATCH";
                 delete data.password;
                 delete data.rePassword;
+
+                const isChanged = (
+                data.username !== originalAdminData.username ||
+                data.email !== originalAdminData.email ||
+                data.contact !== originalAdminData.contact
+            );
+
+            if (!isChanged) {
+                alert("No changes detected. You did not modify any fields.");
+                closeForm();
+                originalAdminData = null;
+                return;
+            }
             }
 
             const res = await fetch(url, {
@@ -218,6 +232,12 @@ document.addEventListener('DOMContentLoaded', () => {
             userEmail.value = admin.email;
             userContact.value = admin.contact;
             userRole.value = admin.role;
+
+            originalAdminData = {
+            username: admin.username,
+            email: admin.email,
+            contact: admin.contact,
+        };
 
             document.querySelectorAll('.password-section').forEach(group => {
                 group.style.display = 'none';

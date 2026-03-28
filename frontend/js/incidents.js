@@ -26,18 +26,18 @@ async function handleResponse(response) {
     return data;
 }
 
-// Configuration
+
 const ITEMS_PER_PAGE = 8;
 let currentPage = 1;
 let totalPages = 1;
 let allIncidents = [];
 
-// Initialize page
+
 document.addEventListener('DOMContentLoaded', () => {
     fetchIncidents();
 });
 
-// Fetch incidents from API
+
 async function fetchIncidents() {
     showLoading();
     try {

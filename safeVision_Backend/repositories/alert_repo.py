@@ -1,5 +1,11 @@
 from  sqlalchemy.orm import Session
-from safeVision_Backend.models.table_creation import EmergencyContact,Location,Camera,Accident,Alert
+from safeVision_Backend.models.table_creation import (
+    EmergencyContact,
+    Location,
+    Camera,
+    Accident,
+    Alert  
+)
 
 
 def save_alert(
@@ -52,6 +58,21 @@ def get_accident_location(db, accident_id: int):
         return "Unknown Location"
 
     return f"{result.location_name}, {result.city}"
+
+def get_accident_coordinates(db: Session, accident_id: int):
+    """
+    Get the lat/lng of the camera location for a given accident
+    """
+    result = (
+        db.query(Location.latitude, Location.longitude)
+        .join(Camera, Camera.location_id == Location.location_id)
+        .join(Accident, Accident.cameraid == Camera.cameraid)
+        .filter(Accident.accidentid == accident_id)
+        .first()
+    )
+    if result:
+        return result.latitude, result.longitude
+    return None, None
 
 def get_alerts_by_accident(db: Session, accident_id: int):
     return db.query(Alert).filter(

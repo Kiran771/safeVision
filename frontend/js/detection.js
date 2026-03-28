@@ -294,7 +294,7 @@ function renderFrameStrip() {
                     : "—";
                 return `
             <tr>
-                <td style="text-align:center">${d.accidentid}</td>
+                <td style="text-align:center">${d.id}</td>
                 <td style="text-align:center">${timeStr}</td>
                 <td style="text-align:center">
                     <span class="status-badge ${statusClass}">${d.status}</span>

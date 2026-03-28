@@ -1,4 +1,5 @@
 import os
+import base64
 from dotenv import load_dotenv
 from sib_api_v3_sdk import (
     Configuration,
@@ -172,6 +173,20 @@ def send_accident_alert_email(
         subject = subject,
         html_content = html_content,
     )
+    if frame_path and os.path.exists(frame_path):
+        try:
+            with open(frame_path, "rb") as img_file:
+                encoded = base64.b64encode(img_file.read()).decode("utf-8")
+            filename = os.path.basename(frame_path)
+            send_smtp_email.attachment = [
+                {
+                    "content": encoded,
+                    "name": filename
+                }
+            ]
+            print(f"[ALERT] Attached frame: {filename}")
+        except Exception as e:
+            print(f"[ALERT] Failed to attach image: {e}")
     try:
         response = api_instance.send_transac_email(send_smtp_email)
         print(f"[ALERT] Sent to {to_email} | id: {response.message_id}")

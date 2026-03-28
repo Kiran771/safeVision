@@ -120,6 +120,10 @@ async function confirmIncident() {
     const confirmed = confirm('Are you sure you want to CONFIRM this incident?');
     if (!confirmed) return;
 
+    const btn = document.getElementById('confirm-btn');
+    btn.disabled = true;
+    btn.textContent = 'Confirming...';
+
     try {
         const response = await fetch(`/accidents/${incidentId}/verify`, {
             method: 'POST',
@@ -132,15 +136,53 @@ async function confirmIncident() {
         if (!response.ok) {
             throw new Error(result?.detail || 'Failed to confirm incident');
         }
-        alert('Incident confirmed successfully!');
 
-        window.location.href = '/html/verify.html';
+        showStatusMessage('Incident confirmed! Alerts dispatched to nearest responders.', 'success');
+        setTimeout(() => {
+            window.location.href = '/html/verify.html';
+        }, 2000);
+
     } catch (error) {
         console.error('Error confirming incident:', error);
-        alert(`Failed to confirm incident: ${error.message}`);
+        showStatusMessage(`Failed to confirm incident: ${error.message}`, 'error');
+        btn.disabled = false;
+        btn.textContent = 'Confirm';
     }
 }
 
+function showStatusMessage(message, type) {
+    const existing = document.getElementById('alert-status-msg');
+    if (existing) existing.remove();
+
+    const colors = {
+        success: { bg: '#d1fae5', border: '#10b981', text: '#065f46' },
+        error:   { bg: '#fee2e2', border: '#ef4444', text: '#991b1b' },
+        warning: { bg: '#fef3c7', border: '#f59e0b', text: '#92400e' },
+    };
+    const color = colors[type] || colors.success;
+
+    const div = document.createElement('div');
+    div.id = 'alert-status-msg';
+    div.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 16px 24px;
+        background: ${color.bg};
+        border: 1px solid ${color.border};
+        color: ${color.text};
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        max-width: 350px;
+        z-index: 9999;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    `;
+    div.textContent = message;
+    document.body.appendChild(div);
+
+    setTimeout(() => div.remove(), 5000);
+}
 
 async function rejectIncident() {
     const confirmed = confirm('Are you sure you want to REJECT this incident?');
