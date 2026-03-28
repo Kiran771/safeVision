@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from safeVision_Backend.models.table_creation import Accident,Camera,Location
 
 
-notifications = []
+notifications = {}  
 
 def get_camera_location(db: Session, camera_id: int):
     camera = db.query(Camera).filter(Camera.cameraid == camera_id).first()
@@ -106,15 +106,18 @@ def get_confirmed_count(db: Session, camera_id: int):
     return count
 
 
-def add_notification(message: str, type: str = "info"):
-    notifications.append({
+def add_notification(message: str, type: str = "info", camera_id: int = None):
+    key = camera_id if camera_id else "global"
+    if key not in notifications:
+        notifications[key] = []
+    notifications[key].append({
         "message":   message,
-        "type":      type,   
+        "type":      type,
         "timestamp": datetime.now().isoformat(),
         "read":      False
     })
-    if len(notifications) > 20:
-        notifications.pop(0)
+    if len(notifications[key]) > 20:
+        notifications[key].pop(0)
 
 def get_unread_notifications():
     
@@ -124,9 +127,11 @@ def get_unread_notifications():
     return unread
 
 
-def get_all_notifications():
-    return list(notifications)
+def get_all_notifications(camera_id: int = None):
+    key = camera_id if camera_id else "global"
+    return list(notifications.get(key, []))
 
-
-def clear_all_notifications():
-    notifications.clear()
+def clear_all_notifications(camera_id: int = None):
+    key = camera_id if camera_id else "global"
+    if key in notifications:
+        notifications[key].clear()

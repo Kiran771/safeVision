@@ -1,3 +1,4 @@
+guardPage(["super admin", "admin"]);
 function getUserRole() {
     const adminConfig = window.ADMIN_HEADER_CONFIG || {};
     const userConfig = window.HEADER_CONFIG || {};

@@ -1,3 +1,4 @@
+guardPage(["admin"]);
 const API_BASE = "";
 function getAuthHeaders() {
     const token = sessionStorage.getItem("access_token");
@@ -207,35 +208,6 @@ async function savePassword() {
     } finally {
         setBtnLoading("btnSavePass", false);
     }
-}
-
-function checkStrength(val) {
-    let score = 0;
-    if (val.length >= 8) score++;
-    if (val.length >= 12) score++;
-    if (/[A-Z]/.test(val)) score++;
-    if (/[0-9]/.test(val)) score++;
-    if (/[^A-Za-z0-9]/.test(val)) score++;
-
-    const widths = ["0%", "20%", "40%", "65%", "85%", "100%"];
-    const colors = ["transparent", "#d93838", "#e07a1a", "#d4ac1a", "#48bb78", "#2f9e64"];
-    const labels = [
-        "At least 8 characters recommended",
-        "Weak — too short",
-        "Fair — add uppercase & numbers",
-        "Good — add a symbol",
-        "Strong",
-        "Very strong",
-    ];
-
-    const fill = document.getElementById("strengthFill");
-    const label = document.getElementById("strengthLabel");
-    if (!fill || !label) return;
-
-    fill.style.width = widths[score];
-    fill.style.backgroundColor = colors[score];
-    label.textContent = labels[score];
-    label.style.color = score === 0 ? "#a8bfce" : colors[score];
 }
 
 function togglePass(inputId, btn) {

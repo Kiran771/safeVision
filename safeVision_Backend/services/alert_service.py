@@ -25,9 +25,11 @@ def dispatch_alerts(accident_id: int, user_id: int = None):
             print(f"[ALERT] No detection found for id: {accident_id}")
             add_notification(
                 f"Alert failed: Incident #{accident_id} not found",
-                type="error"
+                type="error",
+                camera_id=None
             )
             return
+        camera_id = detection.cameraid 
 
         if "fire" in (detection.detection_type or ""):
             alert_key = "fire"
@@ -48,7 +50,8 @@ def dispatch_alerts(accident_id: int, user_id: int = None):
             print(f"[ALERT] No coordinates found for accident #{accident_id}")
             add_notification(
                 f"Alert failed: Camera location has no coordinates. Please update the location.",
-                type="error"
+                type="error",
+                camera_id = detection.cameraid 
             )
             return
 
@@ -63,7 +66,8 @@ def dispatch_alerts(accident_id: int, user_id: int = None):
                 print(f"[ALERT] No active contacts for: {category}")
                 add_notification(
                     f"No active {category.replace('_', ' ').title()} contact found - skipped",
-                    type="warning"
+                    type="warning",
+                    camera_id = detection.cameraid 
                 )
                 continue
 
@@ -75,7 +79,8 @@ def dispatch_alerts(accident_id: int, user_id: int = None):
                 print(f"[ALERT] No email for: {nearest.authority_name}")
                 add_notification(
                     f"{nearest.authority_name} has no email registered — alert not sent",
-                    type="warning"
+                    type="warning",
+                    camera_id = detection.cameraid 
                 )
                 continue
             distance = haversine_distance(
@@ -108,14 +113,16 @@ def dispatch_alerts(accident_id: int, user_id: int = None):
                 sent_count += 1
                 add_notification(
                     f"{category.replace('_', ' ').title()} alerted: {nearest.authority_name} ({distance:.1f} km away)",
-                    type="success"
+                    type="success",
+                    camera_id = detection.cameraid 
                 )
 
             else:
                 failed_count += 1
                 add_notification(
                     f"Failed to alert {nearest.authority_name} ({category.replace('_', ' ').title()}) — check email settings",
-                    type="error"
+                    type="error",
+                    camera_id = detection.cameraid 
                 )
 
             print(

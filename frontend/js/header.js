@@ -108,7 +108,11 @@
     clearBtn?.addEventListener('click', async () => {
       try {
         const token = sessionStorage.getItem("access_token");
-        await fetch('/accidents/notifications/clear', {
+        const cameraId = sessionStorage.getItem("selected_camera_id");
+        const url = cameraId
+            ? `/accidents/notifications/clear?camera_id=${cameraId}`
+            : '/accidents/notifications/clear';
+        await fetch(url, {
           method: 'DELETE',
           headers: { "Authorization": `Bearer ${token}` }
         });
@@ -127,7 +131,12 @@
     try {
       const token = sessionStorage.getItem("access_token");
       if (!token) return;
-      const res = await fetch('/accidents/notifications', {
+      const cameraId = sessionStorage.getItem("selected_camera_id");
+        const url = cameraId 
+            ? `/accidents/notifications?camera_id=${cameraId}`
+            : '/accidents/notifications';
+
+      const res = await fetch(url, {
         headers: { "Authorization": `Bearer ${token}` }
       });
       if (!res.ok) return;

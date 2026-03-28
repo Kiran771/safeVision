@@ -1,3 +1,4 @@
+guardPage(["super admin"]);
 let originalAdminData = null; 
 let isRedirecting = false
 function getAuthHeaders() {

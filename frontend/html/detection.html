@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="/css/admin_header.css?v=3">
     <script src="/js/detection.js?v=1" defer></script>
     <script src="/js/sideMenu_loader.js" defer></script>
+    <script src="/js/auth_guard.js"></script>
     <script> window.ADMIN_HEADER_CONFIG = { title: "Accident Detection System" }; </script>
 
 </head>
@@ -43,13 +44,13 @@
                         <button id="startDetection">Start Detection</button>
                     </div>
                 </section>
-                
+
                 <section class="detection-frames-section">
                     <h2>Detected Frames</h2>
 
                     <p class="no-frames" id="noFramesMessage">No accident detected yet</p>
 
-                    
+
                     <div class="frames-layout" id="framesLayout" style="display:none;">
 
                         <div class="frame-center" id="centerFrame" onclick="openFrameModal()">

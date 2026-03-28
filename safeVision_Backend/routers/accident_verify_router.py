@@ -150,26 +150,27 @@ def get_stats(camera_id: int=Query(...,description='camerid to fetch for stats')
         raise HTTPException(status_code=500, detail="Failed to fetch accident stats")
 
 @router.get("/notifications")
-def get_notifications():
-    all_notifs = get_all_notifications()  
+def get_notifications(
+    camera_id: int = Query(None),
+    db: Session = Depends(get_db)
+):
+    all_notifs = get_all_notifications(camera_id=camera_id)
     return {
         "notifications": all_notifs,
         "total": len(all_notifs)
     }
 
-
 @router.get("/notifications/all")
-def get_all_notifs():
-    all_notifs = get_all_notifications()  
+def get_all_notifs(camera_id: int = Query(None)):
+    all_notifs = get_all_notifications(camera_id=camera_id)
     return {
         "notifications": all_notifs,
-        "total":len(all_notifs)
+        "total": len(all_notifs)
     }
 
-
 @router.delete("/notifications/clear")
-def clear_notifications():
-    clear_all_notifications()            
+def clear_notifications(camera_id: int = Query(None)):
+    clear_all_notifications(camera_id=camera_id)
     return {"message": "Notifications cleared"}
 
 

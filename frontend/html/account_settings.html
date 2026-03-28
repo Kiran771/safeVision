@@ -7,6 +7,7 @@
     <title>Account Settings</title>
     <link rel="stylesheet" href="/css/admin_header.css?v=2" />
     <link rel="stylesheet" href="/css/accountSettings.css?v=2" />
+    <script src="/js/auth_guard.js"></script>
     <script>
         window.ADMIN_HEADER_CONFIG = { title: "Account Settings" };
     </script>
@@ -122,8 +123,7 @@
                                     <label class="form-label" for="inputNewPass">New Password</label>
                                     <div class="input-wrap">
                                         <input class="form-input" id="inputNewPass" type="password"
-                                            placeholder="New password" autocomplete="new-password"
-                                            oninput="checkStrength(this.value)" />
+                                            placeholder="New password" autocomplete="new-password" />
                                         <button class="toggle-eye" type="button"
                                             onclick="togglePass('inputNewPass', this)" aria-label="Show password">
                                             <img src="/resources/password.png" data-eye-open="/resources/password.png"
@@ -171,4 +171,5 @@
     <script src="/js/header.js?v=1" defer></script>
     <script src="/js/account_settings.js"></script>
 </body>
+
 </html>

@@ -1,4 +1,5 @@
-let = isRedirecting = false
+guardPage(["admin"]);
+let isRedirecting = false
 function getAuthHeaders() {
     const token = sessionStorage.getItem("access_token");
     return token ? { "Authorization": `Bearer ${token}` } : {};

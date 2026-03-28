@@ -304,7 +304,8 @@ def generate_detection_frames(
                                 )
                                 add_notification(
                                         f"Accident detected at Camera #{camera_id} with {acc_conf:.0%} confidence — pending review",
-                                        type="error"
+                                        type="error",
+                                        camera_id=camera_id 
                                 )
                         finally:
                                 db.close()
@@ -336,7 +337,8 @@ def generate_detection_frames(
                             )
                             add_notification(
                                 f"Fire detected at Camera #{camera_id} with {fire_conf:.0%} confidence — pending review",
-                                type="error"
+                                type="error",
+                                camera_id=camera_id 
                             )
                         finally:
                             db.close()
@@ -368,7 +370,8 @@ def generate_detection_frames(
                             ) 
                             add_notification(
                                 f"Borderline {'accident' if is_borderline_accident else 'fire'} detected at Camera #{camera_id} — flagged for review",
-                                type="warning"
+                                type="warning",
+                                camera_id=camera_id 
                             )
                         finally:
                             db.close()
