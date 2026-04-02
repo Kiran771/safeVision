@@ -55,7 +55,6 @@
     position: relative;
 }
 
-
 .bell-btn {
     position: relative;
     cursor: pointer;
@@ -95,7 +94,6 @@
 .notif-badge.hidden {
     display: none;
 }
-
 
 .notif-dropdown {
     position: absolute;

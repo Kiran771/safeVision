@@ -1,4 +1,4 @@
-guardPage(["admin"]);
+guardPage(["admin","super admin"]);
 const API_BASE = "";
 function getAuthHeaders() {
     const token = sessionStorage.getItem("access_token");
@@ -76,6 +76,11 @@ function renderProfile(user) {
     setVal("inputEmail", user.email || "");
     setVal("inputContact", user.contact || "");
     setVal("inputRole", user.role || "");
+    const roleNote = document.getElementById('roleNote');
+    if (roleNote) {
+        const normalizedRole = (user.role || '').toLowerCase().replace(/\s+/g, '');
+        roleNote.style.display = normalizedRole === 'superadmin' ? 'none' : '';
+    }
 }
 
 async function saveProfile() {

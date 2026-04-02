@@ -64,7 +64,6 @@ async function loadIncidentData() {
 }
 
 
-
 function setConfidenceBar(confidence) {
     const fill = document.getElementById('confidence-fill')
     const textEl = document.getElementById('confidence-score-text')
@@ -103,7 +102,11 @@ async function loadFrameImage(frameUrl) {
         }
         if (!response.ok) throw new Error('Image load failed');
         const blob = await response.blob();
+        originalImg.parentElement.classList.remove('loading');
+        originalImg.onload = () => URL.revokeObjectURL(originalImg.src); 
         originalImg.src = URL.createObjectURL(blob);
+        originalImg.style.display = 'block';
+
         originalImg.style.display = 'block';
     } catch (err) {
         console.error('Failed to load frame image:', err);
@@ -130,14 +133,16 @@ async function confirmIncident() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', ...getAuthHeaders() }
         });
-
-        const result = await handleResponse(response);
-        if (!result) return;
-
-        if (!response.ok) {
-            throw new Error(result?.detail || 'Failed to confirm incident');
+        if (response.status === 401) {
+            sessionStorage.clear();
+            window.location.href = '/html/login.html';
+            return;
         }
-
+        if (!response.ok) {
+            let detail = 'Failed to confirm incident';
+            try { detail = (await response.json())?.detail || detail; } catch {}
+            throw new Error(detail);
+        }
         showStatusMessage('Incident confirmed! Alerts dispatched to nearest responders.', 'success');
         setTimeout(() => {
             window.location.href = '/html/verify.html';

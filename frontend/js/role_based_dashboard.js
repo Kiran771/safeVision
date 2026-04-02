@@ -1,7 +1,7 @@
 guardPage(["super admin", "admin"]);
 function getUserRole() {
     const adminConfig = window.ADMIN_HEADER_CONFIG || {};
-    const userConfig = window.HEADER_CONFIG || {};
+    const superAdminConfig = window.HEADER_CONFIG || {};
     let storedUser = {};
 
     try {
@@ -10,7 +10,7 @@ function getUserRole() {
 
     const role = (
         adminConfig.role ||
-        userConfig.role ||
+        superAdminConfig.role ||
         storedUser.role ||
         sessionStorage.getItem("role") ||
         "Admin"
@@ -406,7 +406,7 @@ async function renderAdminDashboard(contentEl) {
     contentEl.innerHTML =
         '<div style="padding:2rem;text-align:center;color:#666;">Loading dashboard...</div>';
     try {
-        const cameraId     = sessionStorage.getItem('selected_camera_id');
+        const cameraId = sessionStorage.getItem('selected_camera_id');
         const dashboardData = await dashboardAPI.getAdminStats(cameraId);
 
         if (!dashboardData || !dashboardData.metrics) {
@@ -552,14 +552,14 @@ function updateCameraBadge(status) {
     const badge = document.getElementById('cameraStatusBadge');
     if (!badge) return;
     const styles = {
-        active:      { bg: '#dcfce7', color: '#15803d', border: '#bbf7d0', label: '● Active' },
-        inactive:    { bg: '#fee2e2', color: '#dc2626', border: '#fecaca', label: '● Inactive' },
+        active: { bg: '#dcfce7', color: '#15803d', border: '#bbf7d0', label: '● Active' },
+        inactive: { bg: '#fee2e2', color: '#dc2626', border: '#fecaca', label: '● Inactive' },
         maintenance: { bg: '#fef9c3', color: '#a16207', border: '#fde68a', label: '● Maintenance' },
     };
     const s = styles[status?.toLowerCase()] || styles.active;
-    badge.textContent       = s.label;
-    badge.style.background  = s.bg;
-    badge.style.color       = s.color;
+    badge.textContent = s.label;
+    badge.style.background = s.bg;
+    badge.style.color = s.color;
     badge.style.borderColor = s.border;
 }
 async function loadAdminCameras() {
@@ -573,7 +573,7 @@ async function loadAdminCameras() {
 
         if (!resp.ok) {
             select.innerHTML = '<option disabled>No cameras assigned</option>';
-            
+
             const badge = document.getElementById('cameraStatusBadge');
             if (badge) {
                 badge.textContent = '● Unassigned';
@@ -701,7 +701,7 @@ function setupTimeFilters() {
                 console.log("Fetching stats for period:", period);
 
                 try {
-                    const cameraId   = sessionStorage.getItem('selected_camera_id');
+                    const cameraId = sessionStorage.getItem('selected_camera_id');
                     const periodData = await dashboardAPI.getTimePeriodStats(period, cameraId);
                     console.log("Period data:", periodData);
 
