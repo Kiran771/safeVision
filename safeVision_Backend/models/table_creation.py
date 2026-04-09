@@ -61,12 +61,12 @@ class EmergencyContact(Base):
 
     contactid = Column(Integer, primary_key=True, autoincrement=True, index=True)
     authority_name = Column(String(150), nullable=False)
-    contact_number = Column(String(20), nullable=False)
+    contact_number = Column(String(20), nullable=False,unique=True)
     category = Column(String(50), nullable=False)
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
     location  = Column(String(255), nullable=False)
-    email   = Column(String(120), nullable=True)
+    email   = Column(String(120), nullable=False, unique=True)
     is_active  = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 

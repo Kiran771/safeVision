@@ -46,6 +46,9 @@ const CROP_REGIONS = {
 let syncRunning = false
 let stopSyncFunc = null
 
+const overlay = document.getElementById("videoOverlay"); 
+if (overlay) overlay.style.display = "none";
+
 function applyCameraId(cameraId) {
     const titleEl = document.getElementById('cameraTitle');
     const idEl    = document.getElementById('cameraIdText');
@@ -398,7 +401,6 @@ function renderFrameStrip() {
         const detectionImg = document.getElementById("detectionStreamImg");
         const fpsElement = document.getElementById("videoFps");
         const noFramesMsg = document.getElementById("noFramesMessage");
-        const overlay = document.getElementById("videoOverlay");
         const framesLayout = document.getElementById("framesLayout");
 
         if (overlay) overlay.style.display = "none";

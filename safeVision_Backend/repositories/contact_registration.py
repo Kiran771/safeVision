@@ -23,7 +23,7 @@ def get_all_contacts(db: Session):
 def update_contact(db: Session, contact_id: int, contact: EmergencyContactUpdate):
     db_contact = get_contact_by_id(db, contact_id)
     if db_contact:
-        for key, value in contact.model_dump(exclude_unset=True).items():  # only update provided fields
+        for key, value in contact.model_dump(exclude_unset=True).items():  
             setattr(db_contact, key, value)
         db.commit()
         db.refresh(db_contact)

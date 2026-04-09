@@ -77,7 +77,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Username
         if (!data.username.trim()) { showError("userNameError", "Username required"); valid = false; }
-        else if (/^\d/.test(data.username)) { showError("userNameError", "Cannot start with number"); valid = false; }
+        else if (/^\d/.test(data.username)) { showError("userNameError", "Username cannot start with a number"); valid = false; }
         else if (data.username.length < 3) { showError("userNameError", "Min 3 characters"); valid = false; }
 
         // Email
@@ -257,7 +257,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function deleteAdmin(e) {
         const id = e.currentTarget.dataset.id;
-        if (!confirm("Delete this admin?")) return;
+        const row = e.currentTarget.closest("tr"); 
+        const username = row.cells[1].textContent;
+        if (!confirm(`Are you sure you want to delete admin "${username}"? This action cannot be undone.`)) return;
 
         try {
             const res = await fetch(`/admins/${id}`, {

@@ -90,10 +90,47 @@ def get_contact(contact_id: int = Path(..., description="ID of the contact"), db
 
 # Update a contact
 @router.put("/{contact_id}", response_model=EmergencyContactOut)
-def update_contact(contact_id: int, updated_contact: EmergencyContactUpdate, db: Session = Depends(get_db)):
-    contact = crud.update_contact(db, contact_id, updated_contact)
-    if not contact:
+def update_contact(
+    contact_id: int, 
+    updated_contact: EmergencyContactUpdate, 
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    db_contact = crud.get_contact_by_id(db, contact_id)
+    if not db_contact:
         raise HTTPException(status_code=404, detail="Contact not found")
+    
+    if updated_contact.email:
+        existing_email = db.query(EmergencyContact).filter(
+            EmergencyContact.email == updated_contact.email,
+            EmergencyContact.contactid != contact_id
+        ).first()
+        if existing_email:
+            raise HTTPException(status_code=400, detail="Email already registered")
+        
+    if updated_contact.contact_number:
+        existing_phone = db.query(EmergencyContact).filter(
+            EmergencyContact.contact_number == updated_contact.contact_number,
+            EmergencyContact.contactid != contact_id
+        ).first()
+        if existing_phone:
+            raise HTTPException(status_code=400, detail="Phone number already registered")
+    
+    email_changed = updated_contact.email and updated_contact.email != db_contact.email
+    
+    contact = crud.update_contact(db, contact_id, updated_contact)
+    if email_changed:
+        contact.is_active = False
+        db.commit()
+        db.refresh(contact)
+        token = generate_verification_token(contact.email)
+        background_tasks.add_task(
+            send_verification_email,
+            to_email=contact.email,
+            token=token,
+            authority_name=contact.authority_name,
+            category=contact.category
+        )
     return contact
 
 # Delete a contact

@@ -13,11 +13,12 @@ router = APIRouter(prefix="/dashboard", tags=["Dashboard"],dependencies=[Depends
 
 
 @router.get("/admin/stats",response_model=Dict[str, Any])
-def get_admin_dashboard_stats(db: Session = Depends(get_db),current_user = Depends(get_current_user)
+def get_admin_dashboard_stats(camera_id:int=None,db: Session = Depends(get_db),current_user = Depends(get_current_user)
 ):
     try:
-        cameras    = camera_management_repo.get_cameras_by_user(db, current_user.userid)
-        camera_id  = cameras[0]["camera_id"] if cameras else None
+        if not camera_id:
+            cameras    = camera_management_repo.get_cameras_by_user(db, current_user.userid)
+            camera_id  = cameras[0]["camera_id"] if cameras else None
         stats = get_detection_stats(db,camera_id=camera_id)
         incidents = get_incident_breakdown(db,camera_id=camera_id)
         status = get_status_breakdown(db,camera_id=camera_id)

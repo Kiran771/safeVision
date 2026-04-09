@@ -198,7 +198,7 @@ window.addEventListener("DOMContentLoaded", () => {
         <td>${cam.assigned_to}</td>
         <td>${cam.status}</td>
         <td>
-          <button class="btn-edit" data-id="${cam.cameraid}" data-location="${cam.location_id}"data-admin="${cam.admin_id}"
+          <button class="btn-edit" data-id="${cam.cameraid}" data-location="${cam.location_id}" data-admin="${cam.admin_id}"
         data-status="${cam.status}"><img src="/resources/edit.png" alt="Edit"></button>
           <button class="btn-delete" data-id="${cam.cameraid}"><img src="/resources/delete.png" alt="Delete"></button>
       </td>`;
@@ -233,7 +233,7 @@ window.addEventListener("DOMContentLoaded", () => {
     // DELETE
     if (deleteBtn) {
       const cameraId = deleteBtn.dataset.id;
-      const confirmed = confirm(`Do you want to remove camera with CameraId${cameraId}?`);
+      const confirmed = confirm(`Do you want to remove camera with CameraId ${cameraId}?`);
       if (!confirmed) return;
 
       try {

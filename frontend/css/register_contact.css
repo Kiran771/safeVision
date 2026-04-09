@@ -221,7 +221,7 @@ body {
 
 .error-message {
   display: none;
-  color: black;
+  color: rgb(192, 41, 41);
   font-size: 0.9rem;
   margin-top: 0.3rem;
   min-height: 13px;

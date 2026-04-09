@@ -1,6 +1,6 @@
 from math import radians, sin, cos, sqrt, atan2
 
-def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float):
     R = 6371 
 
     lat1, lon1, lat2, lon2 = map(radians, [lat1, lon1, lat2, lon2])
@@ -10,7 +10,7 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float) -> fl
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 
-def get_nearest_contact(accident_lat: float, accident_lon: float, contacts: list) -> object:
+def get_nearest_contact(accident_lat: float, accident_lon: float, contacts: list):
     if not contacts:
         return None
     return min(
