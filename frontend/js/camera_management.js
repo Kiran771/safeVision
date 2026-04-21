@@ -247,7 +247,7 @@ window.addEventListener("DOMContentLoaded", () => {
         const res = await fetch(`/cameras/delete/${cameraId}`, { method: 'DELETE', headers: getAuthHeaders() });
         const data = await handleResponse(res);
         if (!data) return;
-        alert(data.message);
+        alert(data.error || data.message);
         loadCameras();
       } catch (err) {
         console.error("Delete error", err);

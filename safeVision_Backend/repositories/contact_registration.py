@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from safeVision_Backend.models.table_creation import EmergencyContact
+from safeVision_Backend.models.table_creation import Alert, EmergencyContact
 from safeVision_Backend.schemas.safeVisionSchema import EmergencyContactCreate, EmergencyContactUpdate
 
 # Create a new emergency contact
@@ -33,6 +33,7 @@ def update_contact(db: Session, contact_id: int, contact: EmergencyContactUpdate
 def delete_contact(db: Session, contact_id: int):
     db_contact = get_contact_by_id(db, contact_id)
     if db_contact:
+        db.query(Alert).filter(Alert.contactid == contact_id).delete()
         db.delete(db_contact)
         db.commit()
         return True

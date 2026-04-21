@@ -68,6 +68,7 @@ def update_camera(camera_id: int, data: CameraUpdate, db: Session = Depends(get_
         data.status
     )
 
+# Endpoint to delete a camera
 @router.delete("/delete/{camera_id}")
 def delete_camera(camera_id: int, db: Session = Depends(get_db)):
     return camera_management_repo.delete_camera(db, camera_id)

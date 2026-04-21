@@ -77,6 +77,7 @@ if (!res.ok) {
       sessionStorage.setItem("access_token", data.access_token);
       sessionStorage.setItem("role", data.user.role);
       sessionStorage.setItem("user", JSON.stringify(data.user)); 
+      sessionStorage.setItem("expires_at", Date.now() + data.expires_in * 1000);
 
       window.location.href = "/html/dashboard.html";
 
