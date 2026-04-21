@@ -4,7 +4,7 @@ from pydantic import BaseModel, EmailStr, Field, field_validator
 
 
 
-# Admin Schemas 
+# Schema for creating a new admin user
 class AdminCreate(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr
@@ -17,7 +17,7 @@ class LoginRequest(BaseModel):
     username: str = Field(..., min_length=3)
     password: str = Field(..., min_length=8)
 
-
+# Admin Update Schema
 class AdminUpdate(BaseModel):
     username : Optional[str] = Field(None, min_length=3, max_length=60)
     email : Optional[EmailStr] = None
@@ -25,11 +25,13 @@ class AdminUpdate(BaseModel):
     role : Optional[str] = Field(None, min_length=2,  max_length=30)
     password: Optional[str] = Field(None, min_length=8)
 
+# Schema for returning admin stats
 class AdminStatsOut(BaseModel):
     total: int
     recently_added: int
     unassigned: int
 
+# Schema for returning admin details
 class UserOut(BaseModel):
     userid : int
     username : str
@@ -42,7 +44,7 @@ class UserOut(BaseModel):
         from_attributes = True
 
 
-# Emergency Contact Schemas
+# Schema for creating a new emergency contact
 class EmergencyContactBase(BaseModel):
     authority_name: str = Field(..., min_length=2, max_length=150)
     contact_number: str = Field(..., min_length=10, max_length=20)
@@ -55,7 +57,7 @@ class EmergencyContactBase(BaseModel):
 class EmergencyContactCreate(EmergencyContactBase):
     pass
 
-
+# Schema for returning emergency contact details
 class EmergencyContactOut(BaseModel):
     contactid: int
     authority_name: str
@@ -71,7 +73,7 @@ class EmergencyContactOut(BaseModel):
         from_attributes = True
 
 
-
+# Schema for updating an existing emergency contact
 class EmergencyContactUpdate(BaseModel):
     authority_name: Optional[str] = None
     contact_number: Optional[str] = None
@@ -81,6 +83,7 @@ class EmergencyContactUpdate(BaseModel):
     location: Optional[str] = None
     email: Optional[EmailStr] = None
 
+# Schema for creating a new camera
 class CameraCreate(BaseModel):
     location_id: int
     admin_id : int
@@ -94,9 +97,11 @@ class CameraCreate(BaseModel):
             raise ValueError(f"status must be one of: {allowed}")
         return v 
 
+# Schema for updating an existing camera
 class CameraUpdate(CameraCreate):
     pass
 
+# Schema for returning camera details
 class CameraOut(BaseModel):
     cameraid   : int
     location   : str
@@ -108,16 +113,17 @@ class CameraOut(BaseModel):
     class Config:
         from_attributes = True
 
+# Schema for returning available admins for camera assignment
 class AvailableAdminOut(BaseModel):
     userid  : int
     username: str
 
-
+# Schema for returning location details
 class LocationOut(BaseModel):
     location_id: int
     name       : str  
 
-
+# Schema for returning accident details with location info
 class AccidentOut(BaseModel):
     accidentid : int
     cameraid : int
@@ -131,11 +137,11 @@ class AccidentOut(BaseModel):
     class Config:
         from_attributes = True
 
-
+# Schema for updating accident status
 class AccidentStatusUpdate(BaseModel):
     status: str = Field(..., pattern="^(confirmed|rejected|pending)$")
 
-
+# Schema for returning alert details
 class AlertOut(BaseModel):
     alertid : int
     status : str
@@ -147,13 +153,13 @@ class AlertOut(BaseModel):
     class Config:
         from_attributes = True
 
-
+# Schema for returning alert statistics
 class AlertStatsOut(BaseModel):
     total : int
     sent  : int
     failed: int
 
-
+# Schema for returning detection settings
 class DetectionSettingsOut(BaseModel):
     id : int
     camera_id : Optional[int]   = None  
@@ -167,7 +173,7 @@ class DetectionSettingsOut(BaseModel):
     class Config:
         from_attributes = True
 
-
+# Schema for updating detection settings
 class DetectionSettingsUpdate(BaseModel):
     camera_id  : Optional[int]   = None
     accident_confidence : Optional[float] = Field(None, ge=0.0, le=1.0)

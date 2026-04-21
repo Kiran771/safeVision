@@ -1,5 +1,6 @@
 from math import radians, sin, cos, sqrt, atan2
 
+# Haversine formula implementation to calculate distance between two lat/lon points on Earth
 def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float):
     R = 6371 
 
@@ -10,6 +11,7 @@ def haversine_distance(lat1: float, lon1: float, lat2: float, lon2: float):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 
+# Function to find nearest contact from a list of contacts based on accident location using Haversine distance
 def get_nearest_contact(accident_lat: float, accident_lon: float, contacts: list):
     if not contacts:
         return None

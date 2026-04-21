@@ -1,4 +1,5 @@
 guardPage(["super admin"]);
+// Auth guard function to protect pages based on user roles and authentication status
 function getAuthHeaders() {
     const token = sessionStorage.getItem("access_token");
     return token ? { "Authorization": `Bearer ${token}` } : {};
@@ -51,23 +52,26 @@ window.addEventListener("DOMContentLoaded", () => {
             el.style.display = "block";
         }
     }
-
+    // function to mark form fields with error styling when validation fails 
+    // and remove the error styling when the field is valid
     function markFieldAsError(fieldId, hasError = true) {
-    const field = document.getElementById(fieldId);
-    if (!field) return;
-    if (hasError) {
-        field.classList.add("error");
-    } else {
-        field.classList.remove("error");
+        const field = document.getElementById(fieldId);
+        if (!field) return;
+        if (hasError) {
+            field.classList.add("error");
+        } else {
+            field.classList.remove("error");
+        }
     }
-    }
+
+    // function to clear all error message
     function clearErrors() {
-    document.querySelectorAll(".error-message").forEach(el => {
-        el.textContent = "";
-        el.style.display = "none";         
-    });
-    document.querySelectorAll(".form-input.error, .form-select.error")
-        .forEach(el => el.classList.remove("error"));
+        document.querySelectorAll(".error-message").forEach(el => {
+            el.textContent = "";
+            el.style.display = "none";         
+        });
+        document.querySelectorAll(".form-input.error, .form-select.error")
+            .forEach(el => el.classList.remove("error"));
     
     }
     function resetForm(){
@@ -89,6 +93,8 @@ window.addEventListener("DOMContentLoaded", () => {
         return { valid: true };
     };
 
+    //  Helper function to validate the form fields and 
+    // display appropriate error messages for invalid inputs 
     function validateForm(data) {
     let isValid = true;
     clearErrors();                    
@@ -155,7 +161,8 @@ window.addEventListener("DOMContentLoaded", () => {
         return isValid;
     }
 
-
+    // function to load contacts and populate the table with 
+    // contact data including edit and delete buttons
     async function loadContacts() {
 
         

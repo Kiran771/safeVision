@@ -15,12 +15,14 @@ from safeVision_Backend.repositories.admin_management_repo import (
 from safeVision_Backend.core.psql_db import get_db
 from safeVision_Backend.core.security import get_current_user
 
+# Admin Registration Router
 router = APIRouter(
     prefix="/admins",
     tags=["Admin Registration"],
     dependencies=[Depends(get_current_user)]
 )
 
+# Endpoint to register a new admin user
 @router.post("/", response_model=dict, status_code=status.HTTP_201_CREATED)
 def register_admin(
     admin: AdminCreate,
@@ -45,7 +47,7 @@ def register_admin(
     new_admin = create_admin(db, admin)
     return {"message": "Admin created successfully", "admin_id": new_admin.userid}
 
-
+# Endpoint to list all admin users with pagination
 @router.get("/", response_model=List[Dict[str, Any]])
 def list_admins(
     skip: int = Query(0, ge=0),
@@ -76,6 +78,7 @@ def list_admins(
         for admin in admins
     ]
 
+# Endpoint to get admin statistics
 @router.get("/stats", response_model=AdminStatsOut)
 def get_admin_stats(db: Session = Depends(get_db)):
     return {
@@ -104,7 +107,7 @@ def get_admin_detail(
         "created_at": admin.created_at.isoformat() if admin.created_at else None
     }
 
-
+# Endpoint to update an existing admin user
 @router.patch("/{admin_id}", response_model=Dict[str, str])
 def update_admin_user(
     admin_id: int,
@@ -145,7 +148,7 @@ def update_admin_user(
         raise HTTPException(status_code=404, detail="Admin not found")
     return {"message": "Admin updated successfully"}
 
-
+# Endpoint to delete an admin user
 @router.delete("/{admin_id}", response_model=Dict[str, str])
 def delete_admin_user(
     admin_id: int,

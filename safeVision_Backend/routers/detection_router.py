@@ -21,6 +21,7 @@ last_uploaded = {
 
 frame_generator = None
 
+# Endpoint to upload video for detection
 @router.post("/upload-video")
 async def upload_video(
     file: UploadFile = File(...),
@@ -28,8 +29,8 @@ async def upload_video(
 ):
     global last_uploaded
 
-    allowed_extensions = {'.mp4', '.avi', '.mov', '.mkv'}
     ext = os.path.splitext(file.filename)[1].lower()
+    allowed_extensions = {'.mp4', '.avi', '.mov', '.mkv'}
     if ext not in allowed_extensions:
         raise HTTPException(status_code=400, detail="Invalid video format")
 
@@ -68,7 +69,7 @@ async def upload_video(
         "video_id": f"vid_{int(time.time() * 1000)}"
     })
 
-
+# Endpoint to clear uploaded video and reset generator
 @router.post("/clear-video")
 async def clear_video():
 	global last_uploaded 
@@ -78,7 +79,7 @@ async def clear_video():
 	return JSONResponse({"status": "cleared"})
 
 
-
+# Endpoint to get next processed frame with headers for frame number and confidence scores
 @router.get("/next-frame")
 async def get_next_frame():
     global frame_generator, last_uploaded
@@ -131,7 +132,7 @@ async def get_next_frame():
         return Response (status_code=204)
     
 
-
+# Endpoint to reset the frame generator
 @router.post("/reset-generator")
 async def reset_generator():
     global frame_generator

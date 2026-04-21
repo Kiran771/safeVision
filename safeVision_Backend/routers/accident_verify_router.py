@@ -25,7 +25,7 @@ from safeVision_Backend.repositories.accident_repo import (
 
 router = APIRouter(prefix="/accidents", tags=["Accidents"],dependencies=[Depends(get_current_user)])
 
-
+# Endpoints to confirm detected accidents
 @router.post("/{accident_id}/verify")
 def verify_incident(
     accident_id: int, 
@@ -54,6 +54,7 @@ def verify_incident(
 
     return {"message": "Incident confirmed successfully", "status":"confirmed"}
 
+# Endpoint to reject an incident
 @router.post("/{accident_id}/reject")
 def reject_incident(accident_id: int, db: Session = Depends(get_db)):
     detection = get_detection_by_id(db=db, accident_id=accident_id)
@@ -70,6 +71,7 @@ def reject_incident(accident_id: int, db: Session = Depends(get_db)):
 
     return {"message": "Incident rejected successfully", "status": "rejected"}
 
+# Endpoint to get pending reviews for user's cameras with location info
 @router.get("/pending")
 def get_pending(
     db: Session = Depends(get_db),

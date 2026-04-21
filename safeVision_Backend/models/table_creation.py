@@ -2,7 +2,9 @@ from sqlalchemy import Column, Integer, String, ForeignKey, DateTime, Float, Boo
 from sqlalchemy.sql import func
 from safeVision_Backend.core.psql_db import Base
 
+# Define SQLAlchemy models for the database tables
 
+# User model representing users of the system
 class User(Base):
     __tablename__ = 'users'
 
@@ -16,7 +18,7 @@ class User(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
-
+# Camera model representing traffic cameras
 class Camera(Base):
     __tablename__ = 'cameras'
     cameraid = Column(Integer, primary_key=True, autoincrement=True, index=True)
@@ -24,7 +26,7 @@ class Camera(Base):
     status = Column(String(20), nullable=False, default='active')
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-
+# Association table linking users to cameras they are responsible for
 class UserCamera(Base):
     __tablename__ = 'user_cameras'
     usercameraid = Column(Integer, primary_key=True, autoincrement=True)
@@ -33,7 +35,7 @@ class UserCamera(Base):
     assigned_date  = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     is_active  = Column(Boolean, default=True, nullable=False)
 
-
+# Location model representing the physical locations of cameras
 class Location(Base):
     __tablename__ = "locations"
     location_id = Column(Integer, primary_key=True, autoincrement=True, index=True)
@@ -43,7 +45,7 @@ class Location(Base):
     latitude = Column(Float, nullable=False)
     longitude = Column(Float, nullable=False)
 
-
+# Accident model representing detected accidents from cameras
 class Accident(Base):
     __tablename__ = 'accidents'
 
@@ -55,7 +57,7 @@ class Accident(Base):
     frame_path = Column(String(500), nullable=True)
     detection_type = Column(String(20), nullable=True, default='accident')
 
-
+# EmergencyContact model representing emergency contacts for alerts
 class EmergencyContact(Base):
     __tablename__ = 'emergency_contacts'
 
@@ -70,7 +72,7 @@ class EmergencyContact(Base):
     is_active  = Column(Boolean, default=False, nullable=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
 
-
+# Alert model representing alerts generated from accident detections
 class Alert(Base):
     __tablename__ = 'alerts'
 
@@ -81,7 +83,7 @@ class Alert(Base):
     accidentid = Column(Integer, ForeignKey('accidents.accidentid'), nullable=False, index=True)
     userid = Column(Integer, ForeignKey('users.userid'), nullable=True, index=True)
 
-
+# Configuration model for detection settings
 class DetectionConfig(Base):
     __tablename__ = 'detection_config'
     config_id = Column(Integer, primary_key=True, autoincrement=True)

@@ -16,7 +16,7 @@ ALERT_CATEGORIES = {
     "fire":     ["police", "fire_department", "medical"],
 }
 
-
+# Service function to dispatch alerts to nearest authorities based on accident type and location
 def dispatch_alerts(accident_id: int, user_id: int = None):
     db = SessionLocal()
     try:

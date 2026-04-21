@@ -1,3 +1,9 @@
+// JavaScript for the role-based dashboard,
+// which renders different views and data based on whether the user is an admin or super admin. 
+// It includes functions to fetch and display dashboard statistics,
+//  handle camera selection for admins, and render charts using Chart.js
+//  The script also manages user greetings 
+// and handles session expiration by redirecting to the login page when necessary.
 guardPage(["super admin", "admin"]);
 function getUserRole() {
     const adminConfig = window.ADMIN_HEADER_CONFIG || {};

@@ -11,6 +11,7 @@ router = APIRouter(
     dependencies=[Depends(get_current_user)]
 )
 
+# Endpoint to update detection sensitivity level
 @router.post("/sensitivity/{level}")
 def update_sensitivity(
     level: str,
@@ -43,6 +44,8 @@ def update_sensitivity(
         "thresholds" : get_config()
     }
 
+
+# Endpoint to get current sensitivity threshold
 @router.get("/sensitivity")
 def current_sensitivity():
     return get_config()

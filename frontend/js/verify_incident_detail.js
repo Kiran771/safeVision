@@ -1,3 +1,8 @@
+// JavaScript for the incident detail verification page, 
+// which allows admins to view details of a specific incident, 
+// including the frame image, confidence score, and location information
+// Admins can confirm or reject the incident,
+//  which triggers API calls to update the incident status and dispatch alerts if confirmed
 guardPage(["admin"]);
 let isRedirecting = false
 function getAuthHeaders() {

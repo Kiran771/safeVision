@@ -1,3 +1,4 @@
+// Auth guard function to protect pages based on user roles and authentication status
 function guardPage(allowedRoles) {
     const token = sessionStorage.getItem("access_token");
 

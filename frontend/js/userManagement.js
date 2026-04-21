@@ -1,3 +1,7 @@
+// JavaScript for the user management page, 
+// which allows super admins to view, add, edit, and delete admin users. 
+// It includes form validation, API interactions for CRUD operations on admin users, 
+// and handles session expiration by redirecting to the login page when necessary
 guardPage(["super admin"]);
 let originalAdminData = null; 
 let isRedirecting = false

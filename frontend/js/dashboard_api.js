@@ -1,3 +1,5 @@
+// DashboardAPI class to handle all API interactions for the dashboard page, 
+// including fetching stats, pending incidents, and verifying/rejecting incidents.
 class DashboardAPI {
     constructor(baseURL = '') {
         this.baseURL = baseURL;

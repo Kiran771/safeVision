@@ -1,10 +1,13 @@
 guardPage(["admin"]);
+// Auth guard to restrict access to the detection page to users with the "admin" role only
 function getAuthHeaders() {
     const token = sessionStorage.getItem("access_token");
     return token ? { "Authorization": `Bearer ${token}` } : {};
 }
 
 let isRedirecting= false
+// Helper function to handle API responses, 
+// including checking for unauthorized access and redirecting to login if necessary
 async function handleResponse(response) {
     if (response.status === 401) {
         if (isRedirecting) return null;
@@ -37,6 +40,8 @@ const frameSrcs = {
 
 };
 
+// Predefined crop regions for 
+// the different views (top, corner, bottom) based on the original frame dimensions
 const CROP_REGIONS = {
     top: (w, h) => ({ sx: 0, sy: 0, sw: w, sh: h * 0.33 }),
     corner: (w, h) => ({ sx: w * 0.5, sy: 0, sw: w * 0.5, sh: h * 0.5 }),
@@ -56,6 +61,8 @@ function applyCameraId(cameraId) {
     if (idEl)    idEl.textContent    = `Camera id: ${cameraId}`;
 }
 
+// Function to load the assigned camera 
+// for the admin and set it as the active camera on the dashboard
 async function loadAssignedCamera() {
     try {
         const res = await fetch('/cameras/my-cameras', {
@@ -80,7 +87,8 @@ async function loadAssignedCamera() {
         console.error('[CAMERA] Failed to load assigned camera:', err);
     }
 }
-
+// Event listener for camera change events to update the selected camera 
+// and refresh the dashboard data accordingly
 window.addEventListener('cameraChanged', (e) => {
     const cameraId = e.detail?.cameraId || sessionStorage.getItem('selected_camera_id');
     if (!cameraId) return;
@@ -90,6 +98,7 @@ window.addEventListener('cameraChanged', (e) => {
     loadRecentAccidents();
     loadStats();
 });
+
 
 window.addEventListener('storage', (e) => {
     if (e.key !== 'selected_camera_id' || !e.newValue) return;
@@ -444,7 +453,7 @@ function renderFrameStrip() {
 
             if (!resp.ok) {
                 const err = await resp.text();
-                alert("Upload failed");
+                alert("Invalid video format");
                 return;
             }
             const data = await resp.json();

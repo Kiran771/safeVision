@@ -9,18 +9,20 @@ load_dotenv()
 
 SECRET=os.getenv('VERIFICATION_SECRET_KEY')
 
+# Ensure the secret key is set for token generation and verification, otherwise raise an error
 if not SECRET:
   raise RuntimeError("VERIFICATION_SECRET_KEY is missing in .env")
 
 serializer=URLSafeTimedSerializer(SECRET)
 
-
+# Function to generate a time-limited verification token for a given email address using itsdangerous library
 def generate_verification_token(email:EmailStr):
   return serializer.dumps(
     {'email':email},
     salt="safevision-contact-verification"
   )
 
+# Function to verify the token and extract email, with error handling for expired or invalid tokens
 def verify_verification_token(token:str):
   try:
     data=serializer.loads(

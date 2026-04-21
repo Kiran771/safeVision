@@ -1,3 +1,6 @@
+// JavaScript for the map page, which allows users to select a location on the map
+// and search for locations using the OpenStreetMap Nominatim API
+// It uses Leaflet.js for map rendering and interaction.
 document.addEventListener("DOMContentLoaded", function () {
   // Default Kathmandu
   const defaultLat = 27.7172;

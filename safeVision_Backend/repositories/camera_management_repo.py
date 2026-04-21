@@ -91,6 +91,7 @@ def get_cameras(db: Session):
         for r in results
     ]
 
+# Get cameras assigned to a specific user
 def get_cameras_by_user(db: Session, user_id: int):
     results = (
         db.query(UserCamera.cameraid, Camera.status)
@@ -169,7 +170,9 @@ def delete_camera(db: Session, camera_id: int):
     except Exception as e:
         db.rollback()
         return {"error": f"Unexpected error: {str(e)}"}
+    
 
+# Get available admins for a specific camera (including current admin if assigned)
 def get_available_admins(db: Session, camera_id: int):
     current = (
         db.query(User)

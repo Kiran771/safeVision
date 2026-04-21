@@ -29,7 +29,7 @@ configuration.api_key['api-key'] = BREVO_API_KEY
 api_client = ApiClient(configuration)
 api_instance = TransactionalEmailsApi(api_client)
 
-
+# Function to send verification email with token link for contact activation
 def send_verification_email(
     to_email: str,
     token: str,
@@ -77,7 +77,7 @@ def send_verification_email(
         print(f"Error sending email: {e}")
         return False  
     
-
+# Function to send accident alert email to nearest contact with details and optional frame attachment
 def send_accident_alert_email(
     to_email        : str,
     authority_name  : str,

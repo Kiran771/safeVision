@@ -1,4 +1,6 @@
 guardPage(["super admin"]);
+
+// Helper function to get authorization headers with the access token for API requests
 function getAuthHeaders() {
   const token = sessionStorage.getItem("access_token");
   return token ? { "Authorization": `Bearer ${token}` } : {};
@@ -28,6 +30,7 @@ async function handleResponse(response) {
   return data;
 }
 
+// Event listener to intialize the camera mangement page
 window.addEventListener("DOMContentLoaded", () => {
 
   console.log("Script running - DOMContentLoaded fired");
@@ -45,7 +48,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
   let editCameraId = null;
 
-
+  // Event listener for the add camera buttion to open the modal form
   addButton.addEventListener('click', async () => {
 
     try {
@@ -88,6 +91,7 @@ window.addEventListener("DOMContentLoaded", () => {
     overlay.classList.remove('open');
   });
 
+  //  function to reset the form fields to their default state
   function resetForm() {
     locationSelect.selectedIndex = 0
     adminSelect.selectedIndex = 0
@@ -121,6 +125,7 @@ window.addEventListener("DOMContentLoaded", () => {
       console.error("Location load error:", err);
     }
   }
+  //  function to load admins and populate the admin dropdown with options
   async function loadAdmin(selectedValue = null, allAdmins = false) {
     try {
       const url = allAdmins ? '/cameras/admins/all' : '/cameras/admins/all-admins';
@@ -148,6 +153,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
 
   }
+  // function to load avilable admin 
   async function loadAvailableAdmins(selectedValue = null, cameraId = null) {
     try {
       const url = cameraId
@@ -173,6 +179,7 @@ window.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  //  function to load cameras and populate the table with camera data including edit and delete buttons
   async function loadCameras() {
     try {
       const res = await fetch('/cameras/', {

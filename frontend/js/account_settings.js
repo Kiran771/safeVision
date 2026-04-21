@@ -1,5 +1,7 @@
 guardPage(["admin","super admin"]);
 const API_BASE = "";
+
+// Helper function to get auth headers for API requests
 function getAuthHeaders() {
     const token = sessionStorage.getItem("access_token");
     return token ? { "Authorization": `Bearer ${token}` } : {};
@@ -31,12 +33,12 @@ async function handleResponse(response) {
 
 let profile = null;
 
-
+// Load user profile on page load
 document.addEventListener("DOMContentLoaded", () => {
     loadProfile();
 });
 
-
+// Fetch user profile from the API and render it on the page
 async function loadProfile() {
     try {
         const response = await fetch(`${API_BASE}/auth/profile`, {
@@ -60,6 +62,7 @@ async function loadProfile() {
     }
 }
 
+// Render user profile information on the page
 function renderProfile(user) {
     const initial = (user.username || "?")[0].toUpperCase();
 
@@ -82,7 +85,7 @@ function renderProfile(user) {
         roleNote.style.display = normalizedRole === 'superadmin' ? 'none' : '';
     }
 }
-
+//  Validate input fields and send updated profile data to the API
 async function saveProfile() {
     clearErrors();
 
@@ -146,11 +149,13 @@ async function saveProfile() {
     }
 }
 
+// Revert any unsaved changes by re-rendering the original profile data
 function discardProfile() {
     if (profile) renderProfile(profile);
     clearErrors();
 }
 
+// Validate password fields and send change password request to the API
 async function savePassword() {
     clearErrors();
 
@@ -215,6 +220,7 @@ async function savePassword() {
     }
 }
 
+// Toggle password visibility for the specified input field and update the button icon accordingly
 function togglePass(inputId, btn) {
     const input = document.getElementById(inputId);
     if (!input) return;
@@ -230,6 +236,7 @@ function togglePass(inputId, btn) {
     }
 }
 
+// Switch between profile and security tabs, showing the relevant content and clearing any error messages
 function switchTab(tab, el) {
     document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
     el.classList.add("active");
@@ -240,6 +247,7 @@ function switchTab(tab, el) {
     clearErrors();
 }
 
+// Clear password input fields and reset any strength indicators or error messages related to password change
 function clearPassFields() {
     ["inputCurrentPass", "inputNewPass", "inputConfirmPass"].forEach(id => setVal(id, ""));
 
@@ -251,17 +259,20 @@ function clearPassFields() {
     clearErrors();
 }
 
+// Clear all error messages and remove error/ok classes from input fields to reset the form state
 function clearErrors() {
     document.querySelectorAll(".field-error").forEach(el => { el.textContent = ""; });
     document.querySelectorAll(".form-input").forEach(el => {
         el.classList.remove("is-error", "is-ok");
     });
 }
-
+// Show the main content card after successfully loading the user profile to ensure a smooth user experience
 function showCard() {
     const content = document.getElementById("cardContent");
     if (content) content.classList.remove("hidden");
 }
+
+
 function setBtnLoading(btnId, loading) {
     const btn = document.getElementById(btnId);
     if (!btn) return;
@@ -281,11 +292,13 @@ function setBtnLoading(btnId, loading) {
         if (iconSpan) iconSpan.style.display = "";
     }
 }
-
+// Helper functions to get and set values of input fields and text content of elements by their IDs
 function getVal(id) { return document.getElementById(id)?.value ?? ""; }
+
 function setVal(id, val) { const el = document.getElementById(id); if (el) el.value = val; }
 function setEl(id, text) { const el = document.getElementById(id); if (el) el.textContent = text; }
 
+// Set error message for a specific field and add error styling to the corresponding input element
 function setError(errId, msg) {
     const errEl = document.getElementById(errId);
     if (errEl) errEl.textContent = msg;

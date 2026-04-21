@@ -1,3 +1,6 @@
+// This script dynamically renders the header section of the admin dashboard 
+// and super admin pages, including user profile information and notifications, 
+// based on the user's role and configuration settings.
 (function () {
   if (!document.getElementById('fa-cdn')) {
     const link = document.createElement('link');

@@ -8,7 +8,7 @@ from datetime import timedelta
 from safeVision_Backend.core.psql_db import get_db
 from safeVision_Backend.core.security import get_current_user
 from safeVision_Backend.core.security import verify_password, create_access_token
-from safeVision_Backend.repositories.admin_profile_repo import (
+from safeVision_Backend.repositories.profile_repo import (
     username_exists_for_another,
     email_exists_for_another,
     update_profile,
@@ -20,13 +20,13 @@ from safeVision_Backend.core.config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-
+# Request model for changing password
 class ChangePasswordRequest(BaseModel):
     current_password: str
     new_password    : str
     confirm_password: str
 
-
+# Endpoint to login and get access token
 @router.post("/token", summary="Login and get access token")
 def login_for_access_token(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -68,7 +68,7 @@ def login_for_access_token(
         }
     }
 
-
+# Authenticate user credentials and generate JWT access token
 @router.post("/token")
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(),
@@ -109,7 +109,7 @@ def login(
     }
 
 
-
+# Endpoint to get current user's profile
 @router.get("/profile", response_model=UserOut)
 def get_my_profile(
     current_user: User = Depends(get_current_user),
@@ -117,7 +117,7 @@ def get_my_profile(
 
     return current_user
 
-
+# Endpoint to update current user's profile
 @router.put("/profile", response_model=UserOut)
 def update_my_profile(
     data : AdminUpdate,
@@ -147,7 +147,7 @@ def update_my_profile(
 
     return updated
 
-
+# Endpoint to change current user's password
 @router.post("/profile/change-password")
 def change_my_password(
     data : ChangePasswordRequest,

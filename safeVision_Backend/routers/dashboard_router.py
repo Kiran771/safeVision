@@ -11,7 +11,7 @@ from safeVision_Backend.repositories.dashboard_repo import (
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"],dependencies=[Depends(get_current_user)])
 
-
+# Endpoint to get dashboard stats for admin users
 @router.get("/admin/stats",response_model=Dict[str, Any])
 def get_admin_dashboard_stats(camera_id:int=None,db: Session = Depends(get_db),current_user = Depends(get_current_user)
 ):
@@ -52,7 +52,8 @@ def get_admin_dashboard_stats(camera_id:int=None,db: Session = Depends(get_db),c
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-    
+
+# Endpoint to get dashboard stats for specific time periods (24hrs, 7days, 30days)
 @router.get("/time-period-stats", response_model=Dict[str, Any])
 def get_time_period_stats(period: str = "7days", camera_id: int = None,db: Session = Depends(get_db)):
     try:
@@ -90,7 +91,7 @@ def get_time_period_stats(period: str = "7days", camera_id: int = None,db: Sessi
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+# Endpoint to get dashboard stats for superadmin users
 @router.get("/superadmin/stats", response_model=Dict[str, Any])
 def get_superadmin_dashboard_stats(db: Session = Depends(get_db)):
     try:

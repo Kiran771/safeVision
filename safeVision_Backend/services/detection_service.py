@@ -20,10 +20,10 @@ fire_model=YOLO(str(fire_detection_model_path))
 
 
 # consecutive frames required to confirm accident
-consecutive_frames_needed = 4
+consecutive_frames_needed = 5
 
 # accident confirmation cooldown to prevent multiple detections of same event
-accident_cooldown_seconds = 50
+accident_cooldown_seconds = 60
 
 # frame skip interval to balance perfromance and detection speed
 frame_skip_interval = 4
@@ -38,6 +38,7 @@ os.makedirs(FIRE_FOLDER, exist_ok=True)
 os.makedirs(REVIEW_FOLDER, exist_ok=True)
 
 
+# Annotation functions for accident dectected frames
 def annotate_accident_frame(frame,boxes,model_name):
     has_accident=False
     max_conf=0.0
@@ -60,6 +61,7 @@ def annotate_accident_frame(frame,boxes,model_name):
     
     return frame,has_accident,max_conf
 
+# Annotation function for fire detected frames
 def annotate_fire_frame(frame,boxes,model_name):
     has_fire=False
     max_conf=0.0
@@ -86,6 +88,7 @@ def annotate_fire_frame(frame,boxes,model_name):
 
     return frame,has_fire,max_conf
 
+# Function to draw status overlay on frames with detection info and confidence scores
 def draw_status_overlay(frame,frame_count,acc_conf,fire_conf,
                     is_accident,is_fire,  is_borderline ,vehicle_count):
     h,w= frame.shape[:2]
@@ -121,6 +124,7 @@ def draw_status_overlay(frame,frame_count,acc_conf,fire_conf,
                 )
     return frame
 
+# Function to save detected frame images with confidence in filename for easy reference
 def save_frame_img(frame,folder,prefix, video_name, frame_count, conf):
     
     filename = f"{prefix}_{video_name}_frame_{frame_count:06d}_conf{conf:.2f}.jpg"
@@ -130,7 +134,7 @@ def save_frame_img(frame,folder,prefix, video_name, frame_count, conf):
     return path
 
 
-
+# Main generator function to process video frames, run detections, annotate frames, and yield results with appropriate headers for streaming to frontend
 def generate_detection_frames(
     video_bytes: bytes | None = None,
     video_name: str = "video",

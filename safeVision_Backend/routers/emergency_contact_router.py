@@ -11,12 +11,13 @@ from safeVision_Backend.repositories import contact_registration as crud
 from safeVision_Backend.core.email import send_verification_email
 from safeVision_Backend.utils.verification_token import generate_verification_token, verify_verification_token
 
-
+# Public router for verification endpoint
 public_router = APIRouter(
     prefix="/contacts",
     tags=["Emergency Contacts"]
 )
 
+# Router for authenticated endpoints
 router = APIRouter(
     prefix="/contacts",
     tags=["Emergency Contacts"],

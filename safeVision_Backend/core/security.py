@@ -17,22 +17,22 @@ pwd_context = PasswordHash.recommended()
 # OAuth2 scheme
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/token")
 
-
+# function for hashing passwords
 def hash_password(password: str) -> str:
     return pwd_context.hash(password)
 
-
+# function for verifying passwords
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
-
+# function to create JWT access tokens
 def create_access_token(
     data: dict,
     expires_delta: timedelta | None = None
 ) -> str:
     to_encode = data.copy()
 
-    expire_minutes = getattr(settings, "ACCESS_TOKEN_EXPIRE_MINUTES", 30)
+    expire_minutes = getattr(settings, "ACCESS_TOKEN_EXPIRE_MINUTES", 120)
     expire = datetime.now(timezone.utc) + (expires_delta or timedelta(minutes=expire_minutes))
 
     to_encode.update({

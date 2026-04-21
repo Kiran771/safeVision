@@ -6,7 +6,7 @@ from safeVision_Backend.models.table_creation import User,UserCamera
 from safeVision_Backend.schemas.safeVisionSchema import AdminCreate, AdminUpdate
 from safeVision_Backend.core.security import hash_password
 
-
+# create new admin 
 def create_admin(db: Session, admin_in: AdminCreate) -> User:
     hashed_pwd = hash_password(admin_in.password)
     

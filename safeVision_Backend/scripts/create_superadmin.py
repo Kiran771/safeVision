@@ -3,6 +3,8 @@ from safeVision_Backend.models.table_creation import User
 from safeVision_Backend.core.security import hash_password
 from safeVision_Backend.core.psql_db import engine
 
+
+# function to create the first super admin if none exists
 def create_first_superadmin():
     db = Session(bind=engine)
 

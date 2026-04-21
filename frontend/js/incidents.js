@@ -1,3 +1,6 @@
+// JavaScript for the incidents page of the admin dashboard, 
+// which displays pending incidents for verification 
+// and allows pagination through the incidents list.   
 guardPage(["admin"]);
 function getAuthHeaders() {
     const token = sessionStorage.getItem("access_token");

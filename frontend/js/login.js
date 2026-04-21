@@ -1,3 +1,7 @@
+// JavaScript for the login page, handling form submission, validation, 
+// and authentication with the backend API. 
+// On successful login, it stores the access token and user information in session storage 
+// and redirects to the dashboard.  
 document.addEventListener("DOMContentLoaded", function () {
   const loginForm = document.getElementById("loginForm");
   if (!loginForm) {

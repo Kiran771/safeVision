@@ -1,4 +1,6 @@
-
+// JavaScript for loading the sidebar based on user role 
+// and managing sidebar interactions such as toggling and highlighting active menu items
+// It also includes a logout function that clears session storage and redirects to the login page 
 const token = sessionStorage.getItem("access_token");
 if (!token) {
     window.location.href = "/html/login.html";
